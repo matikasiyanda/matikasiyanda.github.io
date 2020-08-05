@@ -82,7 +82,7 @@ social:
   type                   : # Person or Organization (defaults to Person)
   name                   : # If the user or organization name differs from the site's name
   links: 
-    - "https://www.linkedin.com/in/siyanda-matika/" # An array of links to social media profiles
+   - "https://www.linkedin.com/in/siyanda-matika/" # An array of links to social media profiles
 
 # Analytics
 analytics:
