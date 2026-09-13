@@ -5,6 +5,7 @@ permalink: /blog/kb-search-agent-art/
 description: "Insurance questions are answered by exclusions and conditions buried in the terms, not by the general cover wording. I trained Qwen3-14B with OpenPipe ART to search for them. It reached 0.769 on unseen questions, and RL wasn't what got it there."
 tags: [rl, grpo, agents, retrieval, openpipe-art]
 mermaid: true
+image: /assets/art/v5_metrics.png
 ---
 
 A customer types: *"I am trying not to panic. Does the vehicle warranty cover

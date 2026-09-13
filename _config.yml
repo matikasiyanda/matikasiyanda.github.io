@@ -5,6 +5,9 @@ baseurl: ""
 timezone: Africa/Johannesburg
 lang: en
 
+twitter:
+  card: summary_large_image
+
 author:
   name: "Siyanda Matika"
   handle: "siyanda"

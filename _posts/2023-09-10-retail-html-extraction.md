@@ -5,6 +5,7 @@ permalink: /blog/retail-html-extraction/
 description: "Scrapers for South African retailers, then three attempts at a model that pulls names and prices out of raw HTML, and what a later review of the code turned up."
 tags: [scraping, nlp, lora, flan-t5, spacy]
 mermaid: true
+image: /assets/retail/card_to_fields.png
 ---
 
 Price-comparison sites, stock trackers and shopping assistants all need the

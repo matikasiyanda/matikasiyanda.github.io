@@ -29,3 +29,21 @@ document.querySelectorAll(".copy-btn").forEach(function (btn) {
     });
   });
 });
+
+// share: copy link + native share sheet where the browser supports it
+document.querySelectorAll(".copy-link").forEach(function (btn) {
+  btn.addEventListener("click", function () {
+    navigator.clipboard.writeText(btn.dataset.url).then(function () {
+      var old = btn.textContent; btn.textContent = "Copied";
+      setTimeout(function () { btn.textContent = old; }, 1500);
+    });
+  });
+});
+if (navigator.share) {
+  document.querySelectorAll(".native-share").forEach(function (btn) {
+    btn.hidden = false;
+    btn.addEventListener("click", function () {
+      navigator.share({ title: btn.dataset.title, url: btn.dataset.url }).catch(function () {});
+    });
+  });
+}

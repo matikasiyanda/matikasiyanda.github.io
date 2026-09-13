@@ -4,6 +4,7 @@ date: 2022-08-28
 permalink: /blog/ocr-synthetic-finetune/
 description: "keras-ocr's recogniser can't output a full stop, so it can't read a price. Adding punctuation meant retraining its output layer, and the labelled data for that came from a text-image generator."
 tags: [ocr, keras, synthetic-data]
+image: /assets/ocr/alphabet_problem.png
 ---
 
 Look at a product page on a South African retail site and most of the text

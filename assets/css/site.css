@@ -203,3 +203,15 @@ pre.mermaid { background: none; border: 0; text-align: center; }
 .feedback { margin-top: 4em; padding: 16px 20px; border: 1px solid var(--line); border-radius: 12px; color: var(--muted); font-size: 15px; }
 .feedback p { margin: 0; }
 .feedback a { color: var(--text); }
+
+/* ---------- share ---------- */
+.share { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 3em 0 0; }
+.share--compact { margin: -2.2em 0 2.6em; }
+.share-label { font: 600 0.78rem/1 var(--sans); letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); margin-right: 6px; }
+.share-btn {
+  font: 500 13px/1 var(--sans); color: var(--muted); text-decoration: none;
+  background: var(--panel); border: 1px solid var(--line); border-radius: 99px;
+  padding: 7px 12px; cursor: pointer;
+}
+.share-btn:hover { color: var(--text); border-color: var(--accent); }
+.share--compact .share-btn { padding: 5px 10px; font-size: 12px; }

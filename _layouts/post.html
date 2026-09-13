@@ -9,6 +9,7 @@ layout: default
     · {{ words | divided_by: 220 | plus: 1 }} min read
     {% if page.series %}· <a href="{{ page.series_url | relative_url }}">{{ page.series }}</a>{% endif %}
   </p>
+  {% include share.html compact=true %}
   {% if page.corrections %}
   <aside class="corrections" aria-label="Corrections">
     <strong>Corrections</strong>
@@ -46,6 +47,8 @@ layout: default
   url          = {{ lb }}{{ abs_url }}{{ rb }},
   note         = {{ lb }}Blog post{{ rb }}
 {{ rb }}{% endcapture %}
+  {% include share.html %}
+
   {% assign issue_title = "Correction: " | append: page.title | url_encode %}
   {% capture issue_body %}Page: {{ page.url | absolute_url }}
 
