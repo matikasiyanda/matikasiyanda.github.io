@@ -216,3 +216,30 @@ pre.mermaid { background: none; border: 0; text-align: center; }
 .share-btn:hover { color: var(--text); border-color: var(--accent); }
 .share--compact .share-btn { padding: 5px 10px; font-size: 12px; }
 .cite-label { color: var(--muted); font-size: 14px; margin: -0.4em 0 0.6em; }
+
+/* ---------- in-page image viewer ---------- */
+.lightbox {
+  position: fixed; inset: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: center;
+  padding: 48px 20px 20px;
+  background: rgba(8, 10, 16, 0.97);
+  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+  cursor: zoom-out;
+}
+.lightbox[hidden] { display: none; }
+.lightbox-figure { margin: 0; max-width: min(1400px, 100%); max-height: 100%; display: flex; flex-direction: column; align-items: center; }
+.lightbox-figure img {
+  max-width: 100%; max-height: calc(100vh - 140px); object-fit: contain;
+  border-radius: 10px; cursor: default;
+  filter: invert(0.9) hue-rotate(180deg);
+}
+.lightbox-figure img.no-invert { filter: none; background: #fff; }
+.lightbox-figure figcaption { color: var(--muted); font-size: 14px; margin-top: 12px; text-align: center; max-width: 900px; }
+.lightbox-close {
+  position: absolute; top: 12px; right: 16px;
+  font: 400 34px/1 var(--sans); color: var(--text);
+  background: none; border: 0; cursor: pointer; padding: 4px 10px;
+}
+.lightbox-close:hover { color: var(--accent); }
+html.lightbox-open { overflow: hidden; }
+.prose img:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
