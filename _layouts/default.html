@@ -6,35 +6,19 @@
   <meta name="theme-color" content="#000000">
   {% seo %}
   {% feed_meta %}
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect width='16' height='16' fill='black'/><text x='1' y='13' font-family='monospace' font-size='13' fill='%2328fe14'>&gt;_</text></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect width='16' height='16' rx='3' fill='black'/><circle cx='8' cy='8' r='3' fill='white'/></svg>">
   <link rel="stylesheet" href="{{ '/assets/css/site.css' | relative_url }}">
   {% if page.math %}
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.min.js"></script>
   {% endif %}
-  <script>
-    // Decide rain on/off before first paint so the canvas never flashes.
-    (function () {
-      var saved = localStorage.getItem("rain");
-      var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      document.documentElement.dataset.rain = saved || (reduce ? "off" : "on");
-    })();
-  </script>
 </head>
 <body>
-  <canvas id="rain" aria-hidden="true"></canvas>
-
-  <div class="term">
-    <div class="term__bar">
-      <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
-      <span class="term__title">{{ site.author.handle }}@{{ site.author.host }}: ~{{ page.url | remove: 'index.html' | split: '?' | first | remove_last: '/' }} — zsh</span>
-      <button id="rain-toggle" class="term__btn" type="button">rain</button>
-    </div>
-
-    <header class="prompt-head">
-      <a class="prompt" href="{{ '/' | relative_url }}"><span class="user">{{ site.author.handle }}@{{ site.author.host }}</span>:<span class="path">~</span>$</a>
-      <nav class="nav" aria-label="Main">
+  <div class="wrap">
+    <header class="site-head">
+      <a class="site-name" href="{{ '/' | relative_url }}">{{ site.author.name }}</a>
+      <nav aria-label="Main">
         {% for item in site.data.navigation %}
           {% assign active = false %}
           {% if item.url == '/' %}
@@ -42,7 +26,7 @@
           {% elsif page.url contains item.url %}
             {% assign active = true %}
           {% endif %}
-          <a href="{{ item.url | relative_url }}"{% if active %} aria-current="page"{% endif %}>[{{ item.title }}]</a>
+          <a href="{{ item.url | relative_url }}"{% if active %} aria-current="page"{% endif %}>{{ item.title }}</a>
         {% endfor %}
       </nav>
     </header>
@@ -51,15 +35,11 @@
       {{ content }}
     </main>
 
-    <footer class="foot">
-      <span class="dim">$ logout</span>
-      <span>
-        <a href="mailto:{{ site.author.email }}">mail</a> ·
-        <a href="https://github.com/{{ site.author.github }}">github</a> ·
-        <a href="{{ site.author.linkedin }}">linkedin</a> ·
-        <a href="{{ '/feed.xml' | relative_url }}">rss</a>
-      </span>
-      <span class="dim">© {{ 'now' | date: '%Y' }} {{ site.author.name }}</span>
+    <footer class="site-foot">
+      <a href="mailto:{{ site.author.email }}">email</a>
+      <a href="https://github.com/{{ site.author.github }}">github</a>
+      <a href="{{ site.author.linkedin }}">linkedin</a>
+      <a href="{{ '/feed.xml' | relative_url }}">rss</a>
     </footer>
   </div>
 
@@ -70,20 +50,11 @@
     document.querySelectorAll(".language-mermaid").forEach(function (block) {
       var pre = document.createElement("pre");
       pre.className = "mermaid";
-      // drop the source's light-theme fills so the terminal palette applies
+      // drop the source's light-theme fills so the dark palette applies
       pre.textContent = block.textContent.replace(/^\s*(style|classDef|linkStyle)\b.*$/gm, "");
       block.replaceWith(pre);
     });
-    mermaid.initialize({
-      startOnLoad: false,
-      theme: "base",
-      themeVariables: {
-        darkMode: true, background: "#000000", fontFamily: "Menlo, Monaco, monospace",
-        primaryColor: "#021a02", primaryTextColor: "#28fe14", primaryBorderColor: "#28fe14",
-        lineColor: "#1fb80f", secondaryColor: "#031f03", tertiaryColor: "#000000",
-        clusterBkg: "#010d01", clusterBorder: "#1a7a10"
-      }
-    });
+    mermaid.initialize({ startOnLoad: false, theme: "dark", themeVariables: { background: "#000000", fontFamily: "system-ui, sans-serif" } });
     mermaid.run({ querySelector: ".mermaid" });
   </script>
   {% endif %}

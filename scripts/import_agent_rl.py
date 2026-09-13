@@ -107,7 +107,7 @@ def main():
     for name, meta in PAGES.items():
         title, body = split_head((SRC / name).read_text())
         fm = ["---", f"title: {yaml_str(title)}", f"permalink: {meta['url']}", "math: true",
-              f"command: less ~/blog/agent-rl/{name}", "---"]
+              "---"]
         (ROOT / meta["out"]).write_text("\n".join(fm) + "\n\n<div class=\"prose\" markdown=\"1\">\n\n"
                                         + convert(body) + "\n\n</div>\n")
     print("imported", len(POSTS), "posts and", len(PAGES), "pages")

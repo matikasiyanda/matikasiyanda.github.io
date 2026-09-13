@@ -1,10 +1,7 @@
 ---
 title: "Work"
 permalink: /work/
-command: "ls -l ~/work"
 ---
-
-<div class="card" markdown="1">
 
 ## Document-search agent, GRPO on one RTX 4090
 
@@ -20,6 +17,4 @@ zero-shot, at Rust and JavaScript books it had never seen.
 
 [read the series](/blog/agent-rl/) · [data](/blog/agent-rl/part-1-data/) · [RL](/blog/agent-rl/part-2-rl/) · [results](/blog/agent-rl/part-3-results/)
 
-</div>
-
-<p class="todo"># TODO: more projects: name, one paragraph, links.</p>
+<p class="todo">TODO: more projects: name, one paragraph, links.</p>

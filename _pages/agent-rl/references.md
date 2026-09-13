@@ -2,7 +2,6 @@
 title: "References"
 permalink: /blog/agent-rl/references/
 math: true
-command: less ~/blog/agent-rl/references.md
 ---
 
 <div class="prose" markdown="1">

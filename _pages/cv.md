@@ -1,7 +1,6 @@
 ---
 title: "CV"
 permalink: /cv/
-command: "cat cv.md"
 ---
 
 <div class="prose" markdown="1">
@@ -14,16 +13,16 @@ Full history on [LinkedIn]({{ site.author.linkedin }}).
 
 ## Experience
 
-<span class="todo"># TODO: role, company, dates, one or two lines on what you shipped.</span>
+<span class="todo">TODO: role, company, dates, one or two lines on what you shipped.</span>
 
 ## Education
 
-<span class="todo"># TODO</span>
+<span class="todo">TODO</span>
 
 ## Skills
 
 RL for language models (GRPO, LoRA), retrieval (ColBERT/PLAID, RRF), vLLM,
 synthetic data generation and verification.
-<span class="todo"># TODO: extend</span>
+<span class="todo">TODO: extend</span>
 
 </div>

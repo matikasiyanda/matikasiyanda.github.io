@@ -2,7 +2,6 @@
 title: "Glossary"
 permalink: /blog/agent-rl/glossary/
 math: true
-command: less ~/blog/agent-rl/glossary.md
 ---
 
 <div class="prose" markdown="1">

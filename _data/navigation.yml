@@ -1,5 +1,4 @@
-- { title: about, url: / }
 - { title: cv, url: /cv/ }
 - { title: work, url: /work/ }
 - { title: now, url: /now/ }
-- { title: blog, url: /blog/ }
+- { title: writing, url: /blog/ }

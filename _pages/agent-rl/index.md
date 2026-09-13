@@ -2,7 +2,6 @@
 title: "Training a document-search agent with GRPO on one RTX 4090"
 permalink: /blog/agent-rl/
 math: true
-command: less ~/blog/agent-rl/README.md
 ---
 
 <div class="prose" markdown="1">

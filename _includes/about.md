@@ -4,4 +4,4 @@ single RTX 4090, that learned to reformulate queries, chain hops across
 documents and say "not here" when the answer isn't in the corpus.
 [The write-up is here](/blog/agent-rl/).
 
-<span class="todo"># TODO: a line or two about background, what you're after, what you'd like to hear about.</span>
+<span class="todo">TODO: a line or two about background, what you're after, what you'd like to hear about.</span>
