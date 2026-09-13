@@ -176,3 +176,6 @@ pre.mermaid { background: none; border: 0; text-align: center; }
 
 /* a long inline formula can't wrap; don't let it make the page scroll sideways on phones */
 @media (max-width: 520px) { .prose { overflow-x: clip; position: relative; } .katex { font-size: 1em; } }
+
+.work-meta { margin: -0.3em 0 1.2em; font-size: 14px; }
+.prose h2:first-child { margin-top: 0.4em; }
