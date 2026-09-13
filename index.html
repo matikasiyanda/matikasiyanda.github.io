@@ -1,0 +1,34 @@
+---
+layout: default
+title: "Siyanda Matika"
+---
+<section class="block">
+  <p class="cmd"><span class="ps1">$</span> whoami</p>
+{% include banner.html %}
+  <p class="dim">{{ site.author.location }} · <a href="https://github.com/{{ site.author.github }}">github</a> · <a href="{{ site.author.linkedin }}">linkedin</a> · <a href="mailto:{{ site.author.email }}">{{ site.author.email }}</a></p>
+</section>
+
+<section class="block">
+  <p class="cmd"><span class="ps1">$</span> cat about.txt</p>
+  {% capture about %}{% include about.md %}{% endcapture %}
+  {{ about | markdownify }}
+</section>
+
+<section class="block">
+  <p class="cmd"><span class="ps1">$</span> ps --now <span class="dim"># problems I'm currently playing with</span></p>
+  {% include problems.html limit=4 %}
+  <p><a href="{{ '/now/' | relative_url }}">more -&gt;</a></p>
+</section>
+
+<section class="block">
+  <p class="cmd"><span class="ps1">$</span> ls -t ~/blog | head</p>
+  <ul class="ls">
+    {% for post in site.posts limit:6 %}
+    <li><time datetime="{{ post.date | date_to_xmlschema }}">{{ post.date | date: "%Y-%m-%d" }}</time><a href="{{ post.url | relative_url }}">{{ post.title }}</a></li>
+    {% endfor %}
+  </ul>
+</section>
+
+<section class="block">
+  <p class="cmd"><span class="ps1">$</span> <span class="cursor" aria-hidden="true"></span></p>
+</section>

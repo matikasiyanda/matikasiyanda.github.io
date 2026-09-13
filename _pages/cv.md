@@ -1,29 +1,29 @@
 ---
 title: "CV"
 permalink: /cv/
-toc: true
-toc_label: "CV"
+command: "cat cv.md"
 ---
 
-<!-- Drop a PDF at assets/files/cv.pdf and uncomment the next line -->
-<!-- [Download PDF](/assets/files/cv.pdf){: .btn .btn--primary} -->
+<div class="prose" markdown="1">
+
+<!-- Drop a PDF at assets/files/cv.pdf and uncomment:
+[download pdf](/assets/files/cv.pdf)
+-->
+
+Full history on [LinkedIn]({{ site.author.linkedin }}).
 
 ## Experience
 
-### TODO Role, Company
-*Month YYYY – Present · City*
-
-- What you did, with a concrete outcome
+<span class="todo"># TODO: role, company, dates, one or two lines on what you shipped.</span>
 
 ## Education
 
-### TODO Degree, Institution
-*YYYY – YYYY*
+<span class="todo"># TODO</span>
 
 ## Skills
 
-TODO
+RL for language models (GRPO, LoRA), retrieval (ColBERT/PLAID, RRF), vLLM,
+synthetic data generation and verification.
+<span class="todo"># TODO: extend</span>
 
-## Publications & talks
-
-TODO
+</div>

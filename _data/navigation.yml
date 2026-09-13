@@ -1,11 +1,5 @@
-main:
-  - title: "About"
-    url: /
-  - title: "CV"
-    url: /cv/
-  - title: "Work"
-    url: /work/
-  - title: "Now"
-    url: /now/
-  - title: "Blog"
-    url: /blog/
+- { title: about, url: / }
+- { title: cv, url: /cv/ }
+- { title: work, url: /work/ }
+- { title: now, url: /now/ }
+- { title: blog, url: /blog/ }

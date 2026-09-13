@@ -1,13 +1,9 @@
 ---
 title: "Now"
 permalink: /now/
+command: "ps aux --now"
 ---
 
-Problems I'm currently playing with. Updated {{ site.data.problems.updated | date: "%B %Y" }}.
+What I'm working on or can't stop thinking about. Last updated {{ site.data.problems.updated | date: "%-d %B %Y" }}.
 
-{% for p in site.data.problems.items %}
-### {{ p.title }}
-{% if p.status %}<span class="badge">{{ p.status }}</span>{% endif %}
-
-{{ p.description | markdownify }}
-{% endfor %}
+{% include problems.html full=true %}

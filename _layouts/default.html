@@ -1,42 +1,91 @@
----
----
-
 <!doctype html>
-<!--
-  Minimal Mistakes Jekyll Theme 4.20.1 by Michael Rose
-  Copyright 2013-2019 Michael Rose - mademistakes.com | @mmistakes
-  Free for personal and commercial use under the MIT license
-  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
--->
-<html lang="{{ site.locale | slice: 0,2 | default: "en" }}" class="no-js">
-  <head>
-    {% include head.html %}
-    {% include head/custom.html %}
-  </head>
+<html lang="{{ site.lang }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#000000">
+  {% seo %}
+  {% feed_meta %}
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect width='16' height='16' fill='black'/><text x='1' y='13' font-family='monospace' font-size='13' fill='%2328fe14'>&gt;_</text></svg>">
+  <link rel="stylesheet" href="{{ '/assets/css/site.css' | relative_url }}">
+  {% if page.math %}
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.min.js"></script>
+  {% endif %}
+  <script>
+    // Decide rain on/off before first paint so the canvas never flashes.
+    (function () {
+      var saved = localStorage.getItem("rain");
+      var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      document.documentElement.dataset.rain = saved || (reduce ? "off" : "on");
+    })();
+  </script>
+</head>
+<body>
+  <canvas id="rain" aria-hidden="true"></canvas>
 
-  <body class="layout--{{ page.layout | default: layout.layout }}{% if page.classes or layout.classes %}{{ page.classes | default: layout.classes | join: ' ' | prepend: ' ' }}{% endif %}">
-    {% include_cached skip-links.html %}
-    {% include_cached browser-upgrade.html %}
-    {% include_cached masthead.html %}
+  <div class="term">
+    <div class="term__bar">
+      <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
+      <span class="term__title">{{ site.author.handle }}@{{ site.author.host }}: ~{{ page.url | remove: 'index.html' | split: '?' | first | remove_last: '/' }} — zsh</span>
+      <button id="rain-toggle" class="term__btn" type="button">rain</button>
+    </div>
 
-    <div class="initial-content">
+    <header class="prompt-head">
+      <a class="prompt" href="{{ '/' | relative_url }}"><span class="user">{{ site.author.handle }}@{{ site.author.host }}</span>:<span class="path">~</span>$</a>
+      <nav class="nav" aria-label="Main">
+        {% for item in site.data.navigation %}
+          {% assign active = false %}
+          {% if item.url == '/' %}
+            {% if page.url == '/' %}{% assign active = true %}{% endif %}
+          {% elsif page.url contains item.url %}
+            {% assign active = true %}
+          {% endif %}
+          <a href="{{ item.url | relative_url }}"{% if active %} aria-current="page"{% endif %}>[{{ item.title }}]</a>
+        {% endfor %}
+      </nav>
+    </header>
+
+    <main id="main">
       {{ content }}
-    </div>
+    </main>
 
-    {% if site.search == true %}
-      <div class="search-content">
-        {% include_cached search/search_form.html %}
-      </div>
-    {% endif %}
+    <footer class="foot">
+      <span class="dim">$ logout</span>
+      <span>
+        <a href="mailto:{{ site.author.email }}">mail</a> ·
+        <a href="https://github.com/{{ site.author.github }}">github</a> ·
+        <a href="{{ site.author.linkedin }}">linkedin</a> ·
+        <a href="{{ '/feed.xml' | relative_url }}">rss</a>
+      </span>
+      <span class="dim">© {{ 'now' | date: '%Y' }} {{ site.author.name }}</span>
+    </footer>
+  </div>
 
-    <div id="footer" class="page__footer">
-      <footer>
-        {% include footer/custom.html %}
-        {% include_cached footer.html %}
-      </footer>
-    </div>
-
-    {% include scripts.html %}
-
-  </body>
+  <script src="{{ '/assets/js/site.js' | relative_url }}" defer></script>
+  {% if page.mermaid %}
+  <script type="module">
+    import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+    document.querySelectorAll(".language-mermaid").forEach(function (block) {
+      var pre = document.createElement("pre");
+      pre.className = "mermaid";
+      // drop the source's light-theme fills so the terminal palette applies
+      pre.textContent = block.textContent.replace(/^\s*(style|classDef|linkStyle)\b.*$/gm, "");
+      block.replaceWith(pre);
+    });
+    mermaid.initialize({
+      startOnLoad: false,
+      theme: "base",
+      themeVariables: {
+        darkMode: true, background: "#000000", fontFamily: "Menlo, Monaco, monospace",
+        primaryColor: "#021a02", primaryTextColor: "#28fe14", primaryBorderColor: "#28fe14",
+        lineColor: "#1fb80f", secondaryColor: "#031f03", tertiaryColor: "#000000",
+        clusterBkg: "#010d01", clusterBorder: "#1a7a10"
+      }
+    });
+    mermaid.run({ querySelector: ".mermaid" });
+  </script>
+  {% endif %}
+</body>
 </html>

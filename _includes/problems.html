@@ -1,0 +1,13 @@
+{% assign items = site.data.problems.items %}
+<table class="ps">
+  <thead><tr><th>PID</th><th>STAT</th><th>PROBLEM</th></tr></thead>
+  <tbody>
+  {% for p in items limit: include.limit %}
+    <tr>
+      <td class="dim">{{ forloop.index | prepend: "00" | slice: -3, 3 }}</td>
+      <td><span class="badge badge--{{ p.status }}">{{ p.status }}</span></td>
+      <td><span class="title">{{ p.title }}</span>{% if include.full %}{{ p.description | markdownify }}{% endif %}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>

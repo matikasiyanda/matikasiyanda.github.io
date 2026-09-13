@@ -1,0 +1,296 @@
+---
+title: "Part 3 — Results, and the transfer test"
+date: 2026-09-04
+permalink: /blog/agent-rl/part-3-results/
+series: "Training a document-search agent with GRPO"
+series_url: /blog/agent-rl/
+part: 3
+tags: [rl, grpo, retrieval, agents]
+math: true
+mermaid: false
+---
+
+*Last of three posts on building an agentic retrieval model on one RTX 4090:*
+
+- [Part 1 — The data](/blog/agent-rl/part-1-data/): corpus, questions, verification, the
+  failure→data map.
+- [Part 2 — The environment and the RL](/blog/agent-rl/part-2-rl/): tools, token buffer,
+  reward, GRPO.
+- **Part 3 — Results** (you are here).
+- [Glossary](/blog/agent-rl/glossary/) · [References](/blog/agent-rl/references/).
+
+---
+
+## v1: a working agent, and three honest failures
+
+![v1 training curves](/assets/agent-rl/v1_training_curves.png)
+
+***Figure 1.*** *v1 training curves over 200 steps. The dotted lines mark the context-schedule transitions; the run also survived a fragmentation OOM and a restart at step 95.*
+
+200 steps, Qwen3-1.7B + LoRA (Figure 1). It beat everything it was measured against:
+
+| policy | NDCG (held-out, n=203) | precision |
+|---|---|---|
+| BM25 top-10 | 0.232 | 0.05 |
+| ColBERT top-10 | 0.338 | 0.07 |
+| hybrid top-10 | 0.317 | 0.06 |
+| SFT agent (no RL) | 0.229 | 0.21 |
+| **v1 RL agent** | **0.458** | **0.333** |
+
+On a *third* question set (fresh generator, fresh seed, zero text overlap) it
+scored **0.404** — so the number wasn't a generator artifact.
+
+The behavioural story was equally clear. RL taught **persistence** (1.5 → 3.3
+turns; the SFT policy reported after one search wave), **reformulation**
+(situational questions went 0.000 → 0.281), and **aimed fan-out**
+(conjunctive 0.058 → 0.402).
+
+But the slice table refused to flatter:
+
+| slice | v1 |
+|---|---|
+| chain | **0.245** — flat all run, *falling* through the phase built to help it |
+| situational | 0.281 (vs 0.546 direct) |
+| single | 0.332 — below ColBERT's 0.404 |
+
+And operationally it was violent: a fragmentation OOM at step 95, a corrupted
+merged checkpoint, five distinct memory bugs before the first clean step, and
+a hedging drift I watched but couldn't diagnose from the metrics alone.
+
+Every one of those became a v2 change — the data fixes in
+[Part 1](/blog/agent-rl/part-1-data/), the mechanics fixes in [Part 2](/blog/agent-rl/part-2-rl/).
+
+---
+
+## v2: the run
+
+![v2 training curves](/assets/agent-rl/v2_training_curves.png)
+
+***Figure 2.*** *v2 training curves over 200 steps — no crashes, no restarts, no interventions. The bottom-right panel is the trainer-versus-sampler logprob gap, flat at 0.011 nats throughout.*
+
+**200/200 steps. Zero crashes. Zero restarts. Zero interventions** (Figure 2).
+
+| phase | reward | NDCG | over-report | abstain-on-answerable | logprob gap |
+|---|---|---|---|---|---|
+| steps 0–25 | 0.476 | 0.408 | 1.21 | 0.09 | 0.0108 |
+| steps 26–50 | 0.507 | 0.434 | 1.49 | 0.05 | 0.0111 |
+| steps 51–199 | 0.593 | **0.525** | 1.96 | 0.05 | 0.0108 |
+
+Two things to notice in Figure 2.
+
+**It started where v1 finished.** Step 0 sampled at NDCG 0.457 — v1's final
+score — because the solve-rate band feeds only questions that carry gradient
+and the SFT floor was higher. The 10×-corrected learning rate then did in 25
+steps what v1 took ~85 steps to do.
+
+**The bottom-right panel is a flat line at 0.011 nats.** That's the
+trainer-versus-sampler logprob gap: the collapse mode that kills naive
+multi-turn RL implementations, measured as absent for all 200 steps.
+
+### The one wart, and why I left it alone
+
+Over-reporting climbed to ~1.96 — past the 1.5 line that is normally a
+kill-criterion. I diagnosed it live rather than reflexively tuning:
+
+- It was **failure-correlated**: high-ratio steps were the low-NDCG batches
+  (2.30 ratio at 0.258 NDCG) while good batches stayed tight (1.11 at 0.489).
+  The model hedges longer reports on questions it is failing.
+- Equivalence classes already excluded the confound that made v1's version of
+  this metric partly fictitious.
+- Those hedged trajectories carry **negative advantage by construction** — the
+  metric was counting behaviour the gradient was already punishing.
+- Failed out-of-bounds rollouts inflate the ratio arithmetically (a 3-document
+  report against an empty target set contributes 3.0).
+
+I set tripwires (abstention > 0.30, phase-NDCG regression, final precision
+materially below the SFT baseline's 0.360) and let it run. Final precision:
+**0.352** — 0.8 points below baseline against a 4.3-point NDCG gain. The
+patience was correct.
+
+---
+
+## Held-out results
+
+![v1 vs v2 by slice, and the transfer gate](/assets/agent-rl/v2_comparison.png)
+
+***Figure 3.*** *Left: v1 versus v2 on the held-out set, by slice. Right: the zero-shot transfer test on Rust and JavaScript books — a corpus the agent never trained on.*
+
+Figure 3 puts v1 and v2 side by side, and the transfer test beside the
+retrievers it beat.
+
+**Main eval, n = 296, generated by a different pipeline than training:**
+
+| policy | NDCG | precision | recall |
+|---|---|---|---|
+| BM25 top-10 | 0.334 | 0.075 | 0.443 |
+| ColBERT top-10 | 0.425 | 0.094 | 0.551 |
+| hybrid top-10 | 0.431 | 0.094 | 0.551 |
+| SFT agent (no RL) | 0.499 | 0.360 | 0.548 |
+| **v2 RL agent** | **0.542** | 0.352 | 0.609 |
+| v2 RL agent + RRF@4 | **0.637** | 0.298 | 0.730 |
+
+The precision column is the quiet headline: **0.352 vs 0.094**. The retrievers
+dump ten documents and hope; the agent commits to two or three. For anything
+downstream — a synthesis model, a human adjuster — that's the difference
+between a citation and a reading list.
+
+**Unseen test split (n = 139, third generator): 0.575.**
+
+### v1 → v2 by slice
+
+| slice | v1 | v2 | change |
+|---|---|---|---|
+| all | 0.458 | **0.542** | +18% |
+| single | 0.332 | **0.481** | +45% |
+| conjunctive | 0.402 | **0.516** | +28% |
+| **chain** | 0.245 | **0.469** | **+91%** |
+| situational | 0.281 | **0.420** | +49% |
+| oob (abstention) | 0.780 | 0.746 | −4% |
+| cross-insurer comparison | unmeasured | 0.591 | — |
+
+Chains (Figure 3, left) — the slice that never moved in v1, that consumed the most turns and
+tokens and converted the least — nearly doubled, and hit **0.697** on the
+unseen test split. Nothing in the training algorithm changed to do that. The
+entity-anchored pairing from [Part 1](/blog/agent-rl/part-1-data/) did it: 21% verified
+yield instead of 10%, 314 chains with load-bearing bridges instead of 241
+mostly-decorative ones.
+
+That is the whole thesis of this project in one row of a table. **The
+bottleneck was the data, and the data was fixable because the failures were
+readable.**
+
+
+### Did it learn to switch modes? Partly.
+
+The question taxonomy from [Part 1](/blog/agent-rl/part-1-data/) exists for exactly one
+purpose: the plan states that *"conjunctive questions should converge to fewer
+turns than chain questions. If both flatten to the same number, the model
+learned one mode, not two."* Figure 4 is that test.
+
+![mode switching by question type](/assets/agent-rl/p3_mode_switching.png)
+
+***Figure 4.*** *Turns and fan-out by question type across all three evaluation sets. The abstention/answerable distinction is learned cleanly; the conjunctive/chain distinction is barely there.*
+
+| question type | turns (main) | turns (test) | turns (transfer) | calls/turn (main) |
+|---|---|---|---|---|
+| single | 2.99 | 2.97 | 2.85 | 2.81 |
+| conjunctive | 2.98 | 3.00 | 3.00 | 2.68 |
+| chain | 3.05 | 3.00 | 3.00 | 2.23 |
+| **oob** | **2.51** | **2.49** | **2.44** | **1.89** |
+
+Read honestly, this is a split verdict:
+
+- **The distinction it learned is answerable versus not.** Out-of-bounds
+  questions finish half a turn earlier and with a third less fan-out, on all
+  three sets. The model recognises "there is nothing here" and stops, which is
+  the behaviour with the clearest reward signal behind it.
+- **The distinction it did not learn is conjunctive versus chain.** 2.98 versus
+  3.05 turns on the main eval is a difference of 0.07 — by the plan's own
+  criterion, *both flattened to the same number*. The agent runs essentially
+  one answerable strategy: fan out wide, read what looks right, report.
+
+That is the same finding as the turn-structure analysis in
+[Part 2 §6.5](/blog/agent-rl/part-2-rl/) arriving from a different direction, and it is
+consistent with chains being the weakest answerable slice (0.469). The one
+place the strategies genuinely diverge is fan-out width: chains get 2.23 calls
+per turn against single's 2.81, i.e. on the questions where a *second wave*
+would help, the agent actually casts a *narrower* first net.
+
+---
+
+## The transfer test
+
+Everything above could still be an elaborate way of memorising an insurance
+corpus. So the last experiment removes the corpus.
+
+Take the finished checkpoint — trained exclusively on South African insurance
+documents — and point it, **with no further training**, at *The Rust
+Programming Language* and six *You Don't Know JS* books. New corpus (1 692
+chunks), new indexes, new questions from a separate generator run, same three
+tools.
+
+| policy | NDCG | precision | recall |
+|---|---|---|---|
+| BM25 top-10 | 0.333 | 0.070 | 0.419 |
+| ColBERT top-10 | 0.380 | — | — |
+| hybrid top-10 | 0.366 | — | — |
+| SFT agent (pre-RL) | 0.760 | 0.609 | — |
+| **v2 RL agent, zero-shot** | **0.781** | **0.606** | **0.815** |
+
+That is the right-hand panel of Figure 3: three retriever bars around 0.33–0.38,
+and the agent at 0.781.
+
+**2.1× the best retriever on a corpus it had never seen.** Perfect abstention
+(1.000) on unanswerable programming questions. And it was *more* efficient
+there than at home — 2.73 turns and 117 tokens per question versus 2.89 and
+134 — so it wasn't flailing at unfamiliar material, it was searching it.
+
+Per-slice on the transfer corpus: single 0.597, conjunctive 0.658, chain
+0.576, situational 0.802, cross-source comparison 0.767. RL *improved* on the
+SFT starting point (0.760 → 0.781), so training sharpened the skill rather
+than fitting the domain.
+
+The two design decisions from Part 1 are what make this interpretable. The
+agent outputs document IDs, so it cannot bluff from parametric knowledge about
+Rust — it certainly *has* such knowledge, and that knowledge is unusable here.
+The IDs are randomised per episode, so there was nothing to memorise even in
+training. What transferred is the only thing that could transfer: reformulate,
+fan out, read, verify, commit — or say it isn't there.
+
+---
+
+## Things that felt wrong and were correct
+
+- **No parallelism reward.** Fan-out emerged from turn cost alone: 2.55
+  calls/turn overall, 3.16 on situational questions — widest exactly where the
+  vocabulary gap is hardest. A direct reward would have been farmed with junk
+  queries.
+- **No answer generation.** Document IDs make the agent composable as a
+  subagent, memorisation-proof, and evaluable without an LLM judge in the loop.
+- **~3 000 questions is plenty.** Per-episode ID obfuscation makes repetition
+  safe; the 314 chains were each seen many times with different IDs.
+- **Keeping the length bias in the advantage.** The "fix" is the bug.
+- **Deliberately weak SFT.** It taught grammar and nothing else — and the
+  gate (parse < 2%, calls/turn > 1.2) is what made RL's exploration possible.
+- **Retrieval on CPU.** The GPU's job is rollouts.
+- **Reading the failed questions by hand.** Every meaningful v2 gain came from
+  that afternoon, not from the optimiser.
+
+## What's next
+
+- **4B.** Everything so far was bring-up at a size where bugs reproduce in
+  minutes. Qwen3-4B-Instruct-2507 with FP8 is the next rung.
+- **Privileged self-distillation (PBSD-style).** A teacher that sees the gold
+  documents reweights the student's *own* per-turn advantages — turn-level
+  credit assignment, which plain GRPO lacks. Gated on a stable curve, which v2
+  now has.
+- **Situational precision (0.193)** is the visible ceiling: the agent finds the
+  right neighbourhood and hedges around it.
+- **Abstention-aware fusion.** RRF@4 is worth +0.095 NDCG but currently lets
+  one non-empty rollout override three abstentions.
+
+---
+
+## Appendix: everything in one table
+
+| | v1 | v2 |
+|---|---|---|
+| Train questions (verified) | 2 236 | 3 104 |
+| — chains | 241 (11%) | 314, of which 250 entity-anchored |
+| Chain verification yield | ~10% | **21%** |
+| Question keep rate | 62% | 71% |
+| Learning rate | 1e-6 | **5e-6** |
+| Sampling | pattern-weighted | **+ solve-rate band [0.15, 0.85]** (1 380 questions) |
+| Scoring unit | single chunks | **equivalence classes** |
+| Vocab masking / logprob-gap logging | none | yes (gap 0.011 nats, flat) |
+| Crashes during the run | 1 OOM (+5 pre-run bugs) | **0** |
+| Held-out NDCG | 0.458 | **0.542** |
+| Held-out precision | 0.333 | 0.352 |
+| Unseen-test NDCG | 0.404 | **0.575** |
+| Chain slice | 0.245 | **0.469** (0.697 on test) |
+| **Zero-shot transfer NDCG** | not run | **0.781** (best retriever there: 0.380) |
+
+*Both runs, the data-generation code, the evaluation harnesses and the
+failure→data map are self-contained in the project repositories — v1 frozen as
+the baseline, v2 as the current line.*
+

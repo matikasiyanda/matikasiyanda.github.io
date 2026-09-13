@@ -1,7 +1,25 @@
-# Edit this file to update the /now/ page.
+# Shown on / (first 4) and /now/ (all).
+# status: running | exploring | stuck | next | parked  (each gets its own colour)
 updated: 2026-09-13
 items:
-  - title: "Example problem"
-    status: "exploring"
+  - title: "Scaling the search agent to 4B"
+    status: next
     description: >
-      What the problem is, why it's interesting to you, and where you're stuck.
+      Everything so far was bring-up at 1.7B, where bugs reproduce in minutes.
+      Qwen3-4B-Instruct-2507 with FP8 is the next rung.
+  - title: "Turn-level credit assignment"
+    status: exploring
+    description: >
+      Privileged self-distillation (PBSD-style): a teacher that sees the gold
+      documents reweights the student's own per-turn advantages. Plain GRPO
+      only scores the whole episode.
+  - title: "Situational precision stuck at 0.193"
+    status: stuck
+    description: >
+      The agent finds the right neighbourhood and then hedges around it
+      instead of committing to the document.
+  - title: "Abstention-aware fusion"
+    status: exploring
+    description: >
+      RRF@4 is worth +0.095 NDCG, but one non-empty rollout currently
+      overrides three rollouts that correctly abstained.
