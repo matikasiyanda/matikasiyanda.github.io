@@ -29,7 +29,8 @@ Qwen3-14B trained with ART to answer insurance questions by searching an
 insurer's public brochures through BM25 tools. A RULER-only reward got gamed
 (validation 0.636 → 0.514); blending in a correctness check stopped the slide.
 The best run peaked at 0.881 validation accuracy, but the untrained model
-already scored 0.836, so RL's gain sat inside the noise. The follow-up went
+already scored 0.836, and a later run that scored 1.000 on 20 test questions
+managed 0.769 on 147 unseen ones. The follow-up went
 small, local and judge-free.
 
 [Write-up](/blog/kb-search-agent-art/) · [code](https://github.com/matikasiyanda/kb-search-agent-art)

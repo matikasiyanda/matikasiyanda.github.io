@@ -64,7 +64,7 @@ Accuracy below is judged by gpt-4o-mini against a reference answer.
 | run 3 | RULER only | 1e-5 | 60 | 0.636 at step 10 → 0.514 at step 60 | 0.650 |
 | v2 | 0.5 RULER + 0.5 correctness | 5e-6 | 30 | 0.707 → 0.709 | not saved |
 | v3 | blended, + `read_kb_section` | 5e-6 | 30 | 0.836 → 0.881 (step 15) → 0.836 | 0.800 |
-| v5 | correctness + process rewards | 1.5e-6 | 40 | 0.729 → 0.896 (step 36) → 0.729 | 1.000 |
+| v5 | correctness + process rewards | 1.5e-6 | 40 | 0.729 → 0.896 (step 36) → 0.729 | 1.000; **0.769 on 147 unseen** |
 
 ### Run 3: the judge got gamed
 
@@ -88,12 +88,34 @@ at 0.881. But the model at step 0, before any RL, already scored 0.836, and
 validation here was 67 scenarios. A 4.5-point bump that returns to 0.836 by the
 last step is inside the noise.
 
-### v5: numbers too good to believe
+### v5: 1.000 on twenty, 0.769 on the rest
 
-v5 added process rewards for searching, reading and citing, and reported 1.000
-on the test set. That's 20 questions, validation swung by about 10 points
-between checkpoints, and the notebook mentions gold traces being used during
-rollouts, which may have leaked answers into training. I don't count it.
+v5 added process rewards for searching, reading, citing and avoiding forbidden
+statements, and reported 1.000 on the 20-question test set. The same notebook
+also ran the final checkpoint (step 41) on 147 unseen scenarios written to
+probe weak spots: adversarial source collisions, conditional cover, questions
+the documents don't answer.
+
+![v5 accuracy, reward and forbidden-issue rate by step, with the unseen evaluation at step 41](/assets/art/v5_metrics.png)
+
+| unseen eval, 147 scenarios | score |
+|---|---|
+| accuracy | 0.769 |
+| citation score | 0.886 |
+| behaviour score | 0.751 |
+| forbidden-issue rate | 0.184 |
+| search rate, required-read recall | 1.000 |
+
+The unseen set is the honest number. Accuracy drops from a perfect score to
+0.769, and the forbidden-issue rate jumps from under 0.05 in training and
+validation by the end of the run to 0.184: roughly one answer in five says
+something it shouldn't once the questions stop looking like the training set.
+
+The chart shows why process rewards didn't help. Search rate, read adherence,
+required-read recall and tool-trace score sat at 1.0 from step 0, so every
+trajectory in a group scored the same on them and GRPO had nothing to learn
+from. The notebook also mentions gold traces in rollouts,
+which may have leaked answers into training.
 
 After v5 came an SFT warm-up (v6) and multi-turn conversations on an SFT'd
 Qwen2.5-7B (v7 to v8.2). None of those have saved results.
@@ -109,8 +131,9 @@ matching a problem above:
 2. **An LLM judge is a second model to game.** It costs money per rollout and
    rewards style. The next project scores the IDs the agent reports against a
    gold set, with no judge at all.
-3. **Twenty test questions can't separate runs.** The next project evaluates on
-   hundreds of held-out questions, split by the same slices used in training.
+3. **Twenty test questions can't separate runs.** v5 looked perfect on 20 and
+   scored 0.769 on 147. The next project evaluates on hundreds of held-out
+   questions, split by the same slices used in training.
 
 The follow-up moved to Qwen3-1.7B on a single local RTX 4090, with a from-scratch
 GRPO loop instead of ART. That's [the three-part series](/blog/agent-rl/).
