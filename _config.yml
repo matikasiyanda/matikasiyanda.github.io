@@ -51,6 +51,10 @@ exclude:
 
 defaults:
   - scope: { path: "", type: posts }
-    values: { layout: post }
+    values:
+      layout: post
+      authors:
+        - { given: "Siyanda", family: "Matika" }
+        - { given: "Clemence", family: "Mungwariri" }
   - scope: { path: "_pages" }
     values: { layout: page }

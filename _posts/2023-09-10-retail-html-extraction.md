@@ -44,8 +44,8 @@ def divClassifier(url, divInfo, storeName):
 
 That gives every `<div>` on a page a label: 1 if it matches the store's
 product-card selector, 0 otherwise. Across Woolworths Food and Pick n Pay it
-produced 384,729 labelled divs. Clem wrote the notebook that extended scraping
-to five stores, Clicks and Dis-Chem among them.
+produced 384,729 labelled divs. Clemence Mungwariri wrote the notebook that
+extended scraping to five stores, Clicks and Dis-Chem among them.
 
 The plan that took shape over the three attempts below was a two-stage
 pipeline, so the expensive extraction model only ever sees product cards:

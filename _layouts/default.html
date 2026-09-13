@@ -5,6 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#0f1420">
   {% seo %}
+  {% if page.authors %}{% for a in page.authors %}<meta name="author" content="{{ a.given }} {{ a.family }}">
+  <meta name="citation_author" content="{{ a.family }}, {{ a.given }}">
+  {% endfor %}<meta name="citation_title" content="{{ page.title | escape }}">
+  <meta name="citation_publication_date" content="{{ page.date | date: '%Y/%m/%d' }}">{% endif %}
   {% feed_meta %}
   {% assign v = site.time | date: '%s' %}
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><defs><radialGradient id='g' cx='.3' cy='.3'><stop offset='0' stop-color='%23ff7a59'/><stop offset='1' stop-color='%23c2410c'/></radialGradient></defs><circle cx='8' cy='8' r='7' fill='url(%23g)'/></svg>">
