@@ -26,7 +26,7 @@ Code: [github.com/matikasiyanda/kb-search-agent-art](https://github.com/matikasi
 
 ## Why ordinary retrieval gets this wrong
 
-The usual approach is retrieval-augmented generation: embed the question, pull
+The usual approach is retrieval-augmented generation [[RAG]](#references): embed the question, pull
 the top few chunks by similarity, and have a model answer from them. On these
 questions it fails in three ways.
 
@@ -55,7 +55,7 @@ with a prompt alone.
 The knowledge base was one South African insurer's publicly released
 brochures, plan guides, terms and annexures: 53 PDFs converted to markdown,
 split on headings into sections with citation IDs, and indexed with Tantivy
-BM25.
+[[Tantivy]](#references) using BM25 [[BM25]](#references).
 
 Every evaluation question carries an expected verdict, and the verdicts show
 where the difficulty sits. Of the 147 unseen evaluation questions, only 2 were
@@ -89,14 +89,15 @@ however fluent it is.
 
 ## The agent and the training
 
-The pattern comes from OpenPipe's ART·E example, an agent that searches an
-email inbox. Here the model gets three tools: `search_kb` for a BM25 search,
+The pattern comes from OpenPipe's ART·E [[ARTE]](#references), an agent that
+searches an email inbox. Here the model gets three tools: `search_kb` for a BM25 search,
 `read_kb_section` to read a section in full, and `return_final_answer` with an
 answer and its citations.
 
-The model was `OpenPipe/Qwen3-14B-Instruct` with a rank-8 LoRA, trained 4-bit
-through Unsloth while vLLM served rollouts, on a single rented 80 GB GPU on
-RunPod. [ART](https://github.com/OpenPipe/ART) runs GRPO: for each question it
+The model was `OpenPipe/Qwen3-14B-Instruct` [[Qwen3]](#references) with a
+rank-8 LoRA [[LoRA]](#references), trained 4-bit through Unsloth
+[[Unsloth]](#references) while vLLM [[vLLM]](#references) served rollouts, on a single rented 80 GB GPU on
+RunPod. ART [[ART]](#references) runs GRPO [[GRPO]](#references): for each question it
 samples a group of attempts, scores each one, and nudges the model toward the
 attempts that beat the group average. Pods bill by the minute, so each version
 was one self-contained notebook plus a setup script.
@@ -119,8 +120,8 @@ Accuracy here is gpt-4o-mini comparing each answer with the reference answer.
 | v3 | blended, plus `read_kb_section` | 0.836 at step 0, peak 0.881, ending 0.836 | 0.800 on 20 |
 | v5 | correctness plus process rewards | 0.729 → 0.896 → 0.729 | 1.000 on 20, **0.769 on 147 unseen** |
 
-Run 3 used RULER, ART's built-in reward, where an LLM ranks the attempts in a
-group against each other without a reference answer. It's cheap, about $1.50
+Run 3 used RULER [[RULER]](#references), ART's built-in reward, where an LLM
+ranks the attempts in a group against each other without a reference answer. It's cheap, about $1.50
 in judge calls for a 30-step run. The model learned what the judge liked, which
 was sounding thorough, and accuracy fell as training went on.
 
@@ -175,3 +176,30 @@ Three lessons went into the next attempt:
 That attempt used Qwen3-1.7B on a single local RTX 4090, a from-scratch GRPO
 loop, and a reward computed from reported document IDs with no judge. It's
 written up in [three parts](/blog/agent-rl/).
+
+## References
+
+- **[ART]** OpenPipe, *ART: Agent Reinforcement Trainer*.
+  <https://github.com/OpenPipe/ART>. The training framework: GRPO loop,
+  `LocalBackend`, RULER.
+- **[ARTE]** OpenPipe, *ART·E: How We Built an Email Research Agent That Beats o3*.
+  <https://openpipe.ai/blog/art-e-mail-agent>. The search-then-read agent
+  pattern and notebook this project adapts.
+- **[RULER]** OpenPipe, *RULER: Easy Mode for RL Rewards*.
+  <https://openpipe.ai/blog/ruler>. Relative LLM-judge rewards, used alone in
+  run 3 and blended from v2.
+- **[GRPO]** Shao et al., *DeepSeekMath: Pushing the Limits of Mathematical
+  Reasoning in Open Language Models*, 2024. arXiv:2402.03300. Introduces Group
+  Relative Policy Optimization.
+- **[RAG]** Lewis et al., *Retrieval-Augmented Generation for
+  Knowledge-Intensive NLP Tasks*, NeurIPS 2020. arXiv:2005.11401.
+- **[BM25]** Robertson & Zaragoza, *The Probabilistic Relevance Framework: BM25
+  and Beyond*, Foundations and Trends in IR 3(4), 2009.
+- **[Tantivy]** Quickwit, *Tantivy*, a full-text search engine library in Rust.
+  <https://github.com/quickwit-oss/tantivy>
+- **[Qwen3]** Qwen Team, *Qwen3 Technical Report*, 2025. arXiv:2505.09388.
+- **[LoRA]** Hu et al., *LoRA: Low-Rank Adaptation of Large Language Models*,
+  2021. arXiv:2106.09685.
+- **[Unsloth]** Unsloth AI, *Unsloth*. <https://github.com/unslothai/unsloth>
+- **[vLLM]** Kwon et al., *Efficient Memory Management for Large Language Model
+  Serving with PagedAttention*, SOSP 2023. arXiv:2309.06180.
