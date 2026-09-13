@@ -21,12 +21,13 @@ zero-shot, at Rust and JavaScript books it had never seen.
 
 [Read the series](/blog/agent-rl/) · [data](/blog/agent-rl/part-1-data/) · [RL](/blog/agent-rl/part-2-rl/) · [results](/blog/agent-rl/part-3-results/)
 
-## Knowledge-base search agent with OpenPipe ART
+## Finding the fine print: a 14B search agent with OpenPipe ART
 
 <p class="meta work-meta">May – Jul 2026 · Qwen3-14B, LoRA, OpenPipe ART (GRPO + RULER), Tantivy BM25, RunPod</p>
 
-Qwen3-14B trained with ART to answer insurance questions by searching an
-insurer's public brochures through BM25 tools. A RULER-only reward got gamed
+Insurance questions are decided by exclusions and conditions, not the most
+relevant-sounding paragraph, so one-shot retrieval confidently gets them wrong.
+Qwen3-14B was trained with ART to search, read the fine print and cite it. A RULER-only reward got gamed
 (validation 0.636 → 0.514); blending in a correctness check stopped the slide.
 The best run peaked at 0.881 validation accuracy, but the untrained model
 already scored 0.836, and a later run that scored 1.000 on 20 test questions

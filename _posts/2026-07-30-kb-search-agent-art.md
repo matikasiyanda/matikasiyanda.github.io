@@ -1,139 +1,177 @@
 ---
-title: "Training a 14B search agent with OpenPipe ART on RunPod"
+title: "Teaching a 14B model to find the fine print"
 date: 2026-07-30
 permalink: /blog/kb-search-agent-art/
-description: "Qwen3-14B learns to search an insurer's brochures with GRPO and an LLM judge. The judge got gamed, the base model was already good, and the numbers were smaller than they looked."
+description: "Insurance questions are answered by exclusions and conditions buried in the terms, not by the general cover wording. I trained Qwen3-14B with OpenPipe ART to search for them. It reached 0.769 on unseen questions, and RL wasn't what got it there."
 tags: [rl, grpo, agents, retrieval, openpipe-art]
 ---
 
-Before the [1.7B search agent on one RTX 4090](/blog/agent-rl/), there was this:
-the same idea, a model that answers insurance questions by searching documents
-instead of guessing, built on [OpenPipe ART](https://github.com/OpenPipe/ART)
-with a 14B model on rented GPUs. Most of what went into the later project came
-from what went wrong here.
+A customer types: *"I am trying not to panic. Does the vehicle warranty cover
+electric vehicles or only hybrids? Please do not guess."*
+
+The insurer's documents contain two answers. The warranty's general wording
+covers mechanical breakdown and electrical failure, which sounds like yes. Its
+exclusions section says electric vehicles are not covered, while hybrids are.
+The exclusion is what decides a claim. An assistant that answers from the
+general wording tells someone with an EV they're covered when they aren't, and
+they find out at claim time.
+
+That's the problem this project is about. Insurance questions are rarely
+answered by the most relevant-sounding paragraph. They're answered by an
+exclusion, a condition, a limit in an annexure, or by the fact that the
+documents don't cover the question at all. I wanted a model that goes and finds
+that part, cites it, and says "that isn't covered here" when it should.
 
 Code: [github.com/matikasiyanda/kb-search-agent-art](https://github.com/matikasiyanda/kb-search-agent-art)
 
-## The setup
+## Why ordinary retrieval gets this wrong
+
+The usual approach is retrieval-augmented generation: embed the question, pull
+the top few chunks by similarity, and have a model answer from them. On these
+questions it fails in three ways.
+
+It ranks by resemblance, not authority. "Does the warranty cover electric
+vehicles" resembles the general cover wording and the product's marketing page
+more than a terse exclusions list, so those come back first and the exclusion
+may not come back at all.
+
+It takes one shot. Asked whether an Uber vehicle can be insured, BM25 finds the
+right policy document but not the clause about fare-paying passengers deeper
+inside it, because the question never uses those words. Getting there takes a
+second search after reading the first result.
+
+It can't say no. Top-*k* always returns *k* chunks. Ask it to rewrite an angry
+email, or for your live claim status, and it hands the model five insurance
+paragraphs to improvise from.
+
+A person handling these questions searches, skims, searches again using the
+document's own words, reads the exclusions before answering, and knows when to
+stop. The bet was that a model could learn that loop through reinforcement
+learning, because "read the exclusions before you answer" is hard to enforce
+with a prompt alone.
+
+## What "right" meant
 
 The knowledge base was one South African insurer's publicly released
-brochures and policy documents: 53 PDFs converted to markdown. An index script
-splits each file on its `#` to `###` headings, caps sections at 2,000
-characters and loads them into a Tantivy BM25 index, with a citation ID per
-section.
+brochures, plan guides, terms and annexures: 53 PDFs converted to markdown,
+split on headings into sections with citation IDs, and indexed with Tantivy
+BM25.
 
-The agent pattern comes from ART's ART·E example, an email-search agent. The
-model gets a question and a small set of tools:
+Every evaluation question carries an expected verdict, and the verdicts show
+where the difficulty sits. Of the 147 unseen evaluation questions, only 2 were
+plainly covered:
 
-- `search_kb(query)` runs a BM25 search and returns matching sections with their IDs.
-- `read_kb_section(id)` returns the full section (added in v3).
-- `return_final_answer(answer, citations)` ends the episode.
+| expected verdict | questions |
+|---|---|
+| conditional cover | 50 |
+| not found in the documents | 48 |
+| excluded | 35 |
+| needs clarification | 12 |
+| covered | 2 |
+
+Each question also records which sections must be read before answering, which
+sources may not be the primary citation, and phrases the answer must never
+contain. For the EV question:
+
+```json
+{
+  "expected_verdict": "excluded",
+  "required_read_citations": ["vehicle-warranty-terms-and-conditions::exclusions"],
+  "forbidden_sources_as_primary": ["vehicle-warranty::what-makes-us-different"],
+  "must_not_say": ["electric vehicles are covered", "full electric car is included",
+                   "another insurer", "knowledge base"]
+}
+```
+
+The product's marketing page ("what makes us different") is explicitly barred
+as the main source. An answer that leans on it, or says EVs are covered, fails
+however fluent it is.
+
+## The agent and the training
+
+The pattern comes from OpenPipe's ART·E example, an agent that searches an
+email inbox. Here the model gets three tools: `search_kb` for a BM25 search,
+`read_kb_section` to read a section in full, and `return_final_answer` with an
+answer and its citations.
 
 The model was `OpenPipe/Qwen3-14B-Instruct` with a rank-8 LoRA, trained 4-bit
-through Unsloth while vLLM served rollouts, both managed by ART's
-`LocalBackend` on a single 80 GB GPU. ART runs GRPO: for each question it
-samples a group of trajectories, scores them, and pushes the model toward the
-ones that scored above the group's average.
+through Unsloth while vLLM served rollouts, on a single rented 80 GB GPU on
+RunPod. [ART](https://github.com/OpenPipe/ART) runs GRPO: for each question it
+samples a group of attempts, scores each one, and nudges the model toward the
+attempts that beat the group average. Pods bill by the minute, so each version
+was one self-contained notebook plus a setup script.
 
-## The data
+Training questions were generated locally from the documents: 2,887 for the
+first runs, then a deterministic generator with no LLM in the loop that
+produced 11,909 (v2) and 15,400 (v5) templated questions with the same verdict,
+citation and must-not-say fields. The run notes record two data mistakes along
+the way. A set ordered easy to hard trained worse than a shuffled one, and a
+set that was 80% unanswerable questions taught the model to decline everything.
 
-Every training question was generated locally from the documents. The first
-set, `rl_3k`, had 2,887 scenarios. Later sets came from a deterministic
-generator with no LLM in the loop: templated questions over KB sections, 11,909
-scenarios in 11 categories for v2, and 15,400 in 17 categories for v5. The
-generator splits train and test by source group and rejects scenarios whose cited IDs don't exist or
-whose questions duplicate another.
+## What happened
 
-Two data lessons from the run notes:
+Accuracy here is gpt-4o-mini comparing each answer with the reference answer.
 
-- **Sorted data.** An earlier set was ordered easy to hard. That can help
-  supervised fine-tuning, but in RL the policy changes every step, and the
-  hard tail undid what the easy head had taught. Shuffling fixed it.
-- **Too many "not in KB" questions.** One set was 80% questions the documents
-  couldn't answer. The model learned to decline everything. The notes cap that
-  share at 30% afterwards.
+| run | reward | validation accuracy | test |
+|---|---|---|---|
+| run 3 | RULER only | 0.636 at step 10, 0.514 at step 60 | 0.650 on 20 |
+| v2 | half RULER, half correctness | 0.707 → 0.709 | not saved |
+| v3 | blended, plus `read_kb_section` | 0.836 at step 0, peak 0.881, ending 0.836 | 0.800 on 20 |
+| v5 | correctness plus process rewards | 0.729 → 0.896 → 0.729 | 1.000 on 20, **0.769 on 147 unseen** |
 
-## Runs
+Run 3 used RULER, ART's built-in reward, where an LLM ranks the attempts in a
+group against each other without a reference answer. It's cheap, about $1.50
+in judge calls for a 30-step run. The model learned what the judge liked, which
+was sounding thorough, and accuracy fell as training went on.
 
-Pods bill by the minute, so each version was a self-contained notebook plus a
-setup script, with keys pasted straight in rather than wired through secrets.
-Accuracy below is judged by gpt-4o-mini against a reference answer.
+v2 and v3 made half the reward a correctness check against a reference answer
+the agent never sees, and the decline stopped. v3, which added the separate
+read tool, is the best-behaved run. But look at step 0: the model scored 0.836
+before any training, and its peak of 0.881 on 67 validation questions came
+back down to where it started.
 
-| run | reward | lr | steps | validation | test (20 q) |
-|---|---|---|---|---|---|
-| run 3 | RULER only | 1e-5 | 60 | 0.636 at step 10 → 0.514 at step 60 | 0.650 |
-| v2 | 0.5 RULER + 0.5 correctness | 5e-6 | 30 | 0.707 → 0.709 | not saved |
-| v3 | blended, + `read_kb_section` | 5e-6 | 30 | 0.836 → 0.881 (step 15) → 0.836 | 0.800 |
-| v5 | correctness + process rewards | 1.5e-6 | 40 | 0.729 → 0.896 (step 36) → 0.729 | 1.000; **0.769 on 147 unseen** |
-
-### Run 3: the judge got gamed
-
-RULER, ART's built-in reward, has an LLM rank the
-trajectories in a group against each other, with no reference answer needed.
-It's cheap, about $1.50 of judge calls for a 30-step run. With RULER as the
-only reward, the model got better at looking thorough and worse at being right.
-Validation accuracy peaked around step 10 and fell to 0.514 by step 60. The
-RunPod notes record the same run as 64% → 40%; the saved notebook output is
-the number above.
-
-### v2 and v3: blend in correctness
-
-v2 made half the reward a correctness check against a reference answer the
-agent never sees, halved the learning rate and shuffled the data. The curve
-stopped falling but didn't climb either.
-
-v3 added `read_kb_section`, giving the model a separate step for reading a
-section in full. This is the run I'd stand behind: validation peaked
-at 0.881. But the model at step 0, before any RL, already scored 0.836, and
-validation here was 67 scenarios. A 4.5-point bump that returns to 0.836 by the
-last step is inside the noise.
-
-### v5: 1.000 on twenty, 0.769 on the rest
-
-v5 added process rewards for searching, reading, citing and avoiding forbidden
-statements, and reported 1.000 on the 20-question test set. The same notebook
-also ran the final checkpoint (step 41) on 147 unseen scenarios written to
-probe weak spots: adversarial source collisions, conditional cover, questions
-the documents don't answer.
+v5 added rewards for the process itself: searching before answering, reading
+the required sections, citing them, and avoiding the must-not-say phrases. It
+scored 1.000 on its 20-question test set. The same notebook then ran the final
+checkpoint on the 147 unseen questions above.
 
 ![v5 accuracy, reward and forbidden-issue rate by step, with the unseen evaluation at step 41](/assets/art/v5_metrics.png)
 
-| unseen eval, 147 scenarios | score |
+| unseen eval, 147 questions | score |
 |---|---|
 | accuracy | 0.769 |
 | citation score | 0.886 |
 | behaviour score | 0.751 |
 | forbidden-issue rate | 0.184 |
-| search rate, required-read recall | 1.000 |
+| searched before answering, read the required sections | 1.000 |
 
-The unseen set is the honest number. Accuracy drops from a perfect score to
-0.769, and the forbidden-issue rate jumps from under 0.05 in training and
-validation by the end of the run to 0.184: roughly one answer in five says
-something it shouldn't once the questions stop looking like the training set.
+The model always searched and always read what it was meant to read, and still
+said something forbidden in 18% of answers, against under 5% during training.
+The process rewards couldn't have taught that search-and-read behaviour either:
+search rate, read adherence, required-read recall and tool-trace score were
+already 1.0 at step 0, so every attempt in a group scored the same on them and
+GRPO had nothing to push against.
 
-The chart shows why process rewards didn't help. Search rate, read adherence,
-required-read recall and tool-trace score sat at 1.0 from step 0, so every
-trajectory in a group scored the same on them and GRPO had nothing to learn
-from. The notebook also mentions gold traces in rollouts,
-which may have leaked answers into training.
+## Did it solve the problem?
 
-After v5 came an SFT warm-up (v6) and multi-turn conversations on an SFT'd
-Qwen2.5-7B (v7 to v8.2). None of those have saved results.
+Partly, and not because of the RL.
 
-## What carried over
+The capability that matters, finding the exclusion and reading it before
+answering, was in the base 14B from the first step. On unseen questions the
+trained model gets about three in four right and cites well (0.886), which is
+useful. But it still makes a forbidden claim, like telling someone they're
+covered, in roughly one answer in five, and that's the failure that hurts a
+customer. The training numbers hid it: 1.000 on 20 questions written like the
+training set says very little about 147 questions written to probe weak spots.
 
-Put side by side, the next project differs from this one in three ways, each
-matching a problem above:
+Three lessons went into the next attempt:
 
-1. **The base 14B was already good.** RL on top moved accuracy by amounts
-   smaller than the evaluation noise. A model that starts weak has more room
-   to show what RL teaches.
-2. **An LLM judge is a second model to game.** It costs money per rollout and
-   rewards style. The next project scores the IDs the agent reports against a
-   gold set, with no judge at all.
-3. **Twenty test questions can't separate runs.** v5 looked perfect on 20 and
-   scored 0.769 on 147. The next project evaluates on hundreds of held-out
-   questions, split by the same slices used in training.
+1. A strong base model leaves RL little room to show anything. Start with a
+   model that can't yet do the task.
+2. An LLM judge is a second model to game, and it bills per rollout. Score
+   what can be checked mechanically, like which sections were cited.
+3. Evaluate on hundreds of held-out questions built to be hard, from day one.
 
-The follow-up moved to Qwen3-1.7B on a single local RTX 4090, with a from-scratch
-GRPO loop instead of ART. That's [the three-part series](/blog/agent-rl/).
+That attempt used Qwen3-1.7B on a single local RTX 4090, a from-scratch GRPO
+loop, and a reward computed from reported document IDs with no judge. It's
+written up in [three parts](/blog/agent-rl/).
