@@ -215,3 +215,4 @@ pre.mermaid { background: none; border: 0; text-align: center; }
 }
 .share-btn:hover { color: var(--text); border-color: var(--accent); }
 .share--compact .share-btn { padding: 5px 10px; font-size: 12px; }
+.cite-label { color: var(--muted); font-size: 14px; margin: -0.4em 0 0.6em; }

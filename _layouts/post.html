@@ -39,20 +39,18 @@ layout: default
     </nav>
   {% endif %}
 
-  {% comment %} BibTeX: key is surname + year + slug without hyphens. Braces live in variables so Liquid never sees them. {% endcomment %}
+  {% comment %} BibTeX in Quarto style: key is first author surname + year. Braces live in variables so Liquid never sees them. {% endcomment %}
   {% assign lb = "{" %}{% assign rb = "}" %}
-  {% assign slug_word = page.slug | remove: "-" | truncate: 28, "" %}
   {% assign year = page.date | date: "%Y" %}
-  {% assign mon = page.date | date: "%b" | downcase %}
   {% assign abs_url = page.url | absolute_url %}
-  {% capture bibtex %}@misc{{ lb }}matika{{ year }}{{ slug_word }},
-  author       = {{ lb }}{{ bib_authors | join: " and " }}{{ rb }},
-  title        = {{ lb }}{{ page.title }}{{ rb }},
-  year         = {{ lb }}{{ year }}{{ rb }},
-  month        = {{ mon }},
-  howpublished = {{ lb }}\url{{ lb }}{{ abs_url }}{{ rb }}{{ rb }},
-  url          = {{ lb }}{{ abs_url }}{{ rb }},
-  note         = {{ lb }}Blog post{{ rb }}
+  {% assign cite_date = page.date | date: "%Y-%m-%d" %}
+  {% assign first_family = page.authors.first.family | downcase %}
+  {% capture bibtex %}@misc{{ lb }}{{ first_family }}{{ year }},
+  author = {{ lb }}{{ bib_authors | join: " and " }}{{ rb }},
+  title = {{ lb }}{{ page.title }}{{ rb }},
+  date = {{ lb }}{{ cite_date }}{{ rb }},
+  url = {{ lb }}{{ abs_url }}{{ rb }},
+  langid = {{ lb }}en{{ rb }}
 {{ rb }}{% endcapture %}
   {% include share.html %}
 
@@ -72,7 +70,8 @@ What it should say (with a source if you have one):
   </section>
 
   <section class="cite" aria-labelledby="cite-heading">
-    <h2 id="cite-heading" class="label">Cite this post</h2>
+    <h2 id="cite-heading" class="label">Citation</h2>
+    <p class="cite-label">BibTeX citation:</p>
     <div class="cite-box">
       <button type="button" class="copy-btn" data-copy-target="bibtex-{{ page.slug }}">Copy</button>
       <pre id="bibtex-{{ page.slug }}"><code>{{ bibtex | strip | xml_escape }}</code></pre>
