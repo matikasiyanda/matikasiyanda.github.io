@@ -299,6 +299,21 @@ the baseline, v2 as the current line.*
 
 ---
 
+## Where it stands {#where-it-stands}
+
+<div class="stats">
+  <div class="stat"><b>0.542</b><span>held-out NDCG</span></div>
+  <div class="stat"><b>0.781</b><span>zero-shot, new domain</span></div>
+  <div class="stat"><b>1&times;</b><span>RTX 4090</span></div>
+</div>
+
+### Now {#now}
+
+{% include problems.html full=true %}
+
+
+---
+
 ## Glossary {#glossary}
 
 <details markdown="1">

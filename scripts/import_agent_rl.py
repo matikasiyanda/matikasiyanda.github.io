@@ -34,6 +34,25 @@ URLS = {name: SERIES_URL + meta["slug"] + "/" for name, meta in POSTS.items()}
 URLS.update({name: meta["url"] for name, meta in PAGES.items()})
 
 
+# Headline numbers and the live "Now" list (from _data/problems.yml), closing Part 3.
+PART3_CLOSER = """
+
+---
+
+## Where it stands {#where-it-stands}
+
+<div class="stats">
+  <div class="stat"><b>0.542</b><span>held-out NDCG</span></div>
+  <div class="stat"><b>0.781</b><span>zero-shot, new domain</span></div>
+  <div class="stat"><b>1&times;</b><span>RTX 4090</span></div>
+</div>
+
+### Now {#now}
+
+{% include problems.html full=true %}
+"""
+
+
 POST_ANCHORS = {"glossary.md": "#glossary", "references.md": "#references"}
 
 
@@ -129,6 +148,8 @@ def main():
             "---",
         ]
         post = convert(body, in_post=True)
+        if meta["part"] == 3:
+            post += PART3_CLOSER
         post += embedded_section("glossary.md", "Glossary", "glossary", collapsible=True)
         post += embedded_section("references.md", "References", "references", collapsible=False)
         (ROOT / "_posts" / f"{DATE}-{meta['slug']}.md").write_text("\n".join(fm) + "\n\n" + post + "\n")
