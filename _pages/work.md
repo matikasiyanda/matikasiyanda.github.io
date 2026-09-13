@@ -21,6 +21,19 @@ zero-shot, at Rust and JavaScript books it had never seen.
 
 [Read the series](/blog/agent-rl/) · [data](/blog/agent-rl/part-1-data/) · [RL](/blog/agent-rl/part-2-rl/) · [results](/blog/agent-rl/part-3-results/)
 
+## Knowledge-base search agent with OpenPipe ART
+
+<p class="meta work-meta">May – Jul 2026 · Qwen3-14B, LoRA, OpenPipe ART (GRPO + RULER), Tantivy BM25, RunPod</p>
+
+Qwen3-14B trained with ART to answer insurance questions by searching an
+insurer's public brochures through BM25 tools. A RULER-only reward got gamed
+(validation 0.636 → 0.514); blending in a correctness check stopped the slide.
+The best run peaked at 0.881 validation accuracy, but the untrained model
+already scored 0.836, so RL's gain sat inside the noise. The follow-up went
+small, local and judge-free.
+
+[Write-up](/blog/kb-search-agent-art/) · [code](https://github.com/matikasiyanda/kb-search-agent-art)
+
 ## Product extraction from South African retail sites
 
 <p class="meta work-meta">Nov 2022 – Sep 2023 · Selenium, Scrapy, spaCy, FLAN-T5-XL + LoRA, GPT-3.5</p>
@@ -38,17 +51,21 @@ doesn't measure the task.
 
 The second split the job in two with FLAN-T5-XL and LoRA adapters (rank 8 on
 the attention q and v projections). One adapter decides whether a `<div>` is a
-product card; it trained on 23,052 examples, balanced between product and
-non-product divs from Woolworths Food and Pick n Pay. A second adapter
-extracts the fields.
+product card, trained on 20,000 divs from Woolworths Food and Pick n Pay. A
+second adapter extracts name and price, with labels from hand-written
+BeautifulSoup parsers per store.
 
 The third widened the net to more retailers, among them Dis-Chem, Bash and
 Truworths. Of 258,546 scraped divs, 2,486 were product cards, and GPT-3.5
 labelled those with item name, price, ID, promotion, promo price and URL as
 JSON to make a training set.
 
-Where it stopped: both adapters trained, but I never ran an end-to-end
-evaluation, so there's no accuracy number I'd stand behind.
+Where it stopped: both adapters trained, but there was never an end-to-end
+evaluation. Reviewing the code later turned up three problems: the NER labels
+above, a classifier set that was meant to be balanced but went out as 1.8%
+product cards, and an extractor that trained on the test file.
+
+[Write-up](/blog/retail-html-extraction/) · [code](https://github.com/matikasiyanda/retail-html-extraction)
 
 ## Fine-tuning an OCR recogniser on synthetic text
 
@@ -62,8 +79,9 @@ a custom alphabet of digits, lowercase letters and punctuation, starting from
 the pretrained backbone and using gamma-contrast augmentation.
 
 On 7,200 held-out synthetic images it read 83.7% of strings exactly right, and
-87.5% on the words-with-symbols subset. It still confused `l`
-with `i` and `o` with `0`. Those numbers are exact-match on synthetic data;
+it still confused `l` with `i` and `o` with `0`. Those numbers are exact-match on synthetic data;
 it wasn't tested on real scans.
+
+[Write-up](/blog/ocr-synthetic-finetune/) · [code](https://github.com/matikasiyanda/ocr-synthetic-finetune)
 
 </div>
