@@ -1,23 +1,22 @@
 ---
 layout: default
 title: "Siyanda Matika"
+stats:
+  - { value: "0.542", label: "held-out NDCG" }
+  - { value: "0.781", label: "zero-shot, new domain" }
+  - { value: "1×", label: "RTX 4090" }
 ---
-<section class="intro">
+<section class="hero">
   {% capture about %}{% include about.md %}{% endcapture %}
   {{ about | markdownify }}
+  <div class="stats">
+    {% for s in page.stats %}<div class="stat"><b>{{ s.value }}</b><span>{{ s.label }}</span></div>{% endfor %}
+  </div>
 </section>
 
-<section>
-  <h2>Now</h2>
-  {% include problems.html limit=4 %}
-  <p><a href="{{ '/now/' | relative_url }}">More on what I'm working on</a></p>
-</section>
+<h2 class="label">Now</h2>
+{% include problems.html limit=4 %}
+<p class="more"><a href="{{ '/now/' | relative_url }}">Everything I'm working on →</a></p>
 
-<section>
-  <h2>Writing</h2>
-  <ul class="list">
-    {% for post in site.posts limit:6 %}
-    <li><a href="{{ post.url | relative_url }}">{{ post.title }}</a><time datetime="{{ post.date | date_to_xmlschema }}">{{ post.date | date: "%b %Y" }}</time></li>
-    {% endfor %}
-  </ul>
-</section>
+<h2 class="label">Writing</h2>
+{% include post-list.html limit=6 %}

@@ -1,0 +1,9 @@
+<ul class="posts">
+{% for post in site.posts limit: include.limit %}
+  <li>
+    <a href="{{ post.url | relative_url }}">{{ post.title }}</a>
+    <time datetime="{{ post.date | date_to_xmlschema }}">{{ post.date | date: "%b %Y" }}</time>
+    {% if post.description %}<p>{{ post.description }}</p>{% endif %}
+  </li>
+{% endfor %}
+</ul>

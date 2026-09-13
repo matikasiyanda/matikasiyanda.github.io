@@ -18,9 +18,12 @@ ASSETS = "/assets/agent-rl/"
 DATE = "2026-09-04"
 
 POSTS = {
-    "part-1-data.md":    dict(part=1, slug="part-1-data"),
-    "part-2-rl.md":      dict(part=2, slug="part-2-rl"),
-    "part-3-results.md": dict(part=3, slug="part-3-results"),
+    "part-1-data.md":    dict(part=1, slug="part-1-data",
+                              description="Chunking, synthetic questions, verification, and the failure→data map that decided everything."),
+    "part-2-rl.md":      dict(part=2, slug="part-2-rl",
+                              description="Three tools, tokens in/tokens out, the reward, and how my GRPO differs from the textbook version."),
+    "part-3-results.md": dict(part=3, slug="part-3-results",
+                              description="Two runs, the slice tables, and an insurance-trained agent pointed at Rust and JavaScript books."),
 }
 PAGES = {
     "README.md":     dict(url=SERIES_URL, out="_pages/agent-rl/index.md"),
@@ -97,6 +100,7 @@ def main():
             f"series: {yaml_str(SERIES)}",
             f"series_url: {SERIES_URL}",
             f"part: {meta['part']}",
+            f"description: {yaml_str(meta['description'])}",
             "tags: [rl, grpo, retrieval, agents]",
             "math: true",
             f"mermaid: {'true' if '```mermaid' in body else 'false'}",

@@ -5,6 +5,7 @@ permalink: /blog/agent-rl/part-3-results/
 series: "Training a document-search agent with GRPO"
 series_url: /blog/agent-rl/
 part: 3
+description: "Two runs, the slice tables, and an insurance-trained agent pointed at Rust and JavaScript books."
 tags: [rl, grpo, retrieval, agents]
 math: true
 mermaid: false

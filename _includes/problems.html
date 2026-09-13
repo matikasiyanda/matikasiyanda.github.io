@@ -1,8 +1,11 @@
-<ul class="problems">
+<ul class="now">
 {% for p in site.data.problems.items limit: include.limit %}
   <li>
-    <span class="problem-title">{{ p.title }}</span> <span class="status">{{ p.status }}</span>
-    {% if include.full %}{{ p.description | markdownify }}{% endif %}
+    <span class="st st-{{ p.status }}">{{ p.status }}</span>
+    <div>
+      <b>{{ p.title }}</b>
+      {{ p.description | markdownify }}
+    </div>
   </li>
 {% endfor %}
 </ul>

@@ -3,11 +3,15 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#000000">
+  <meta name="theme-color" content="#0f1420">
   {% seo %}
   {% feed_meta %}
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect width='16' height='16' rx='3' fill='black'/><circle cx='8' cy='8' r='3' fill='white'/></svg>">
-  <link rel="stylesheet" href="{{ '/assets/css/site.css' | relative_url }}">
+  {% assign v = site.time | date: '%s' %}
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><defs><radialGradient id='g' cx='.3' cy='.3'><stop offset='0' stop-color='%23ff7a59'/><stop offset='1' stop-color='%23c2410c'/></radialGradient></defs><circle cx='8' cy='8' r='7' fill='url(%23g)'/></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+  <link rel="stylesheet" href="{{ '/assets/css/site.css' | relative_url }}?v={{ v }}">
   {% if page.math %}
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js"></script>
@@ -15,10 +19,12 @@
   {% endif %}
 </head>
 <body>
-  <div class="wrap">
-    <header class="site-head">
-      <a class="site-name" href="{{ '/' | relative_url }}">{{ site.author.name }}</a>
-      <nav aria-label="Main">
+  <div class="shell">
+    <aside class="side">
+      <a class="mark" href="{{ '/' | relative_url }}" aria-label="Home"></a>
+      <a class="side-name" href="{{ '/' | relative_url }}">{{ site.author.name }}</a>
+      <p class="side-loc">{{ site.author.location }}</p>
+      <nav class="side-nav" aria-label="Main">
         {% for item in site.data.navigation %}
           {% assign active = false %}
           {% if item.url == '/' %}
@@ -29,32 +35,40 @@
           <a href="{{ item.url | relative_url }}"{% if active %} aria-current="page"{% endif %}>{{ item.title }}</a>
         {% endfor %}
       </nav>
-    </header>
+      <div class="side-links">
+        <a href="https://github.com/{{ site.author.github }}">GitHub</a>
+        <a href="{{ site.author.linkedin }}">LinkedIn</a>
+        <a href="mailto:{{ site.author.email }}">Email</a>
+      </div>
+    </aside>
 
     <main id="main">
       {{ content }}
+      <footer class="foot">© {{ 'now' | date: '%Y' }} {{ site.author.name }} · <a href="{{ '/feed.xml' | relative_url }}">RSS</a></footer>
     </main>
-
-    <footer class="site-foot">
-      <a href="mailto:{{ site.author.email }}">email</a>
-      <a href="https://github.com/{{ site.author.github }}">github</a>
-      <a href="{{ site.author.linkedin }}">linkedin</a>
-      <a href="{{ '/feed.xml' | relative_url }}">rss</a>
-    </footer>
   </div>
 
-  <script src="{{ '/assets/js/site.js' | relative_url }}" defer></script>
+  <script src="{{ '/assets/js/site.js' | relative_url }}?v={{ v }}" defer></script>
   {% if page.mermaid %}
   <script type="module">
     import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
     document.querySelectorAll(".language-mermaid").forEach(function (block) {
       var pre = document.createElement("pre");
       pre.className = "mermaid";
-      // drop the source's light-theme fills so the dark palette applies
+      // drop the source's light-theme fills so the site palette applies
       pre.textContent = block.textContent.replace(/^\s*(style|classDef|linkStyle)\b.*$/gm, "");
       block.replaceWith(pre);
     });
-    mermaid.initialize({ startOnLoad: false, theme: "dark", themeVariables: { background: "#000000", fontFamily: "system-ui, sans-serif" } });
+    mermaid.initialize({
+      startOnLoad: false,
+      theme: "base",
+      themeVariables: {
+        darkMode: true, background: "#161d2e", fontFamily: "Inter, sans-serif",
+        primaryColor: "#1c2540", primaryTextColor: "#efe8dc", primaryBorderColor: "#ff7a59",
+        lineColor: "#7fd1b9", secondaryColor: "#161d2e", tertiaryColor: "#0f1420",
+        clusterBkg: "#131a2a", clusterBorder: "#263049"
+      }
+    });
     mermaid.run({ querySelector: ".mermaid" });
   </script>
   {% endif %}
