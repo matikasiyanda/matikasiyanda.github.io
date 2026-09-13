@@ -57,7 +57,7 @@ Kilometre Array (SKA), as part of international science collaborations.
 - First ML hire: chose the stack, set the roadmap and mentored the engineers
   who joined.
 - Ran the GPU infrastructure for model deployments: served and fine-tuned
-  open-weight LLMs (Llama, Mixtral), tuned serving for concurrent users, and
+  open-weight LLMs (Llama, Mistral, Mixtral), tuned serving for concurrent users, and
   built a RunPod scheduling tool with run/sleep cycles to keep GPU spend bounded.
 - Designed the AWS ML stack: serverless model services on ECS and Fargate,
   CI/CD pipelines on GitHub Actions, and data pipelines on Spark and EMR with
@@ -98,7 +98,7 @@ Kilometre Array (SKA), as part of international science collaborations.
   <dt>Statistics and analytics</dt><dd>Bayesian inference, time series, segmentation, forecasting, recommendation, A/B testing</dd>
   <dt>Unstructured data</dt><dd>text, images and video: extraction, OCR, embeddings and retrieval</dd>
   <dt>Machine learning</dt><dd>model design, training, evaluation and fine-tuning across classical ML, deep learning and transformers; PyTorch, scikit-learn, XGBoost</dd>
-  <dt>LLMs</dt><dd>retrieval (RAG, hybrid search), fine-tuning (LoRA, Azure OpenAI Service), intent classification and agent routing, reinforcement learning (GRPO), guardrails</dd>
+  <dt>LLMs</dt><dd>open-weight models (Llama, Mistral and Mixtral, Qwen) and GPT models via Azure OpenAI; retrieval (RAG, hybrid search), fine-tuning (LoRA, Azure OpenAI Service), intent classification and agent routing, reinforcement learning (GRPO), guardrails</dd>
   <dt>Scripting</dt><dd>Python, Bash, SQL</dd>
   <dt>Cloud services</dt><dd>AWS (SageMaker, ECS, Fargate, EMR), Azure (Azure ML, App Service), GCP</dd>
   <dt>GPU infrastructure and deployment</dt><dd>Linux GPU servers (RunPod), open-weight model serving with vLLM, concurrency tuning, Docker</dd>
