@@ -92,6 +92,7 @@ Kilometre Array (SKA), as part of international science collaborations.
 - Managed engagement with marketing and cross-sell stakeholders, turning model
   results into campaign and value-proposition recommendations presented to
   senior stakeholders.
+- Hired a data scientist into the team.
 </div>
 
 <div class="cv-role" markdown="1">
