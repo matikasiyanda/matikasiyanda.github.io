@@ -24,8 +24,8 @@ Kilometre Array (SKA).
   personalisation and the ML platform behind them.
 - Building a customer virtual agent for WhatsApp and web: retrieval over
   product documentation, custom guardrail models and drift monitoring.
-- Fine-tuned an agent-routing classifier with OpenAI's fine-tuning service,
-  which reads the user's intent and routes each conversation to the right agent.
+- Fine-tuned an agent-routing classifier with Azure OpenAI Service, which reads
+  the user's intent and routes each conversation to the right agent.
 - Took AI systems through privacy and security review: wrote Data Protection
   Impact Assessments (DPIAs), worked with the security team through multiple
   penetration tests, and worked on data governance and adversarial testing of
@@ -87,7 +87,7 @@ Kilometre Array (SKA).
   <dt>Statistics and analytics</dt><dd>Bayesian inference, time series, segmentation, forecasting, recommendation, A/B testing</dd>
   <dt>Unstructured data</dt><dd>text, images and video: extraction, OCR, embeddings and retrieval</dd>
   <dt>Machine learning</dt><dd>model design, training, evaluation and fine-tuning across classical ML, deep learning and transformers; PyTorch, scikit-learn, XGBoost</dd>
-  <dt>LLMs</dt><dd>retrieval (RAG, hybrid search), fine-tuning (LoRA, OpenAI fine-tuning), intent classification and agent routing, reinforcement learning (GRPO), guardrails</dd>
+  <dt>LLMs</dt><dd>retrieval (RAG, hybrid search), fine-tuning (LoRA, Azure OpenAI Service), intent classification and agent routing, reinforcement learning (GRPO), guardrails</dd>
   <dt>Scripting</dt><dd>Python, Bash, SQL</dd>
   <dt>Cloud services</dt><dd>AWS (SageMaker, ECS, Fargate, EMR), Azure (Azure ML, App Service), GCP</dd>
   <dt>GPU infrastructure and deployment</dt><dd>Linux GPU servers (RunPod), open-weight model serving with vLLM, concurrency tuning, Docker</dd>
