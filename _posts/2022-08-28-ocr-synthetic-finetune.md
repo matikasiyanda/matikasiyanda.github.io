@@ -54,12 +54,19 @@ from plain numbers like `194` to mixed runs like `bgy74j`:
 | words + symbols | 6,000 |
 | numbers + words | 6,000 |
 
-The three word-based categories get three times as many images. Text is black or grey on a plain background, at a fixed font size per
-run; a later version of the script added skew between −15° and 15°. The script
-then renames every image with its category, merges trdg's label files into one
-table, and zips the set for training on Colab.
+The three word-based categories get three times as many images. Each run uses
+one font size, and a later version of the script added skew between −15° and
+15°. The script then renames every image with its category, merges trdg's label
+files into one table, and zips the set for training on Colab. At font size 30
+that's 24,000 labelled images.
 
-At font size 30 that's 24,000 labelled images.
+This is what the generator produces, four images per category from a local run
+at font size 24:
+
+![Generated training images: rows of numbers, symbols, words, numbers with symbols, words with symbols, and numbers with words, in varied colours on speckled backgrounds](/assets/ocr/generated_samples.png){: .no-invert}
+
+Text colour, background noise and blur vary from image to image. The
+recogniser has to learn the characters, not one clean rendering of them.
 
 ## Training
 
@@ -70,14 +77,25 @@ split. Labels are lowercased, then split 70/30 stratified by category so each
 kind of string appears in both halves, leaving 16,800 images to train on and
 7,200 to test.
 
-Training uses gamma-contrast augmentation, so the model sees the same text
-lighter and darker, with early stopping once validation loss hasn't improved
-for 10 epochs and the best checkpoint kept.
+Before an image reaches the model, keras-ocr resizes it to the recogniser's
+fixed 200 × 31 input and pads the rest. Here is one training input from the
+Colab run, labelled `^t+}i"]b` (labels are lowercased, so the capitals in the
+image don't count against it):
+
+![One training input: a short string of symbols and letters on a speckled background, padded with a flat block to 200 pixels wide](/assets/ocr/training_input.png){: .no-invert}
+
+Training adds gamma-contrast augmentation on top, so the model sees the same
+text lighter and darker, with early stopping once validation loss hasn't
+improved for 10 epochs and the best checkpoint kept.
 
 ## How well it read
 
-On the 7,200 held-out images, 83.7% of strings came out exactly right. Exact
-match is strict: `a8ti0wb` read as `a8tiowb` counts as wrong, even though six
+On the 7,200 held-out images, 83.7% of strings came out exactly right. A
+typical correct read from the test set:
+
+![A test image reading a8Ti0WB, which the model predicted as a8ti0wb, matching the label](/assets/ocr/prediction.png){: .no-invert}
+
+Exact match is strict: `a8ti0wb` read as `a8tiowb` counts as wrong, even though six
 of seven characters are correct. The notebook notes the errors that survived:
 `l` read as `i`, and `o` read as `0`. Those are also the pairs that are hardest
 for a person to tell apart in many fonts.
