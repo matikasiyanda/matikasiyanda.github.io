@@ -4,6 +4,7 @@ date: 2026-07-30
 permalink: /blog/kb-search-agent-art/
 description: "Insurance questions are answered by exclusions and conditions buried in the terms, not by the general cover wording. I trained Qwen3-14B with OpenPipe ART to search for them. It reached 0.769 on unseen questions, and RL wasn't what got it there."
 tags: [rl, grpo, agents, retrieval, openpipe-art]
+mermaid: true
 ---
 
 A customer types: *"I am trying not to panic. Does the vehicle warranty cover
@@ -43,6 +44,25 @@ second search after reading the first result.
 It can't say no. Top-*k* always returns *k* chunks. Ask it to rewrite an angry
 email, or for your live claim status, and it hands the model five insurance
 paragraphs to improvise from.
+
+The difference is easiest to see side by side, using the EV question:
+
+```mermaid
+flowchart TB
+  subgraph RAG ["one-shot retrieval"]
+    direction LR
+    q1["EV covered?"] --> r1["top-5 by similarity:<br/>general wording, marketing page"]
+    r1 --> a1["Yes, covered<br/>(wrong)"]
+  end
+  subgraph AGENT ["search agent"]
+    direction LR
+    q2["EV covered?"] --> s1["search:<br/>warranty EV"]
+    s1 --> s2["search:<br/>exclusions"]
+    s2 --> rd["read:<br/>exclusions section"]
+    rd --> a2["No, excluded; hybrids covered<br/>cites the exclusion"]
+  end
+  RAG ~~~ AGENT
+```
 
 A person handling these questions searches, skims, searches again using the
 document's own words, reads the exclusions before answering, and knows when to
@@ -99,7 +119,16 @@ rank-8 LoRA [[LoRA]](#references), trained 4-bit through Unsloth
 [[Unsloth]](#references) while vLLM [[vLLM]](#references) served rollouts, on a single rented 80 GB GPU on
 RunPod. ART [[ART]](#references) runs GRPO [[GRPO]](#references): for each question it
 samples a group of attempts, scores each one, and nudges the model toward the
-attempts that beat the group average. Pods bill by the minute, so each version
+attempts that beat the group average:
+
+```mermaid
+flowchart LR
+  Q["one training question"] --> G["8 attempts by the current model<br/>each: search → read → answer"]
+  G --> S["score every attempt<br/>RULER judge and/or correctness check"]
+  S --> A["advantage = score − group mean"]
+  A --> U["LoRA update: make above-average<br/>attempts more likely"]
+  U --> G
+``` Pods bill by the minute, so each version
 was one self-contained notebook plus a setup script.
 
 Training questions were generated locally from the documents: 2,887 for the

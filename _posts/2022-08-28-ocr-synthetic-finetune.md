@@ -15,15 +15,23 @@ Code: [github.com/matikasiyanda/ocr-synthetic-finetune](https://github.com/matik
 
 ## Why the pretrained model couldn't do it
 
-[keras-ocr](https://github.com/faustomorales/keras-ocr) reads text in two
-stages. A detector (CRAFT) finds boxes around words, and a recogniser (a CRNN)
+keras-ocr [[keras-ocr]](#references) reads text in two stages. A detector
+(CRAFT [[CRAFT]](#references)) finds boxes around words, and a recogniser (a
+CRNN [[CRNN]](#references))
 turns each cropped box into a string. The recogniser's last layer picks one
 character from a fixed alphabet at each position, and the pretrained model's
 alphabet is digits and lowercase letters. Nothing else.
 
-So `R 59.99` can at best come out as `r5999`, and `ID: 225163` as `id225163`.
-The space, the full stop and the colon have no output to map to. No amount of
-cleaner images fixes that; the alphabet has to change.
+The detector splits text at spaces, so `R 59.99` reaches the recogniser as two
+crops, `R` and `59.99`. The second crop has a full stop in it, and the
+recogniser has no output for a full stop. The best it can possibly return is
+`5999`. The same goes for the colon in `ID:` and the decimal point in `4.5m`:
+
+![Three price-page strings, their detector crops, and the best read each alphabet allows: the pretrained alphabet drops the full stop in 59.99, the colon in ID:, and the point in 4.5m](/assets/ocr/alphabet_problem.png){: .no-invert}
+
+This is a ceiling, not a quality problem. No amount of cleaner images gets a
+full stop out of a model that has no full stop to output; the alphabet has to
+change.
 
 Changing it has a cost. When you give the recogniser a different alphabet,
 keras-ocr can't reuse the trained output layer, so it keeps the pretrained
@@ -40,7 +48,7 @@ a pile of hand-labelled prices and product codes.
 
 ## Making the labels
 
-[trdg](https://github.com/Belval/TextRecognitionDataGenerator) renders random
+trdg [[trdg]](#references) renders random
 text as images and records exactly what it rendered, so every image comes with
 a perfect label. I drove it from a script that generates six kinds of string,
 from plain numbers like `194` to mixed runs like `bgy74j`:
@@ -72,7 +80,7 @@ recogniser has to learn the characters, not one clean rendering of them.
 
 The notebook starts from keras-ocr's own fine-tuning example and changes three
 things: the data (the generated set instead of the example's Born-Digital
-dataset), the alphabet (lowercase letters, digits and punctuation), and the
+dataset [[BornDigital]](#references)), the alphabet (lowercase letters, digits and punctuation), and the
 split. Labels are lowercased, then split 70/30 stratified by category so each
 kind of string appears in both halves, leaving 16,800 images to train on and
 7,200 to test.
@@ -116,3 +124,18 @@ product pages.
 If I picked it up again, the first step would be fifty hand-labelled crops
 from real pages, kept aside as the only test set that counts, with the
 generator tuned until the synthetic images look like them.
+
+## References
+
+- **[keras-ocr]** F. Morales, *keras-ocr*: a packaged version of the CRAFT
+  detector and a Keras CRNN recogniser. <https://github.com/faustomorales/keras-ocr>.
+  Default recogniser alphabet: `string.digits + string.ascii_lowercase`.
+- **[CRAFT]** Baek et al., *Character Region Awareness for Text Detection*,
+  CVPR 2019. arXiv:1904.01941.
+- **[CRNN]** Shi, Bai & Yao, *An End-to-End Trainable Neural Network for
+  Image-based Sequence Recognition and Its Application to Scene Text
+  Recognition*, IEEE TPAMI 39(11), 2017. arXiv:1507.05717.
+- **[trdg]** E. Belval, *TextRecognitionDataGenerator*.
+  <https://github.com/Belval/TextRecognitionDataGenerator>
+- **[BornDigital]** Karatzas et al., *ICDAR 2013 Robust Reading Competition*,
+  ICDAR 2013 (Challenge 1, "Born-Digital Images"). <https://rrc.cvc.uab.es/?ch=1>

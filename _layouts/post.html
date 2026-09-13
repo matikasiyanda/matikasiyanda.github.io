@@ -9,6 +9,14 @@ layout: default
     · {{ words | divided_by: 220 | plus: 1 }} min read
     {% if page.series %}· <a href="{{ page.series_url | relative_url }}">{{ page.series }}</a>{% endif %}
   </p>
+  {% if page.corrections %}
+  <aside class="corrections" aria-label="Corrections">
+    <strong>Corrections</strong>
+    <ul>
+      {% for c in page.corrections %}<li><time>{{ c.date | date: "%-d %b %Y" }}</time> {{ c.note | markdownify | remove: "<p>" | remove: "</p>" }}</li>{% endfor %}
+    </ul>
+  </aside>
+  {% endif %}
   <div class="prose">
     {{ content }}
   </div>
@@ -21,5 +29,65 @@ layout: default
       {% for p in parts %}{% if p.part == prev_part %}<a class="prev" href="{{ p.url | relative_url }}">← {{ p.title }}</a>{% endif %}{% endfor %}
       {% for p in parts %}{% if p.part == next_part %}<a class="next" href="{{ p.url | relative_url }}">{{ p.title }} →</a>{% endif %}{% endfor %}
     </nav>
+  {% endif %}
+
+  {% comment %} BibTeX: key is surname + year + slug without hyphens. Braces live in variables so Liquid never sees them. {% endcomment %}
+  {% assign lb = "{" %}{% assign rb = "}" %}
+  {% assign slug_word = page.slug | remove: "-" | truncate: 28, "" %}
+  {% assign year = page.date | date: "%Y" %}
+  {% assign mon = page.date | date: "%b" | downcase %}
+  {% assign abs_url = page.url | absolute_url %}
+  {% capture bibtex %}@misc{{ lb }}matika{{ year }}{{ slug_word }},
+  author       = {{ lb }}Matika, Siyanda{{ rb }},
+  title        = {{ lb }}{{ page.title }}{{ rb }},
+  year         = {{ lb }}{{ year }}{{ rb }},
+  month        = {{ mon }},
+  howpublished = {{ lb }}\url{{ lb }}{{ abs_url }}{{ rb }}{{ rb }},
+  url          = {{ lb }}{{ abs_url }}{{ rb }},
+  note         = {{ lb }}Blog post{{ rb }}
+{{ rb }}{% endcapture %}
+  {% assign issue_title = "Correction: " | append: page.title | url_encode %}
+  {% capture issue_body %}Page: {{ page.url | absolute_url }}
+
+What's wrong:
+
+What it should say (with a source if you have one):
+{% endcapture %}
+  <section class="feedback" aria-label="Corrections and feedback">
+    <p>Spotted a mistake? This post is open source.
+      <a href="https://github.com/{{ site.comments.giscus.repo }}/edit/master/{{ page.path }}">Suggest a correction</a>
+      (opens an editable copy on GitHub) or
+      <a href="https://github.com/{{ site.comments.giscus.repo }}/issues/new?title={{ issue_title }}&amp;body={{ issue_body | url_encode }}">report it as an issue</a>.
+      Accepted corrections are listed at the top of the post.</p>
+  </section>
+
+  <section class="cite" aria-labelledby="cite-heading">
+    <h2 id="cite-heading" class="label">Cite this post</h2>
+    <div class="cite-box">
+      <button type="button" class="copy-btn" data-copy-target="bibtex-{{ page.slug }}">Copy</button>
+      <pre id="bibtex-{{ page.slug }}"><code>{{ bibtex | strip | xml_escape }}</code></pre>
+    </div>
+  </section>
+
+  {% if site.comments.giscus.repo_id %}
+  <section class="comments" aria-labelledby="comments-heading">
+    <h2 id="comments-heading" class="label">Comments</h2>
+    <script src="https://giscus.app/client.js"
+      data-repo="{{ site.comments.giscus.repo }}"
+      data-repo-id="{{ site.comments.giscus.repo_id }}"
+      data-category="{{ site.comments.giscus.category }}"
+      data-category-id="{{ site.comments.giscus.category_id }}"
+      data-mapping="pathname"
+      data-strict="1"
+      data-reactions-enabled="1"
+      data-emit-metadata="0"
+      data-input-position="top"
+      data-theme="transparent_dark"
+      data-lang="en"
+      data-loading="lazy"
+      crossorigin="anonymous"
+      async></script>
+    <noscript>Comments need JavaScript, or join the discussion on <a href="https://github.com/{{ site.comments.giscus.repo }}/discussions">GitHub</a>.</noscript>
+  </section>
   {% endif %}
 </article>

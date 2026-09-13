@@ -18,3 +18,14 @@
     img.addEventListener("click", function () { window.open(img.src, "_blank", "noopener"); });
   });
 })();
+
+// copy buttons for BibTeX blocks
+document.querySelectorAll(".copy-btn").forEach(function (btn) {
+  btn.addEventListener("click", function () {
+    var target = document.getElementById(btn.dataset.copyTarget);
+    navigator.clipboard.writeText(target.innerText).then(function () {
+      btn.textContent = "Copied";
+      setTimeout(function () { btn.textContent = "Copy"; }, 1500);
+    });
+  });
+});

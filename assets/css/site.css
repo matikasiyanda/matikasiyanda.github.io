@@ -182,3 +182,24 @@ pre.mermaid { background: none; border: 0; text-align: center; }
 
 /* photos and sample images keep their real colours */
 .prose img.no-invert { filter: none; background: #fff; padding: 8px; }
+
+/* ---------- cite + comments ---------- */
+.cite, .comments { margin-top: 4em; }
+.cite-box { position: relative; }
+.cite-box pre { margin: 0; padding-top: 18px; font-size: 13px; white-space: pre; }
+.copy-btn {
+  position: absolute; top: 10px; right: 10px;
+  font: 500 12px var(--sans); color: var(--muted);
+  background: var(--panel); border: 1px solid var(--line); border-radius: 6px;
+  padding: 4px 10px; cursor: pointer;
+}
+.copy-btn:hover { color: var(--text); border-color: var(--accent); }
+.comments .giscus { margin-top: 1em; }
+
+.corrections { background: var(--panel); border-left: 3px solid var(--mint); border-radius: 8px; padding: 12px 18px; margin: -1.6em 0 2.4em; font-size: 15px; }
+.corrections strong { color: var(--mint); font-weight: 600; }
+.corrections ul { margin: 6px 0 0; padding-left: 1.1em; }
+.corrections time { color: var(--muted); margin-right: 6px; }
+.feedback { margin-top: 4em; padding: 16px 20px; border: 1px solid var(--line); border-radius: 12px; color: var(--muted); font-size: 15px; }
+.feedback p { margin: 0; }
+.feedback a { color: var(--text); }

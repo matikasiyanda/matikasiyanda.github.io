@@ -14,6 +14,13 @@ author:
   github: "matikasiyanda"
   linkedin: "https://www.linkedin.com/in/siyanda-matika/"
 
+comments:
+  giscus:
+    repo: "matikasiyanda/matikasiyanda.github.io"
+    repo_id: "MDEwOlJlcG9zaXRvcnkyODUxNzY0Njc="
+    category: "Announcements"
+    category_id: "DIC_kwDOEP9yk84DFiBK"
+
 markdown: kramdown
 highlighter: rouge
 kramdown:

@@ -10,12 +10,13 @@ mermaid: true
 Most agent code ends up as a pile of `if` statements deciding what the model
 should do next. LangGraph's idea is to draw that as a graph instead: each step
 is a node, each "what happens next" is an edge, and some edges choose their
-destination at run time. I learned it by writing the three smallest graphs I
+destination at run time [[LangGraph]](#references). I learned it by writing the three smallest graphs I
 could think of, one per concept.
 
 Code: [github.com/matikasiyanda/langchain_related](https://github.com/matikasiyanda/langchain_related)
 
-These use `MessageGraph`, which was the simple entry point in 2024. It has
+These use `MessageGraph`, which was the simple entry point in 2024
+[[MessageGraph]](#references). It has
 since been deprecated in favour of `StateGraph` with a `messages` key, but the
 node, edge and routing ideas carry over unchanged.
 
@@ -61,7 +62,8 @@ runnable = graph.compile()
 print(runnable.invoke("AI is "))
 ```
 
-`runnable.get_graph().draw_mermaid()` gives the shape:
+`runnable.get_graph().draw_mermaid()` gives the shape, drawn with Mermaid
+[[Mermaid]](#references):
 
 ```mermaid
 graph TD;
@@ -202,7 +204,8 @@ invoke("ai")     →  ai is Amazing always!
 
 Unlike the diamond, only one branch runs. Swap the string comparison for a
 model call that classifies the question, and this is the skeleton of a router
-agent.
+agent, the same shape as the ReAct loop [[ReAct]](#references) once Graph 2's cycle
+is added.
 
 ## What the three add up to
 
@@ -212,3 +215,18 @@ directly or go and search first" is Graph 3. The value of writing it as a graph
 is that the control flow becomes something you can print, draw and test on its
 own, without a model in the loop. Graphs 1 and 3 above run with no LLM at all,
 so the outputs shown here come from actually running them.
+
+## References
+
+- **[LangGraph]** LangChain, *LangGraph*: a library for building stateful,
+  multi-actor applications with LLMs as graphs.
+  <https://github.com/langchain-ai/langgraph>
+- **[MessageGraph]** LangChain, `langgraph/graph/message.py`. Deprecated in
+  LangGraph v1.0 in favour of `StateGraph` with a `messages` key.
+  <https://github.com/langchain-ai/langgraph/blob/main/libs/langgraph/langgraph/graph/message.py>
+- **[LangChain]** LangChain, *langchain-core* message types and runnables.
+  <https://github.com/langchain-ai/langchain>
+- **[Mermaid]** K. Sveidqvist et al., *Mermaid*: diagrams from text.
+  <https://mermaid.js.org>
+- **[ReAct]** Yao et al., *ReAct: Synergizing Reasoning and Acting in Language
+  Models*, ICLR 2023. arXiv:2210.03629.
