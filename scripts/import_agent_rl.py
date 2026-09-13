@@ -34,7 +34,10 @@ URLS = {name: SERIES_URL + meta["slug"] + "/" for name, meta in POSTS.items()}
 URLS.update({name: meta["url"] for name, meta in PAGES.items()})
 
 
-def convert(md):
+POST_ANCHORS = {"glossary.md": "#glossary", "references.md": "#references"}
+
+
+def convert(md, in_post=False):
     out, in_fence = [], False
     for line in md.split("\n"):
         if line.lstrip().startswith("```"):
@@ -57,6 +60,8 @@ def convert(md):
         # links between the series files, and local assets
         def relink(m):
             target, anchor = m.group(2), m.group(3) or ""
+            if in_post and target in POST_ANCHORS:
+                return f"]({POST_ANCHORS[target]})"
             if target in URLS:
                 return f"]({URLS[target]}{anchor})"
             if (SRC / target).is_file():
@@ -65,6 +70,22 @@ def convert(md):
         line = re.sub(r"\]\(([\s]*)([^)\s#:]+\.(?:md|png|drawio))(#[^)]*)?\)", relink, line)
         out.append(line)
     return "\n".join(out)
+
+
+def embedded_section(name, heading, anchor, collapsible):
+    """Glossary/references body for embedding at the end of a post: nav line dropped, headings demoted."""
+    _, body = split_head((SRC / name).read_text())
+    lines = body.split("\n")
+    # drop the intro paragraph that links to the other pages, up to the first rule or heading
+    while lines and not lines[0].startswith(("---", "## ")):
+        lines.pop(0)
+    if lines and lines[0].startswith("---"):
+        lines.pop(0)
+    body = "\n".join("#" + l if l.startswith("## ") else l for l in lines)
+    body = convert(body, in_post=True)
+    if collapsible:
+        body = f'<details markdown="1">\n<summary>Plain definitions of every term used in the series. Click to expand.</summary>\n\n{body}\n\n</details>'
+    return f"\n\n---\n\n## {heading} {{#{anchor}}}\n\n{body}\n"
 
 
 def split_head(md):
@@ -107,7 +128,10 @@ def main():
             f"mermaid: {'true' if '```mermaid' in body else 'false'}",
             "---",
         ]
-        (ROOT / "_posts" / f"{DATE}-{meta['slug']}.md").write_text("\n".join(fm) + "\n\n" + convert(body) + "\n")
+        post = convert(body, in_post=True)
+        post += embedded_section("glossary.md", "Glossary", "glossary", collapsible=True)
+        post += embedded_section("references.md", "References", "references", collapsible=False)
+        (ROOT / "_posts" / f"{DATE}-{meta['slug']}.md").write_text("\n".join(fm) + "\n\n" + post + "\n")
 
     for name, meta in PAGES.items():
         title, body = split_head((SRC / name).read_text())

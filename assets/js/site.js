@@ -47,3 +47,14 @@ if (navigator.share) {
     });
   });
 }
+
+// jumping to an embedded section (e.g. #glossary) opens its collapsed block
+function openTargetDetails() {
+  var id = decodeURIComponent(location.hash.slice(1));
+  var el = id && document.getElementById(id);
+  if (!el) return;
+  var det = el.tagName === "DETAILS" ? el : el.nextElementSibling;
+  if (det && det.tagName === "DETAILS") det.open = true;
+}
+addEventListener("hashchange", openTargetDetails);
+openTargetDetails();
