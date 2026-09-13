@@ -91,7 +91,7 @@ def convert(md, in_post=False):
     return "\n".join(out)
 
 
-def embedded_section(name, heading, anchor, collapsible):
+def embedded_section(name, heading, anchor, summary):
     """Glossary/references body for embedding at the end of a post: nav line dropped, headings demoted."""
     _, body = split_head((SRC / name).read_text())
     lines = body.split("\n")
@@ -102,8 +102,7 @@ def embedded_section(name, heading, anchor, collapsible):
         lines.pop(0)
     body = "\n".join("#" + l if l.startswith("## ") else l for l in lines)
     body = convert(body, in_post=True)
-    if collapsible:
-        body = f'<details markdown="1">\n<summary>Plain definitions of every term used in the series. Click to expand.</summary>\n\n{body}\n\n</details>'
+    body = f'<details markdown="1">\n<summary>{summary}</summary>\n\n{body}\n\n</details>'
     return f"\n\n---\n\n## {heading} {{#{anchor}}}\n\n{body}\n"
 
 
@@ -150,8 +149,10 @@ def main():
         post = convert(body, in_post=True)
         if meta["part"] == 3:
             post += PART3_CLOSER
-        post += embedded_section("glossary.md", "Glossary", "glossary", collapsible=True)
-        post += embedded_section("references.md", "References", "references", collapsible=False)
+        post += embedded_section("glossary.md", "Glossary", "glossary",
+                                 "Plain definitions of every term used in the series. Click to expand.")
+        post += embedded_section("references.md", "References", "references",
+                                 "Papers, reports and tools cited across the series. Click to expand.")
         (ROOT / "_posts" / f"{DATE}-{meta['slug']}.md").write_text("\n".join(fm) + "\n\n" + post + "\n")
 
     for name, meta in PAGES.items():
