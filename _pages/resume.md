@@ -1,16 +1,25 @@
 ---
-title: "CV"
-permalink: /cv/
+title: "Resume"
+permalink: /resume/
+redirect_from:
+  - /cv/
 ---
 
 <div class="cv" markdown="1">
 
+<div class="print-only print-header">
+  <p class="print-name">Siyanda Matika</p>
+  <p class="print-contact">Data and AI Lead · Johannesburg, South Africa · {{ site.author.email }} · linkedin.com/in/siyanda-matika · github.com/{{ site.author.github }} · matikasiyanda.github.io</p>
+</div>
+
 Data and AI Lead in Johannesburg, with 8 years of experience across banking,
 capital markets, insurance and research. My work spans the full range of data: large structured datasets in SQL, Spark and Hadoop, ETL pipelines,
 statistical analysis, and unstructured text, image and video data, through to
-machine learning and LLM systems in production. In research, I built data
-pipelines for petabyte-scale radio astronomy data on the path to the Square
-Kilometre Array (SKA).
+machine learning and LLM systems in production. In research, I collaborated on
+data pipelines for petabyte-scale radio astronomy data on the path to the Square
+Kilometre Array (SKA), as part of international science collaborations.
+
+<p class="cv-actions"><a class="btn-download" href="/assets/files/siyanda-matika-resume.pdf" download>Download PDF</a></p>
 
 <p class="cv-contact"><a href="mailto:{{ site.author.email }}">{{ site.author.email }}</a> · <a href="{{ site.author.linkedin }}">LinkedIn</a> · <a href="https://github.com/{{ site.author.github }}">GitHub</a> · <a href="/work/">Projects</a></p>
 
@@ -53,8 +62,10 @@ Kilometre Array (SKA).
 - Designed the AWS ML stack: serverless model services on ECS and Fargate,
   CI/CD pipelines on GitHub Actions, and data pipelines on Spark and EMR with
   Delta Lake.
-- Built retrieval-augmented assistants for capital-markets clients, including
-  a public chatbot for the 2024 South African national elections.
+- Built retrieval-augmented assistants for capital-markets clients.
+- Built Elections Navigator, a public voter-education chatbot for South
+  Africa's 2024 national elections that answered voters' questions about
+  parties, manifestos and the voting process.
 </div>
 
 <div class="cv-role" markdown="1">
@@ -107,8 +118,8 @@ Kilometre Array (SKA).
 Research on the Epoch of Reionization with the Hydrogen Epoch of Reionization
 Array (HERA), a precursor to the Square Kilometre Array (SKA).
 
-- Built pipelines to process and analyse petabyte-scale radio interferometer
-  data.
+- Collaborated on pipelines to process and analyse petabyte-scale radio
+  interferometer data, as part of the international HERA collaboration.
 - Applied Bayesian inference and Gaussian process regression to separate the
   faint cosmological signal from foregrounds.
 
@@ -121,10 +132,11 @@ Co-author of:
 </div>
 
 <div class="cv-role" markdown="1">
-### MSc Physics <span class="cv-org">University of the Western Cape</span>
+### MSc Astrophysics and Space Science <span class="cv-org">University of Cape Town and University of the Western Cape</span>
 <p class="cv-when">2015 – 2017</p>
 
-National Astrophysics and Space Science Programme. Thesis:
+Joint UCT–UWC degree through the National Astrophysics and Space Science
+Programme (NASSP). Thesis:
 [*Detecting Galaxies in the Epoch of Reionization*](https://hdl.handle.net/10566/16687),
 supervised by Mario Santos: a Bayesian framework for fitting the 21-cm absorption
 feature in radio galaxy spectra, to measure the redshift of galaxies in the

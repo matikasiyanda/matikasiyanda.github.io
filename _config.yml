@@ -1,5 +1,5 @@
 title: "siyanda-123bits"
-description: "Siyanda Matika: CV, work, notes and the problems I'm currently playing with."
+description: "Siyanda Matika, Data and AI Lead: resume, work, writing and the problems I'm currently working on."
 url: "https://matikasiyanda.github.io"
 baseurl: ""
 timezone: Africa/Johannesburg
@@ -38,6 +38,7 @@ plugins:
   - jekyll-feed
   - jekyll-sitemap
   - jekyll-seo-tag
+  - jekyll-redirect-from
 
 include:
   - _pages
@@ -48,6 +49,7 @@ exclude:
   - vendor
   - .bundle
   - scripts
+  - package.json
 
 defaults:
   - scope: { path: "", type: posts }
