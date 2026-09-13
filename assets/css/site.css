@@ -243,3 +243,21 @@ pre.mermaid { background: none; border: 0; text-align: center; }
 .lightbox-close:hover { color: var(--accent); }
 html.lightbox-open { overflow: hidden; }
 .prose img:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+/* ---------- CV ---------- */
+.cv > p:first-child { font: 400 1.3rem/1.45 var(--serif); margin-bottom: 0.5em; }
+.cv-contact { color: var(--muted); font-size: 15px; margin-bottom: 1em; }
+.cv-contact a { color: var(--text); }
+.cv h2 { font: 600 0.78rem/1 var(--sans); letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); margin: 3.2em 0 1.2em; padding-bottom: 10px; border-bottom: 1px solid var(--line); }
+.cv-role { margin: 0 0 1.8em; }
+.cv-role h3 { font: 600 1.12rem/1.35 var(--serif); margin: 0; }
+.cv-org { display: block; font: 500 15px/1.4 var(--sans); color: var(--mint); margin-top: 2px; }
+.cv-when { color: var(--muted); font-size: 14px; margin: 2px 0 0.6em; }
+.cv-role ul { margin: 0; }
+.cv-role > p:not(.cv-when) { margin: 0; color: var(--muted); font-size: 15.5px; }
+.cv-skills { display: grid; grid-template-columns: 11rem minmax(0, 1fr); gap: 8px 20px; margin: 0; }
+.cv-skills dt { color: var(--muted); font-size: 15px; }
+.cv-skills dd { margin: 0; }
+@media (max-width: 560px) { .cv-skills { grid-template-columns: minmax(0, 1fr); gap: 0; } .cv-skills dd { margin-bottom: 10px; } }
+.cv-role > ul + p, .cv-role p + ul { margin-top: 0.4em; }
+.cv-role ul li { font-size: 15.5px; }
