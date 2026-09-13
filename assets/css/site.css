@@ -272,9 +272,9 @@ html.lightbox-open { overflow: hidden; }
 .print-only { display: none; }
 
 @media print {
-  @page { size: A4; margin: 11mm 13mm; }
+  @page { size: A4; margin: 10mm 12mm; }
   :root { --text: #111; --muted: #444; --line: #ccc; --accent: #9a3412; --mint: #0f5132; }
-  html, body { background: #fff !important; color: #111; font-size: 9.8pt; line-height: 1.36; }
+  html, body { background: #fff !important; color: #111; font-size: 9.6pt; line-height: 1.33; }
   em, strong { color: #111; }
   .shell { display: block; max-width: none; padding: 0; }
   .side, .foot, .share, .feedback, .cite, .comments, .cv-actions, .cv-contact, .lightbox, main > article > h1, .page > h1 { display: none !important; }
@@ -289,7 +289,7 @@ html.lightbox-open { overflow: hidden; }
   .cv-role h3 { font-size: 11.5pt; }
   .cv-org { font-size: 10pt; }
   .cv-when { font-size: 9pt; margin-bottom: 3pt; }
-  .cv-role ul li, .cv-role > p:not(.cv-when) { font-size: 9.5pt; }
+  .cv-role ul li, .cv-role > p:not(.cv-when) { font-size: 9.3pt; }
   .cv-org { display: inline; margin: 0; }
   .cv-org::before { content: "  ·  "; color: #888; }
   .cv-role h3 { margin-bottom: 0; }

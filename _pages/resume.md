@@ -61,11 +61,12 @@ Kilometre Array (SKA), as part of international science collaborations.
 ### Machine Learning Engineer <span class="cv-org">Navigare Securities</span>
 <p class="cv-when">May 2022 – Aug 2024</p>
 
-- Established the ML function as the first ML hire: chose the stack, set the
-  roadmap, hired and mentored three engineers, and managed the AI product
-  portfolio for capital-markets clients.
+- Joined as the first ML hire and worked at lead level: chose the stack, set the
+  roadmap, and managed the AI product portfolio for capital-markets clients.
+- Sat on the hiring panel for the ML team: interviewed and hired three machine
+  learning engineers, then managed and mentored them.
 - Owned GPU infrastructure and model deployment: served and fine-tuned
-  open-weight LLMs (Llama, Mistral, Mixtral), tuned serving for concurrent
+  open-weight LLMs (Llama, Mistral, Qwen), tuned serving for concurrent
   users, and introduced RunPod scheduling with run/sleep cycles to keep GPU
   spend bounded.
 - Designed and ran the AWS ML stack: serverless model services on ECS and
@@ -92,7 +93,8 @@ Kilometre Array (SKA), as part of international science collaborations.
 - Managed engagement with marketing and cross-sell stakeholders, turning model
   results into campaign and value-proposition recommendations presented to
   senior stakeholders.
-- Hired a data scientist into the team.
+- Interviewed and hired data scientists for the team, then mentored them and
+  managed their day-to-day work.
 </div>
 
 <div class="cv-role" markdown="1">
@@ -111,7 +113,7 @@ Kilometre Array (SKA), as part of international science collaborations.
   <dt>Statistics and analytics</dt><dd>Bayesian inference, time series, segmentation, forecasting, recommendation, A/B testing</dd>
   <dt>Unstructured data</dt><dd>text, images and video: extraction, OCR, embeddings and retrieval</dd>
   <dt>Machine learning</dt><dd>model design, training, evaluation and fine-tuning across classical ML, deep learning and transformers; PyTorch, scikit-learn, XGBoost</dd>
-  <dt>LLMs</dt><dd>open-weight models (Llama, Mistral and Mixtral, Qwen) and GPT models via Azure OpenAI; retrieval (RAG, hybrid search), fine-tuning (LoRA, Azure OpenAI Service), intent classification and agent routing, reinforcement learning (GRPO), guardrails</dd>
+  <dt>LLMs</dt><dd>open-weight models (Llama, Mistral, Qwen) and GPT models via Azure OpenAI; retrieval (RAG, hybrid search), fine-tuning (LoRA, Azure OpenAI Service), intent classification and agent routing, reinforcement learning (GRPO), guardrails</dd>
   <dt>Scripting</dt><dd>Python, Bash, SQL</dd>
   <dt>Cloud services</dt><dd>AWS (SageMaker, ECS, Fargate, EMR), Azure (Azure ML, App Service), GCP</dd>
   <dt>GPU infrastructure and deployment</dt><dd>Linux GPU servers (RunPod), open-weight model serving with vLLM, concurrency tuning, Docker</dd>
