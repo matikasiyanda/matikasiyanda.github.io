@@ -13,7 +13,9 @@ redirect_from:
 </div>
 
 Data and AI Lead in Johannesburg, with 8 years of experience across banking,
-capital markets, insurance and research. My work spans the full range of data: large structured datasets in SQL, Spark and Hadoop, ETL pipelines,
+capital markets, insurance and research. I lead data and AI initiatives from
+scope to production, across the full range of data: large structured datasets
+in SQL, Spark and Hadoop, ETL pipelines,
 statistical analysis, and unstructured text, image and video data, through to
 machine learning and LLM systems in production. In research, I collaborated on
 data pipelines for petabyte-scale radio astronomy data on the path to the Square
@@ -29,66 +31,76 @@ Kilometre Array (SKA), as part of international science collaborations.
 ### Manager: AI & Data Science <span class="cv-org">Discovery Insure</span>
 <p class="cv-when">Aug 2024 – present</p>
 
-- Lead a small data science team working on conversational AI, driver-coaching
-  personalisation and the ML platform behind them.
-- Building a customer virtual agent for WhatsApp and web: retrieval over
-  product documentation, custom guardrail models and drift monitoring.
-- Fine-tuned an agent-routing classifier with Azure OpenAI Service, which reads
-  the user's intent and routes each conversation to the right agent.
-- Took AI systems through privacy and security review: wrote Data Protection
-  Impact Assessments (DPIAs), worked with the security team through multiple
-  penetration tests, and worked on data governance and adversarial testing of
-  chatbots and LLMs.
-- Built monitoring on Prometheus and Grafana for model services, with alerts on
-  cost, warnings and errors that automatically trigger pipelines.
-- Set up Kubeflow pod infrastructure for building agentic systems: agents run in
+- Own AI delivery across conversational AI, driver-coaching personalisation and
+  the ML platform behind them. Manage the data science team and run technical
+  hiring for the function.
+- Lead the customer virtual agent for WhatsApp and web end to end: scope, agent
+  architecture, retrieval over product documentation, guardrail strategy and
+  integration into customer channels.
+- Own the agent-routing classifier, fine-tuned on Azure OpenAI Service to read
+  each user's intent and route the conversation to the right agent.
+- Accountable for taking AI systems through privacy and security sign-off:
+  authored the Data Protection Impact Assessments (DPIAs), coordinated multiple
+  penetration tests with the security team, and set up data governance and
+  adversarial testing for chatbots and LLMs.
+- Established monitoring for model services on Prometheus and Grafana, with
+  alerts on cost, warnings and errors that automatically trigger pipelines.
+- Designed the Kubeflow pod infrastructure for agent development: agents run in
   isolated Kubernetes pods cut off from the wider network, so an agent that
   executes tools or code can only reach the services it is explicitly allowed
   to use.
-- Co-developed a transformer model on sequential health data with Discovery
-  Health; presented it at the Discovery Actuarial and Data Science Conference,
-  where it placed second.
+- Defined the driver-coaching personalisation roadmap, moving from one fixed
+  reward structure for every driver to coaching that adapts to each driver's
+  behaviour.
+- Co-led a transformer model on sequential health data with Discovery Health;
+  presented it at the Discovery Actuarial and Data Science Conference, where it
+  placed second.
 </div>
 
 <div class="cv-role" markdown="1">
 ### Machine Learning Engineer <span class="cv-org">Navigare Securities</span>
 <p class="cv-when">May 2022 – Aug 2024</p>
 
-- First ML hire: chose the stack, set the roadmap and mentored the engineers
-  who joined.
-- Ran the GPU infrastructure for model deployments: served and fine-tuned
-  open-weight LLMs (Llama, Mistral, Mixtral), tuned serving for concurrent users, and
-  built a RunPod scheduling tool with run/sleep cycles to keep GPU spend bounded.
-- Designed the AWS ML stack: serverless model services on ECS and Fargate,
-  CI/CD pipelines on GitHub Actions, and data pipelines on Spark and EMR with
-  Delta Lake.
-- Built retrieval-augmented assistants for capital-markets clients.
-- Built Elections Navigator, a public voter-education chatbot for South
-  Africa's 2024 national elections that answered voters' questions about
-  parties, manifestos and the voting process.
+- Established the ML function as the first ML hire: chose the stack, set the
+  roadmap, hired and mentored three engineers, and managed the AI product
+  portfolio for capital-markets clients.
+- Owned GPU infrastructure and model deployment: served and fine-tuned
+  open-weight LLMs (Llama, Mistral, Mixtral), tuned serving for concurrent
+  users, and introduced RunPod scheduling with run/sleep cycles to keep GPU
+  spend bounded.
+- Designed and ran the AWS ML stack: serverless model services on ECS and
+  Fargate, CI/CD pipelines on GitHub Actions, and data pipelines on Spark and
+  EMR with Delta Lake.
+- Led conversational AI for capital-markets clients, including the decision to
+  design an in-house hybrid retrieval framework when off-the-shelf retrieval
+  fell short on precision.
+- Conceived and led Elections Navigator, a public voter-education chatbot for
+  South Africa's 2024 national elections, from scope to launch against the
+  fixed election deadline.
 </div>
 
 <div class="cv-role" markdown="1">
 ### Data Scientist <span class="cv-org">Absa Group</span>
 <p class="cv-when">Jan 2020 – May 2022</p>
 
-- Built a customer lifetime value model and a cross-sell recommender for
-  merchant devices, both used by marketing and cross-sell teams.
-- Built customer spend forecasting and customer-health monitoring, using Spark
-  and Hadoop for analytics over the bank's customer data.
-- Built Docker containers to deploy the monitoring dashboards.
-- Worked with marketing and cross-sell stakeholders to turn model results into
-  customer campaigns and value-proposition recommendations, and presented
-  findings to senior stakeholders.
+- Owned the customer lifetime value model and the merchant-device cross-sell
+  recommender from development to production; both were adopted by the
+  marketing and cross-sell teams.
+- Delivered customer spend forecasting and customer-health monitoring on Spark
+  and Hadoop over the bank's customer data, and deployed the monitoring
+  dashboards in Docker containers.
+- Managed engagement with marketing and cross-sell stakeholders, turning model
+  results into campaign and value-proposition recommendations presented to
+  senior stakeholders.
 </div>
 
 <div class="cv-role" markdown="1">
 ### Business Analyst <span class="cv-org">Absa Group</span>
 <p class="cv-when">Jan 2017 – Jan 2018</p>
 
-- Analysed retail banking data for trends and customer segments.
-- Worked directly with product, risk and marketing stakeholders, turning the
-  analysis into recommendations for their teams.
+- Owned analyses of retail banking data on trends and customer segments.
+- Managed engagement with product, risk and marketing stakeholders, turning
+  the analysis into recommendations for their teams.
 </div>
 
 ## Skills
