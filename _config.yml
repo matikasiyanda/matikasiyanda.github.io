@@ -19,7 +19,7 @@ author:
 
 analytics:
   # GoatCounter site code, e.g. "matikasiyanda" for matikasiyanda.goatcounter.com. Empty = no analytics.
-  goatcounter: ""
+  goatcounter: "matikasiyanda"
 
 comments:
   giscus:
