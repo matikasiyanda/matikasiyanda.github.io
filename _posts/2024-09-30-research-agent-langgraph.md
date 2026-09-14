@@ -29,6 +29,8 @@ agent was running on 30 September 2024.
 The subject was a national election. Party names below are replaced with
 "Party A" and "Party B".
 
+Code: [github.com/matikasiyanda/research-agent-langgraph](https://github.com/matikasiyanda/research-agent-langgraph)
+
 ```mermaid
 timeline
   title Research agents
@@ -123,6 +125,9 @@ flowchart TB
   A -- "good enough" --> F["finalize_article"]
   F --> E([cited article])
 ```
+
+A Streamlit app wraps the graph: you type a question, watch each node report its
+progress as the graph streams, and read the finished article at the end.
 
 Every model call uses `gpt-4o-mini` at temperature 0.01. The planner, the
 checker and the reviewer return strict JSON, so the next node can read their

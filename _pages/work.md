@@ -36,6 +36,18 @@ small, local and judge-free.
 
 [Write-up](/blog/kb-search-agent-art/) · [code](https://github.com/matikasiyanda/kb-search-agent-art)
 
+## A deep research agent, before deep research
+
+<p class="meta work-meta">Sep 2024 · LangGraph, Pinecone hybrid search, Cohere rerank, gpt-4o-mini, Streamlit</p>
+
+A LangGraph agent with a Streamlit interface that breaks a research question into
+sub-questions, searches 2,245 documents for each with hybrid dense and BM25
+retrieval, checks whether the evidence answers them, drafts a cited article and
+reviews its own draft. Built months before deep research became a product; the
+write-up also covers the wiring bug that disconnected its second hop.
+
+[Write-up](/blog/research-agent-langgraph/) · [code](https://github.com/matikasiyanda/research-agent-langgraph)
+
 ## Product extraction from South African retail sites
 
 <p class="meta work-meta">Nov 2022 – Sep 2023 · Selenium, Scrapy, spaCy, FLAN-T5-XL + LoRA, GPT-3.5</p>
