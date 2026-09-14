@@ -17,6 +17,10 @@ author:
   github: "matikasiyanda"
   linkedin: "https://www.linkedin.com/in/siyanda-matika/"
 
+analytics:
+  # GoatCounter site code, e.g. "matikasiyanda" for matikasiyanda.goatcounter.com. Empty = no analytics.
+  goatcounter: ""
+
 comments:
   giscus:
     repo: "matikasiyanda/matikasiyanda.github.io"

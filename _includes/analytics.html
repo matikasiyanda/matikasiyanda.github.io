@@ -1,0 +1,34 @@
+{% if site.analytics.goatcounter and site.analytics.goatcounter != "" %}
+<script data-goatcounter="https://{{ site.analytics.goatcounter }}.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+<script>
+  // Record reader actions as GoatCounter events: share buttons, copy link, PDF download,
+  // BibTeX copy, and clicks through to GitHub repos. No cookies are set.
+  (function () {
+    function track(name, title) {
+      var send = function () {
+        if (window.goatcounter && window.goatcounter.count) {
+          window.goatcounter.count({ path: name, title: title || document.title, event: true });
+        }
+      };
+      if (window.goatcounter && window.goatcounter.count) send(); else setTimeout(send, 1500);
+    }
+    var page = location.pathname;
+    document.addEventListener("click", function (e) {
+      var el = e.target.closest("a, button");
+      if (!el) return;
+      if (el.classList.contains("share-btn")) {
+        var label = el.textContent.replace("…", "").trim().toLowerCase().replace(/\s+/g, "-");
+        track("share/" + label + page);
+      } else if (el.classList.contains("btn-download")) {
+        track("download/resume-pdf");
+      } else if (el.classList.contains("copy-btn")) {
+        track("cite/copy-bibtex" + page);
+      } else if (el.tagName === "A" && /^https:\/\/github\.com\/matikasiyanda\//.test(el.href)) {
+        track("outbound/github/" + el.href.split("/").slice(4, 5).join("") + page);
+      } else if (el.tagName === "A" && /linkedin\.com\/in\//.test(el.href)) {
+        track("outbound/linkedin" + page);
+      }
+    });
+  })();
+</script>
+{% endif %}
