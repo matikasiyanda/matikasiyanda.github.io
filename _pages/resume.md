@@ -18,8 +18,8 @@ scope to production, across the full range of data: large structured datasets
 in SQL, Spark and Hadoop, ETL pipelines, statistical analysis, and
 unstructured text, image and video data, through to machine learning and LLM
 systems in production. In research, I worked on international science
-experiments in radio astronomy, collaborating on the data pipelines that
-processed petabyte-scale telescope data for the Hydrogen Epoch of
+experiments in radio astronomy, collaborating on the science and data
+pipelines that processed petabyte-scale telescope data for the Hydrogen Epoch of
 Reionization Array (HERA), a precursor experiment to the Square Kilometre
 Array (SKA).
 
