@@ -56,16 +56,17 @@ at.
 
 The most direct way to see a model read a clock is to draw what it read.
 Below, each model's answer is drawn as a pair of hands over the clock it
-was given: red for the ResNet, blue for the ViT, each outlined in black so
-it shows on any background, and the labelled time as a thin white dashed
-pair on top. Where all three coincide, the model
+was given: red for the ResNet, blue for the ViT, each with a black and
+white halo so it shows on any background, and the labelled time as thin
+yellow dashes on top. The clock itself is shown at a third of its colour
+saturation so the hands stand out from it. Where all three coincide, the model
 read the clock. The clocks are from the held-out set, so every typeface
 here is one the models never saw. The geometry for the overlay comes from
 re-rendering each test image from its seed, which reproduces it pixel for
 pixel, and reading the centre and radius the renderer used.
 
-The images are shown enlarged without smoothing, so the pixels are the
-pixels the models saw.
+The images are enlarged without smoothing, so the pixels are the pixels
+the models saw, only paler.
 
 ![Predicted hands from both models, ResNet in red and ViT in blue, drawn over twelve held-out clocks in three rows: both right, one wrong, both wrong](/assets/clocks/overlay_heldout.png){: .no-invert}
 
@@ -73,7 +74,7 @@ In the top row the three sets of hands are on top of each other. In the
 middle row one model is a minute off and the other isn't, and the two
 readings differ by a few degrees at the tip. In the bottom row both models
 agree with each other and disagree with the label, and the red and blue
-minute hands sit just clockwise of the white dashes, one minute's worth. That is the
+minute hands sit just clockwise of the yellow dashes, one minute's worth. That is the
 whole story of this post, and the rest of it is measuring that picture.
 
 Another way to look at the same thing: take what each model answered and
