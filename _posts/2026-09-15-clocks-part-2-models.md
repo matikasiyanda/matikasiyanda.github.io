@@ -217,54 +217,27 @@ $$x_i$$:
 
 $$z_i = E\,x_i + \mathrm{pos}_i, \qquad E \in \mathbb{R}^{192 \times 192}.$$
 
-What does step 3 actually compute? Shrink it to a toy you can check by
-hand: a patch of four grey pixels instead of 192 colour values, and a
-token of three numbers instead of 192. Say the top two pixels
-are light and the bottom two dark. Scaled to $$[-1, 1]$$ and read off
-top-left, top-right, bottom-left, bottom-right, the pixel values are
+What does step 3 actually compute? The clearest way to see it is to
+think of each row of the matrix as a *template*: a tiny pattern the patch
+is compared against. The token entry for that row is how strongly the
+patch matches the pattern, a weighted sum of the pixel values. Figure 2.6
+shrinks the whole thing to a size you can check by hand: a patch of four
+grey pixels and a matrix with three rows, so the token has three numbers.
 
-$$x = \begin{pmatrix} 0.9 \\ 0.8 \\ -0.7 \\ -0.9 \end{pmatrix}.$$
+![A toy tokeniser: a four-pixel patch compared against three templates, average brightness, top minus bottom, left minus right, giving a three-number token; beneath, three of the real model's 192 learned 8 × 8 colour templates](/assets/clocks/token_calc.png){: .no-invert}
 
-The tokeniser is a matrix with one row per output number and one column
-per input number, plus an offset per output. Suppose training had left it
-at
+**Figure 2.6.** A toy tokeniser. Top: a four-pixel patch, three template rows, the multiply-adds, and the three-number token they produce. Bottom: three of vit_tiny's 192 real templates, each 8 × 8 pixels × 3 colours, reshaped from rows of the learned matrix.
+{: .figcap}
 
-$$E = \begin{pmatrix} 0.5 & 0.5 & 0.5 & 0.5 \\ 1 & 1 & -1 & -1 \\ 1 & -1 & 1 & -1 \end{pmatrix}, \qquad
-b = \begin{pmatrix} 0 \\ 0 \\ 0 \end{pmatrix}.$$
-
-Then each output is one row times the pixels, added up:
-
-$$\begin{aligned}
-z_1 &= 0.5(0.9) + 0.5(0.8) + 0.5(-0.7) + 0.5(-0.9) &&= 0.05 \\
-z_2 &= 0.9 + 0.8 - (-0.7) - (-0.9) &&= 3.3 \\
-z_3 &= 0.9 - 0.8 + (-0.7) - (-0.9) &&= 0.3
-\end{aligned}$$
-
-Read the three numbers: the first is the patch's average brightness
-(about zero, half light and half dark), the second is "how much lighter is
-the top than the bottom" (large: there's a horizontal edge), the third is
-"how much lighter is the left than the right" (small: no vertical edge).
-Three numbers, and the patch is described as "mid-grey with a horizontal
-edge". That is what a token is. The real tokeniser is the same
-calculation with 192 inputs, 192 outputs and a 192 × 192 matrix that
-training filled in, so its rows are not this tidy, but every row is still
-one weighted sum over the same patch.
-
-Two patches from the same clock, worked the same way, with the first eight
-entries of each list shown:
-
-| | patch on the minute hand | patch of plain background |
-|---|---|---|
-| pixel values $$x$$ (first 8 of 192) | 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00 | 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00 |
-| token $$Ex + b$$ (first 8 of 192) | −0.16, 0.15, −0.19, 0.04, −0.16, 0.05, −0.27, −0.41 | −0.36, 0.21, 0.06, 0.18, 0.11, 0.12, 0.18, 1.28 |
-| mean size of the 192 token entries | 0.33 | 0.20 |
-
-The first eight pixel values are identical in both patches, and the tokens
-still differ, because the other 184 values differ and every one of them
-touches every output through the matrix. None of the individual numbers
-is interpretable on its own, and it doesn't need to be. The point is only
-that a token is a fixed linear recipe applied to 192 pixel values, the
-same recipe for all 256 patches, applied to each patch alone.
+The three toy rows were chosen to have names: "average brightness", "top
+minus bottom", "left minus right". Against a patch that is light on top
+and dark below they return 0.05, 3.3 and 0.3, which reads as "mid-grey,
+strong horizontal edge, no vertical edge". Three numbers, and the patch is
+described. The real tokeniser is the same calculation with 192 pixel
+values in and 192 numbers out, and its 192 templates were learned rather
+than named, so they look like the colour grids at the bottom of the
+figure: recognisable structure, no tidy meaning. The token is the list of
+192 match scores against them.
 
 Now the problem. The matrix in step 3 sees one patch at a time and never
 sees the neighbours, so it cannot know that the hand in the yellow patch
@@ -401,11 +374,11 @@ held-out fonts:
 | vit_small | 14.4M | 0.422 | 0.432 | 0.829 | 0.724 | 29 min |
 | vit_p16 | 14.5M | 0.074 | 0.075 | 0.261 | 0.139 | 7 min |
 
-Figure 2.6 shows how they got there, epoch by epoch.
+Figure 2.7 shows how they got there, epoch by epoch.
 
 ![Validation exact accuracy and training loss per epoch for all seven runs](/assets/clocks/curves.png)
 
-**Figure 2.6.** Validation exact accuracy and training loss per epoch for all seven runs.
+**Figure 2.7.** Validation exact accuracy and training loss per epoch for all seven runs.
 {: .figcap}
 
 Read the table as a person would: the ResNets get about nine clocks in
@@ -442,11 +415,11 @@ The ViT paper [[ViT]](#references) says ViTs lose to CNNs on small data
 without pre-training, because they lack the locality prior. That's true and
 it isn't specific enough. The ordering here, patch 16 far worse than patch
 8, and the bigger patch-8 model worse than the smaller one, points at the
-first layer (Figure 2.7).
+first layer (Figure 2.8).
 
 ![One clock under a 16, 8 and 4 px patch grid](/assets/clocks/patch_grids.png){: .no-invert}
 
-**Figure 2.7.** One clock under a 16, 8 and 4 px patch grid.
+**Figure 2.8.** One clock under a 16, 8 and 4 px patch grid.
 {: .figcap}
 
 The tokeniser section followed one 8 px patch to its token. Now change
@@ -457,11 +430,11 @@ about those 768 values is gone before any attention happens, and the
 matrix, applied to each patch alone, can't express "which way is the
 centre". At 4 px the hand runs through a dozen tokens, each holding a
 short piece of it, and the attention layers have a line to reassemble
-rather than a smudge to guess from (Figure 2.8).
+rather than a smudge to guess from (Figure 2.9).
 
 ![The same clock as the mean of each 4, 8 and 16 px patch](/assets/clocks/patch_means.png){: .no-invert}
 
-**Figure 2.8.** The same clock as the mean of each 4, 8 and 16 px patch.
+**Figure 2.9.** The same clock as the mean of each 4, 8 and 16 px patch.
 {: .figcap}
 
 Averaging each patch is a crude stand-in for what a linear projection keeps,
@@ -477,11 +450,11 @@ more work than it looks. A clock at 128 px is roughly a wall clock seen
 from across a room: you can tell the time, but you'd take a step closer to
 be sure of the minute. The minute-hand tip moves $$2\pi r / 60$$ per minute, which for a
 typical face at 128 px is three or four pixels (Part 1 derived it). The
-radius $$r$$ scales with the image, so the budget scales too (Figure 2.9):
+radius $$r$$ scales with the image, so the budget scales too (Figure 2.10):
 
 ![The same clock rendered at 64, 128 and 256 px](/assets/clocks/resolution.png){: .no-invert}
 
-**Figure 2.9.** The same clock rendered at 64, 128 and 256 px.
+**Figure 2.10.** The same clock rendered at 64, 128 and 256 px.
 {: .figcap}
 
 | image size | typical tip radius | pixels per minute |
@@ -556,7 +529,7 @@ that are each standard elsewhere:
 - Global average pooling over tokens instead of a class token
   [[PlainViT]](#references).
 
-As a data flow, next to the plain ViT drawn earlier (Figure 2.10):
+As a data flow, next to the plain ViT drawn earlier (Figure 2.11):
 
 ```mermaid
 flowchart TB
@@ -570,7 +543,7 @@ flowchart TB
   end
 ```
 
-**Figure 2.10.** ViT tiny v2 as a data flow: a convolutional stem to stride 4, fixed sincos positions, average pooling.
+**Figure 2.11.** ViT tiny v2 as a data flow: a convolutional stem to stride 4, fixed sincos positions, average pooling.
 {: .figcap}
 
 
@@ -596,11 +569,11 @@ two test splits, on CPU:
 | test, training fonts | 0.892 | 0.998 | 0.893 | 0.997 | 0.11 min |
 | test, held-out fonts | 0.899 | 0.998 | 0.899 | 0.998 | 0.11 min |
 
-Figure 2.11 puts every model on one chart.
+Figure 2.12 puts every model on one chart.
 
 ![Test exact accuracy against parameter count for every model](/assets/clocks/params.png)
 
-**Figure 2.11.** Test exact accuracy against parameter count for every model.
+**Figure 2.12.** Test exact accuracy against parameter count for every model.
 {: .figcap}
 
 A 3.8M-parameter ViT with a different tokeniser matches a 21M ResNet on
