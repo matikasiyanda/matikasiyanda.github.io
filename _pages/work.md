@@ -5,6 +5,30 @@ permalink: /work/
 
 <div class="prose" markdown="1">
 
+## Lost in time: clock readers from scratch, CNNs against ViTs
+
+<p class="meta work-meta">Sep 2026 · PyTorch, a Pillow renderer, ResNets and ViTs from random init, one RTX 4090</p>
+
+Multimodal models read about 8% of analogue clocks correctly. To find out
+what the task actually needs, I rendered 145,000 clock faces with exact
+labels and 250 fonts (39 held out), and trained three ResNets and three
+Vision Transformers from scratch at matched parameter counts. The ResNets
+read 89% of unseen-font clocks exactly in 30 epochs; plain ViTs got half
+that and got worse as they grew, until the tokeniser was replaced with a
+convolutional stem and fixed positions, after which a 3.8M ViT drew level
+with a 21M ResNet, given three times the training. The 10% of misses
+turned out to be one minute late by the renderer's own design, not a limit
+of the models. Then 3,228 real photographs, with published labels, put the
+same models at 37% within a minute.
+
+<div class="stats">
+  <div class="stat"><b>0.899</b><span>exact on 10,000 clocks in unseen fonts (ViT tiny v2, 3.8M)</span></div>
+  <div class="stat"><b>99.9%</b><span>within a minute on renders</span></div>
+  <div class="stat"><b>37%</b><span>within a minute on 3,228 real photographs</span></div>
+</div>
+
+[Read the series](/blog/clocks/) · [data](/blog/clocks/part-1-data/) · [models](/blog/clocks/part-2-models/) · [results](/blog/clocks/part-3-evaluation/)
+
 ## Document-search agent, GRPO on one RTX 4090
 
 <p class="meta work-meta">2026 · Qwen3-1.7B, LoRA, GRPO, vLLM</p>
