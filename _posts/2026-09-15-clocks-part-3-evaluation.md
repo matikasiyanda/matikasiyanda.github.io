@@ -147,12 +147,14 @@ with next.
 
 ## Every miss is one minute, and usually late
 
-The signed error over all 10,000 held-out images, on a log scale so the
-tail is visible ([Figure 3.7](#fig-3-7)):
+The prediction panels above excluded misses under five minutes. This
+section is about those excluded misses, because they are ten times more
+common than the ones shown. The signed error over all 10,000 held-out
+images, on a log scale so the tail is visible ([Figure 3.7](#fig-3-7)):
 
 ![Distribution of predicted minus true minute on held-out fonts, log scale](/assets/clocks/minute_errors.png)
 
-**Figure 3.7.** Distribution of predicted minus true minute on held-out fonts, log scale.
+**Figure 3.7.** Distribution of predicted minus true minute on held-out fonts, log scale. This figure counts every miss, and almost all of them are within one minute: the ±1 bars are the one-minute misses the prediction panels above leave out.
 {: .figcap #fig-3-7}
 
 For the ResNet, 7.0% of predictions are one minute late and 3.4% one minute
@@ -187,7 +189,7 @@ Here is the error rate as a function of the second the renderer sampled ([Figure
 
 ![Late-by-one errors and exact accuracy as a function of the second, for both models](/assets/clocks/err_by_second.png)
 
-**Figure 3.8.** Late-by-one errors and exact accuracy as a function of the second, for both models.
+**Figure 3.8.** Late-by-one errors and exact accuracy as a function of the second, for both models. These are one-minute misses, within the threshold the prediction panels exclude; this figure is about why they happen.
 {: .figcap #fig-3-8}
 
 Both models are at 96 to 97% exact for seconds 0 to 14 and fall to 70% for
@@ -203,7 +205,7 @@ how often it got the *minute* wrong.
 
 ![Two rows of dials, one column per model: hour error rate by true minute on top, minute error rate by true minute beneath](/assets/clocks/hour_err_by_minute.png){: .no-invert}
 
-**Figure 3.9.** Errors around the dial, on held-out fonts. Top row: hour error rate by true minute (red). Bottom row: minute error rate by true minute (blue). One column per model; darker sectors mean more errors at that minute, and the rows use different colour scales.
+**Figure 3.9.** Errors around the dial, on held-out fonts. Top row: hour error rate by true minute (red). Bottom row: minute error rate by true minute (blue). One column per model; darker sectors mean more errors at that minute, and the rows use different colour scales. Both rows count one-minute misses as errors; the :00 and :59 hour errors are 3:59 read as 4:00 and the like, one minute off in time.
 {: .figcap #fig-3-9}
 
 The top row is the boundary again. The two good models get the hour wrong
@@ -308,7 +310,7 @@ model, drawn the same way as the panels at the top of the post ([Figure 3.12](#f
 
 ![The four largest minute errors on held-out fonts for each model, with both models' hands drawn over the clock](/assets/clocks/overlay_worst.png){: .no-invert}
 
-**Figure 3.12.** The four largest minute errors on held-out fonts for each model, with both models' hands drawn over the clock.
+**Figure 3.12.** The four largest errors on held-out fonts for each model, with both models' hands drawn over the clock. All are hours off, far beyond the one-minute threshold.
 {: .figcap #fig-3-12}
 
 These are the one-in-six-hundred cases, and they're a different kind of
