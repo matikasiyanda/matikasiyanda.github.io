@@ -138,14 +138,14 @@ clock below, reading 10:08.
 <summary>The thirty-line renderer (click to expand)</summary>
 
 ```python
-"""A clock renderer in thirty lines, Pillow only. Writes clock_512.png."""
+"""A clock renderer in thirty lines, Pillow only. Saves clock_512.png"""
 import math
 from PIL import Image, ImageDraw, ImageFont
 
 INK, FACE, BG = (30, 30, 40), (250, 250, 245), (245, 240, 225)
 
 
-def draw_clock(hour, minute, size=512, ss=3):
+def draw_clock(hour, minute, size=512, ss=3, hands=INK):
     S = size * ss                            # draw at 3x, shrink later
     img = Image.new("RGB", (S, S), BG)
     d, c, R = ImageDraw.Draw(img), S / 2, S * 0.42
@@ -168,15 +168,16 @@ def draw_clock(hour, minute, size=512, ss=3):
         d.text(polar(R * 0.7, h * 30), str(h), fill=INK, font=font,
                anchor="mm")
     hour_angle = (hour % 12) * 30 + minute * 0.5    # moves with minute
-    hands = ((hour_angle, 0.55, 10), (minute * 6, 0.85, 6))
-    for angle, length, width in hands:
+    both = ((hour_angle, 0.55, 10), (minute * 6, 0.85, 6))
+    for angle, length, width in both:
         d.line([polar(-R * 0.05, angle), polar(R * length, angle)],
-               fill=INK, width=ss * width)
-    disc(ss * 8, (200, 40, 40))              # centre cap
+               fill=hands, width=ss * width)
+    disc(ss * 8, hands)                      # centre cap
     return img.resize((size, size), Image.LANCZOS)
 
 
-draw_clock(10, 8).save("clock_512.png")
+if __name__ == "__main__":
+    draw_clock(10, 8).save("clock_512.png")
 ```
 
 </details>

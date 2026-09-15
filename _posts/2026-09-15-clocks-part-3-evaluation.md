@@ -75,6 +75,15 @@ agree with each other and disagree with the label, and their minute hands
 sit just clockwise of the white dashes, one minute's worth. That is the
 whole story of this post, and the rest of it is measuring that picture.
 
+Another way to look at the same thing: take what each model answered and
+draw it as a clean clock, next to the clock it was given. Red hands are
+the ResNet's reading, blue hands the ViT's. If the model read the clock,
+the drawn clock shows the same time as the unseen one; if it was a minute
+late, the blue or red minute hand is one tick past where the real one
+points.
+
+![Six held-out clocks, each beside a clean clock drawn from the ResNet's reading in red and one from the ViT's reading in blue](/assets/clocks/readback_heldout.png){: .no-invert}
+
 Eight more clocks each model read correctly, and eight it didn't, sampled
 at random from the held-out set. The wrong readings are in red.
 
