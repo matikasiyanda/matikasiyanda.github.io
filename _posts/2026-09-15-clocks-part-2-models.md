@@ -65,16 +65,16 @@ Here is what that means as literal numbers, for one held-out clock. The
 image is stored as three grids of 128 by 128 values, one for red, one for
 green, one for blue, and a row of the actual values is printed under them.
 Those 49,152 numbers are what the model receives. What it returns is
-printed below the model: twelve numbers and sixty numbers. Its answer is
-the largest of each list (Figure 2.2).
+charted below the model: twelve numbers as twelve bars, sixty numbers as
+sixty bars. Its answer is the tallest bar of each chart (Figure 2.2).
 
 ![The input as a clock and its three colour channels, the model, and the output as the twelve and sixty numbers it returns](/assets/clocks/io_numbers.png){: .no-invert}
 
-**Figure 2.2.** The input as a clock and its three colour channels, the model, and the output as the twelve and sixty numbers it returns.
+**Figure 2.2.** The input as a clock and its three colour channels, the model, and its two outputs as bar charts: twelve hour probabilities and sixty minute probabilities. Dark blue is the model's minute, amber the labelled one.
 {: .figcap}
 
-The model put 0.94 on hour 9, and on the minute list 0.73 on 55 and 0.14
-on 54. Its answer is 9:55. The label, the yellow cell, is 9:54. So this
+The model put 0.94 on hour 9, and on the minute chart 0.73 on 55 and 0.14
+on 54. Its answer is 9:55. The label, the amber bar, is 9:54. So this
 clock counts as a miss, by one minute. Hold on to this example; the next
 figure draws the same two lists on a dial, and the section after works out
 what the loss charges for it.
@@ -84,21 +84,17 @@ Below, for an easy clock and then for the clock above, the inner ring is
 the hour list, one sector per hour, shaded darker the more probability the
 model put there. The outer ring is the minute
 list, one sector per minute. The model's answer is drawn as solid hands,
-the labelled time as yellow dashes, and the loss is worked out on the
-right from two numbers: how much probability the model gave the right
-hour, and how much it gave the right minute (Figure 2.3).
+the labelled time as yellow dashes (Figure 2.3).
 
 ![Two clocks through the trained ViT: the input, its output drawn as a probability dial, and the loss worked out](/assets/clocks/objective_dial.png){: .no-invert}
 
-**Figure 2.3.** Two clocks through the trained ViT: the input, its output drawn as a probability dial, and the loss worked out.
+**Figure 2.3.** Two clocks through the trained ViT: the input, and its output drawn as a probability dial. Inner ring: the twelve hour probabilities. Outer ring: the sixty minute probabilities. Solid hands: the model's answer. Yellow dashes: the label.
 {: .figcap}
 
 The top clock is the easy case. One dark green sector at 12, one dark blue
 sector at 22, hands on top of the dashes. The model gave 92% to the right
-hour and 92% to the right minute, so the loss is small: −log 0.92 twice,
-0.17 in total; 1.26 with the label smoothing used in training, whose floor
-is 1.25 (the loss section explains the smoothing). That is what a solved
-clock looks like.
+hour and 92% to the right minute. That is what a solved clock looks like,
+and the loss section works out what it scores.
 
 The bottom clock is the boundary case that Part 3 is about. The hour ring
 is as certain as before. But the minute ring has two shaded sectors: a
@@ -106,14 +102,12 @@ dark one at 55 and a lighter one at 54. The model put 73% on 55 and 14%
 on 54, and the label says 54. Look at the input: the minute hand is
 between the two marks, nearer 55. The model isn't confused about the
 clock. It is reporting, in probabilities, exactly where the hand is. It's
-marked wrong all the same, and the loss says so: −log 0.14 is 1.94 on the
-minute head alone, and the total is 2.88 with smoothing, more than twice
-the floor.
+marked wrong all the same, and the loss section shows what that costs.
 
-That is what "the loss" means for the rest of this post: for each image,
-how far the model's two probability lists are from the target lists, added
-up. Training is the process of nudging the encoder's weights so that
-number, averaged over the batch, goes down.
+The loss, which comes next, is a single number that says how far those
+two probability lists are from the labelled answer. Training is the
+process of nudging the encoder's weights so that number, averaged over the
+batch, goes down.
 
 ## The two families
 
@@ -222,23 +216,35 @@ $$x_i$$:
 
 $$z_i = E\,x_i + \mathrm{pos}_i, \qquad E \in \mathbb{R}^{192 \times 192}.$$
 
-What does step 3 actually compute? Here it is drawn out, with the real
-numbers from the trained vit_tiny for the minute-hand patch above (Figure 2.6):
+What does step 3 actually compute? Shrink it to a toy you can check by
+hand: a patch of four grey pixels instead of 192 colour values, and a
+token of three numbers instead of 192. The pixel values, scaled to
+$$[-1, 1]$$, are
 
-![The token calculation drawn as a matrix-vector product: the 192 × 192 learned matrix E with its first row highlighted, the 192 pixel values, the 192 offsets, and the resulting token](/assets/clocks/token_calc.png){: .no-invert}
+$$x = \begin{pmatrix} 0.9 \\ 0.8 \\ -0.7 \\ -0.9 \end{pmatrix}
+\quad\text{(top-left, top-right, bottom-left, bottom-right: light, light, dark, dark).}$$
 
-**Figure 2.6.** The token calculation drawn as a matrix-vector product: the 192 × 192 learned matrix E with its first row highlighted, the 192 pixel values, the 192 offsets, and the resulting token.
-{: .figcap}
+The tokeniser is a matrix with one row per output number and one column
+per input number, plus an offset per output. Suppose training had left it
+at
 
-Read it left to right. The big square is the matrix $$E$$: 192 rows, 192
-columns, 36,864 numbers that were random before training and were nudged
-into place by it. The pink column is the patch's 192 pixel values (the
-first eight are all +1.00 because that corner of the patch is saturated
-red). To get the first entry of the token, take the first row of the
-matrix, multiply it element by element with the pixel column, add up the
-192 products, and add the first offset. Here that gives −0.16, the
-highlighted cell in the blue column. Do the same with row 2 to get the
-second entry, and so on down all 192 rows. The blue column is the token.
+$$E = \begin{pmatrix} 0.5 & 0.5 & 0.5 & 0.5 \\ 1 & 1 & -1 & -1 \\ 1 & -1 & 1 & -1 \end{pmatrix}, \qquad
+b = \begin{pmatrix} 0 \\ 0 \\ 0 \end{pmatrix}.$$
+
+Then each output is one row times the pixels, added up:
+
+$$z = Ex + b = \begin{pmatrix} 0.5(0.9) + 0.5(0.8) + 0.5(-0.7) + 0.5(-0.9) \\ 0.9 + 0.8 + 0.7 + 0.9 \\ 0.9 - 0.8 - 0.7 + 0.9 \end{pmatrix}
+= \begin{pmatrix} 0.05 \\ 3.3 \\ 0.3 \end{pmatrix}.$$
+
+Read the three numbers: the first is the patch's average brightness
+(about zero, half light and half dark), the second is "how much lighter is
+the top than the bottom" (large: there's a horizontal edge), the third is
+"how much lighter is the left than the right" (small: no vertical edge).
+Three numbers, and the patch is described as "mid-grey with a horizontal
+edge". That is what a token is. The real tokeniser is the same
+calculation with 192 inputs, 192 outputs and a 192 × 192 matrix that
+training filled in, so its rows are not this tidy, but every row is still
+one weighted sum over the same patch.
 
 Two patches from the same clock, worked the same way, with the first eight
 entries of each list shown:
@@ -270,8 +276,9 @@ results section shows what that costs.
 
 ## The loss: two classifications, not one, and not a regression
 
-The plumbing section showed the loss on two clocks. Here it is in
-symbols, and then the three other ways it could have been set up and why
+The loss is where the two probability charts of the first section become
+one number. Here it is in symbols, then worked out for the two clocks in
+Figure 2.3, then the three other ways it could have been set up and why
 they weren't. The encoder's summary vector $$f \in \mathbb{R}^d$$ (the
 averaged last feature map for a ResNet, the class token or the mean token
 for a ViT) goes through two linear layers, one per hand:
@@ -286,8 +293,16 @@ $$\mathcal{L} = \mathrm{CE}_\varepsilon(\ell_h, h) + \mathrm{CE}_\varepsilon(\el
 $$\mathrm{CE}_\varepsilon(\ell, y) = -\sum_{c=1}^{C} q_c \log \mathrm{softmax}(\ell)_c,
 \qquad q_c = (1-\varepsilon)\,[c = y] + \frac{\varepsilon}{C}.$$
 
-At inference each head takes its argmax. There were three other ways to set
-this up, and each was rejected for a reason worth stating.
+For the two clocks of Figure 2.3: the easy one gave 0.92 to the right
+hour and 0.92 to the right minute, so without smoothing the loss would be
+−log 0.92 − log 0.92 = 0.17; with the smoothed target it is 0.53 + 0.74 =
+1.26, against a floor of 1.25 that a perfect model can't go below. The
+boundary one gave 0.94 to the right hour but only 0.14 to the right
+minute, having put 0.73 on the next minute, so the minute term alone is
+2.35 and the total 2.88. Same clock, same model, one minute off, and the
+loss more than doubles. At inference each head takes its argmax. There
+were three other ways to set this up, and each was rejected for a reason
+worth stating.
 
 **One 720-way softmax over (hour, minute) pairs.** The most literal
 framing: every time is a class. It's strictly harder to learn. Each class
@@ -382,11 +397,11 @@ held-out fonts:
 | vit_small | 14.4M | 0.422 | 0.432 | 0.829 | 0.724 | 29 min |
 | vit_p16 | 14.5M | 0.074 | 0.075 | 0.261 | 0.139 | 7 min |
 
-Figure 2.7 shows how they got there, epoch by epoch.
+Figure 2.6 shows how they got there, epoch by epoch.
 
 ![Validation exact accuracy and training loss per epoch for all seven runs](/assets/clocks/curves.png)
 
-**Figure 2.7.** Validation exact accuracy and training loss per epoch for all seven runs.
+**Figure 2.6.** Validation exact accuracy and training loss per epoch for all seven runs.
 {: .figcap}
 
 Read the table as a person would: the ResNets get about nine clocks in
@@ -423,11 +438,11 @@ The ViT paper [[ViT]](#references) says ViTs lose to CNNs on small data
 without pre-training, because they lack the locality prior. That's true and
 it isn't specific enough. The ordering here, patch 16 far worse than patch
 8, and the bigger patch-8 model worse than the smaller one, points at the
-first layer (Figure 2.8).
+first layer (Figure 2.7).
 
 ![One clock under a 16, 8 and 4 px patch grid](/assets/clocks/patch_grids.png){: .no-invert}
 
-**Figure 2.8.** One clock under a 16, 8 and 4 px patch grid.
+**Figure 2.7.** One clock under a 16, 8 and 4 px patch grid.
 {: .figcap}
 
 The tokeniser section followed one 8 px patch to its token. Now change
@@ -438,11 +453,11 @@ about those 768 values is gone before any attention happens, and the
 matrix, applied to each patch alone, can't express "which way is the
 centre". At 4 px the hand runs through a dozen tokens, each holding a
 short piece of it, and the attention layers have a line to reassemble
-rather than a smudge to guess from (Figure 2.9).
+rather than a smudge to guess from (Figure 2.8).
 
 ![The same clock as the mean of each 4, 8 and 16 px patch](/assets/clocks/patch_means.png){: .no-invert}
 
-**Figure 2.9.** The same clock as the mean of each 4, 8 and 16 px patch.
+**Figure 2.8.** The same clock as the mean of each 4, 8 and 16 px patch.
 {: .figcap}
 
 Averaging each patch is a crude stand-in for what a linear projection keeps,
@@ -458,11 +473,11 @@ more work than it looks. A clock at 128 px is roughly a wall clock seen
 from across a room: you can tell the time, but you'd take a step closer to
 be sure of the minute. The minute-hand tip moves $$2\pi r / 60$$ per minute, which for a
 typical face at 128 px is three or four pixels (Part 1 derived it). The
-radius $$r$$ scales with the image, so the budget scales too (Figure 2.10):
+radius $$r$$ scales with the image, so the budget scales too (Figure 2.9):
 
 ![The same clock rendered at 64, 128 and 256 px](/assets/clocks/resolution.png){: .no-invert}
 
-**Figure 2.10.** The same clock rendered at 64, 128 and 256 px.
+**Figure 2.9.** The same clock rendered at 64, 128 and 256 px.
 {: .figcap}
 
 | image size | typical tip radius | pixels per minute |
@@ -537,7 +552,7 @@ that are each standard elsewhere:
 - Global average pooling over tokens instead of a class token
   [[PlainViT]](#references).
 
-As a data flow, next to the plain ViT drawn earlier (Figure 2.11):
+As a data flow, next to the plain ViT drawn earlier (Figure 2.10):
 
 ```mermaid
 flowchart TB
@@ -551,7 +566,7 @@ flowchart TB
   end
 ```
 
-**Figure 2.11.** ViT tiny v2 as a data flow: a convolutional stem to stride 4, fixed sincos positions, average pooling.
+**Figure 2.10.** ViT tiny v2 as a data flow: a convolutional stem to stride 4, fixed sincos positions, average pooling.
 {: .figcap}
 
 
@@ -577,11 +592,11 @@ two test splits, on CPU:
 | test, training fonts | 0.892 | 0.998 | 0.893 | 0.997 | 0.11 min |
 | test, held-out fonts | 0.899 | 0.998 | 0.899 | 0.998 | 0.11 min |
 
-Figure 2.12 puts every model on one chart.
+Figure 2.11 puts every model on one chart.
 
 ![Test exact accuracy against parameter count for every model](/assets/clocks/params.png)
 
-**Figure 2.12.** Test exact accuracy against parameter count for every model.
+**Figure 2.11.** Test exact accuracy against parameter count for every model.
 {: .figcap}
 
 A 3.8M-parameter ViT with a different tokeniser matches a 21M ResNet on
