@@ -100,6 +100,81 @@ stochastic depth up to 0.1.
 Both families end in the same head, and the head is where the task is
 defined, so it gets its own section.
 
+## What goes in, what comes out
+
+Before the loss, the plumbing, because the loss only makes sense once the
+input and output are concrete.
+
+```mermaid
+flowchart TB
+  A["one clock image: 128 × 128 pixels × 3 colours = 49,152 numbers in [−1, 1]"] --> B["encoder (ResNet or ViT) → one feature vector f: 512 numbers (ResNet) or 192 (ViT)"]
+  B --> D["hour head: W_h f + b_h → 12 logits → softmax → 12 probabilities"]
+  B --> E["minute head: W_m f + b_m → 60 logits → softmax → 60 probabilities"]
+  D --> H["cross-entropy against the label h"]
+  E --> I["cross-entropy against the label m"]
+  H --> J["loss = the two added: one number per image, averaged over the batch, pushed down by training"]
+  I --> J
+```
+
+**The input** is one image, 128 by 128 pixels, three colour channels,
+scaled from the 0 to 255 of the file to the range −1 to 1. That's 49,152
+numbers. Nothing else goes in: no hint of where the centre is, no crop, no
+mask. **The label** is two integers, the hour from 0 to 11 (0 meaning
+twelve) and the minute from 0 to 59.
+
+**The output** is two lists of probabilities: twelve for the hour, sixty
+for the minute, each list summing to one. The model's answer is the
+largest entry in each list. That's the whole interface; a person reading
+the clock produces the same two numbers.
+
+Here is the trained ViT doing it on two held-out clocks. The green bars
+are the probabilities it produced, the red outline is the smoothed target
+it was trained towards, and the number in the corner is the loss those two
+things produce together:
+
+![One clock through the trained ViT: input, the two probability vectors it outputs, the smoothed target, and the loss](/assets/clocks/objective.png){: .no-invert}
+
+The top clock is the easy case: nearly all the probability on the right
+hour and the right minute, and a loss of 1.26, within a hair of the floor.
+The bottom clock is the boundary case that Part 3 is about. The hour is
+certain. The minute head puts 73% on 55 and 14% on 54, and the label says 54. The
+model isn't confused about the clock; it is reporting, honestly,
+that the hand is between two minute marks and nearer the later one. The
+loss for that image is 2.88, more than twice the floor, all of it from
+the minute head, and all of it for being one minute late.
+
+That is what "the loss" means for the rest of this post: for each image,
+how far the model's two probability lists are from the target lists, added
+up. Training is the process of nudging the encoder's weights so that
+number, averaged over the batch, goes down.
+
+## How a ViT turns the image into tokens
+
+The ResNet consumes the 128 by 128 grid directly. The ViT can't: a
+transformer works on a sequence of vectors, so the image has to be cut up
+first. This step is called tokenising, and Part 2's main finding is that
+it's where the plain ViTs go wrong, so here it is on the actual model.
+
+![The input clock under vit_tiny's 8 px patch grid, six patches pulled out, and the 192-number token the trained patch embedding produces for each](/assets/clocks/tokeniser.png){: .no-invert}
+
+The image is cut into 16 by 16 squares of 8 by 8 pixels. Each square is
+flattened into a list of 192 numbers (8 × 8 pixels × 3 colours) and
+multiplied by one learned matrix $$E$$ of size 192 × 192, the same matrix
+for every square. The result is the square's *token*: 192 numbers that are
+all the transformer will ever know about those 64 pixels. A position
+vector is added so the transformer can tell square (3, 7) from square
+(12, 2), and the 256 tokens go into the encoder blocks.
+
+Look at the six pulled-out patches. Patch *a* sits on the minute hand, *b*
+on the hour hand, *c* on a numeral, *d* on the rim, and *e* and *f* are flat
+background. Their tokens differ, which is what the matrix is for: the two
+background tokens are nearly blank, the hand and numeral tokens are busy.
+But the matrix cannot know that the hand in patch *a* points towards the
+centre of the clock, because it never sees the centre; it sees 64 pixels. Every geometric fact about the hands has to be
+reassembled by the attention layers from these local descriptions. The
+smaller the patch, the more of the geometry survives into the tokens, and
+the next section shows that in the results.
+
 ## The loss: two classifications, not one, and not a regression
 
 Whatever the encoder is, it ends by producing a single vector
@@ -179,8 +254,8 @@ $$\min(|\hat m - m|,\ 60 - |\hat m - m|)$$.
 
 ## Training
 
-One epoch is one pass over all 120,000 training images, in batches of
-256. The optimiser is AdamW [[AdamW]](#references), the standard choice,
+One epoch is one pass over all 120,000 training images, in batches
+of 256. The optimiser is AdamW [[AdamW]](#references), the standard choice,
 with betas 0.9 and 0.95, weight decay 0.05 on weight matrices only, bf16
 autocast for speed, and peak learning rate
 $$\eta = 2 \times 10^{-3}$$ for the CNNs and $$10^{-3}$$ for the ViTs, 30
@@ -260,8 +335,9 @@ first layer.
 
 ![One clock under a 16, 8 and 4 px patch grid](/assets/clocks/patch_grids.png){: .no-invert}
 
-A plain ViT's first operation is to flatten each patch into a list of
-pixel values and multiply it by one fixed matrix to get a token. That
+As the tokeniser section showed, a plain ViT's first operation is to
+flatten each patch into a list of pixel values and multiply it by one
+fixed matrix to get a token. That
 multiplication is the same for every patch, and it happens before the
 model has looked at anything else. In symbols, For patch $$i$$ with pixels flattened into
 $$x_i \in \mathbb{R}^{3p^2}$$,
