@@ -175,12 +175,13 @@ seconds 45 to 59, on the same curve. In the last quarter of the minute,
 architectures with nothing in common except the data draw the same line,
 which is what you'd expect if the line belongs to the data.
 
-The hour errors, rare as they are, are the same thing. The plot below has
-one point per true minute wherever a model got the hour wrong at all (Figure 3.9):
+The hour errors, rare as they are, are the same thing. Figure 3.9 puts
+the hour error rate on a dial, one clock per model, each minute's sector
+shaded by how often the model got the *hour* wrong at that minute.
 
-![Hour error rate by true minute: the good models only fail at :00 and :59](/assets/clocks/hour_err_by_minute.png)
+![Hour error rate by true minute drawn on a dial for each model: the ResNet and the v2 ViT are dark only at :00 and :59, the plain ViT is dark everywhere](/assets/clocks/hour_err_by_minute.png){: .no-invert}
 
-**Figure 3.9.** Hour error rate by true minute: the good models only fail at :00 and :59.
+**Figure 3.9.** Hour error rate by true minute, one dial per model, on held-out fonts. Darker sectors mean more hour errors at that minute. The two good models fail only at :00 and :59; the plain ViT fails all round the dial.
 {: .figcap}
 
 The ResNet's hour errors sit at minute 0 (6.5% of those images) and minute
