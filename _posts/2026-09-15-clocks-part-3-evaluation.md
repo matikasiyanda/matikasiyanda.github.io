@@ -63,13 +63,17 @@ here is one the models never saw. The geometry for the overlay comes from
 re-rendering each test image from its seed, which reproduces it pixel for
 pixel, and reading the centre and radius the renderer used.
 
-![Predicted hands from both models drawn over ten held-out clocks, with the labelled time as white dashes](/assets/clocks/overlay_heldout.png){: .no-invert}
+The images are shown enlarged without smoothing, so the pixels are the
+pixels the models saw.
+
+![Predicted hands from both models drawn over twelve held-out clocks in three rows: both right, one wrong, both wrong](/assets/clocks/overlay_heldout.png){: .no-invert}
 
 In the top row the three sets of hands are on top of each other. In the
-bottom row look closely at the minute hand: where a model is wrong, its
-hand sits a few degrees off the white one, one minute's worth, and almost
-always clockwise of it. That is the whole story of this post, and the rest
-of it is measuring that picture.
+middle row one model is a minute off and the other isn't, and the two
+readings differ by a few degrees at the tip. In the bottom row both models
+agree with each other and disagree with the label, and their minute hands
+sit just clockwise of the white dashes, one minute's worth. That is the
+whole story of this post, and the rest of it is measuring that picture.
 
 Eight more clocks each model read correctly, and eight it didn't, sampled
 at random from the held-out set. The wrong readings are in red.
