@@ -8,6 +8,7 @@ part: 2
 description: "Six encoders from random init on synthetic clocks. The ResNets read 89% exactly after 30 epochs. Plain ViTs got half that and got worse as they grew, until the tokeniser changed."
 tags: [vision, vit, cnn, pytorch]
 math: true
+mermaid: true
 image: /assets/clocks/curves.png
 ---
 
@@ -38,6 +39,56 @@ what a given amount of model can learn.
 | vit_tiny | 3.7M | patch 8, width 192, depth 8, 3 heads |
 | vit_small | 14.4M | patch 8, width 384, depth 8, 6 heads |
 | vit_p16 | 14.5M | patch 16, width 384, depth 8, 6 heads |
+
+Here are the two families as data flows, with the shape of the tensor at
+each stage for a 128 px input. Read them top to bottom. The ResNet shrinks
+the image four times while widening the channels; the ViT shrinks it once,
+at the very start, and then keeps the same 256 tokens through every layer.
+
+```mermaid
+flowchart TB
+  subgraph R ["ResNet-18 layout (cnn_r18, 11.2M)"]
+    direction TB
+    r0["image<br/>128 × 128 × 3"] --> r1["stem: 3×3 conv, stride 1, BatchNorm, ReLU<br/>128 × 128 × 64"]
+    r1 --> r2["stage 1: 2 residual blocks<br/>128 × 128 × 64"]
+    r2 --> r3["stage 2: 2 blocks, first has stride 2<br/>64 × 64 × 128"]
+    r3 --> r4["stage 3: 2 blocks, stride 2<br/>32 × 32 × 256"]
+    r4 --> r5["stage 4: 2 blocks, stride 2<br/>16 × 16 × 512"]
+    r5 --> r6["global average pool<br/>512"]
+    r6 --> r7["two linear heads<br/>12 hour logits, 60 minute logits"]
+  end
+  subgraph V ["ViT tiny (vit_tiny, 3.7M)"]
+    direction TB
+    v0["image<br/>128 × 128 × 3"] --> v1["patchify: 8×8 patches, one linear map each<br/>16 × 16 = 256 tokens × 192"]
+    v1 --> v2["+ learned position embedding, + class token<br/>257 × 192"]
+    v2 --> v3["8 × encoder block:<br/>LayerNorm → 3-head self-attention → add<br/>LayerNorm → MLP 192→768→192 → add<br/>257 × 192"]
+    v3 --> v4["class token<br/>192"]
+    v4 --> v5["two linear heads<br/>12 hour logits, 60 minute logits"]
+  end
+```
+
+A residual block is two 3x3 convolutions with a skip connection that adds
+the block's input to its output, so each block only has to learn a
+correction. An encoder block is the transformer's unit: self-attention
+lets every token gather information from every other token, weighted by
+learned relevance, and the MLP then processes each token on its own. Both
+families are deep stacks of one repeated unit; the difference is entirely
+in what the unit does and what it can see.
+
+The modified ViT in the second half of this post keeps the eight encoder
+blocks and changes the three parts around them:
+
+```mermaid
+flowchart TB
+  subgraph V2 ["ViT tiny v2 (vit_tiny_v2, 3.8M)"]
+    direction TB
+    w0["image<br/>128 × 128 × 3"] --> w1["conv stem: 3×3 conv stride 2, BatchNorm, GELU → 64 × 64 × 96<br/>3×3 conv stride 2, BatchNorm, GELU → 32 × 32 × 192, then 1×1 conv<br/>32 × 32 = 1,024 tokens × 192"]
+    w1 --> w2["+ fixed 2D sine-cosine positions, no class token<br/>1024 × 192"]
+    w2 --> w3["8 × encoder block, as before<br/>1024 × 192"]
+    w3 --> w4["mean over all tokens<br/>192"]
+    w4 --> w5["two linear heads<br/>12 hour logits, 60 minute logits"]
+  end
+```
 
 The ResNets [[ResNet]](#references) use a 3x3 stride-1 stem instead of the
 ImageNet 7x7 stride-2 convolution plus max-pool. At 128 px the first thing a
