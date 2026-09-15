@@ -297,29 +297,28 @@ multiplied by zero); with it, every class contributes a little, and the
 model is charged for putting probability *exactly* zero anywhere. Figure
 2.7 shows the sum term by term for the boundary clock of Figure 2.3.
 
-![The loss for the boundary clock drawn on clocks: for each head, the model's probabilities as a dial, the smoothed target as a dial, and the per-class loss terms as a dial, then the two sums added](/assets/clocks/loss_terms.png){: .no-invert}
+![The loss in three panels: the penalty curve minus log p with the easy and boundary clocks marked; the decomposition of each head's cross-entropy into the labelled class's term and the rest, for both clocks; and a histogram of the losses of 256 held-out clocks with the batch mean](/assets/clocks/loss_terms.png)
 
-**Figure 2.7.** The loss on clocks, for the boundary clock. Each row is one head. Left: what the model said, p. Middle: what it was asked to say, q, with 0.9 on the label and a little on every sector. Right: the product, −q log p, one term per sector, which the loss adds up. Bottom right: the two sums added.
+**Figure 2.7.** The loss, in three panels. Left: the penalty for giving the labelled class probability p is −log p, cheap near 1 and steep near 0; the easy clock and the boundary clock are marked. Middle: each head's cross-entropy split into the labelled class's term (coloured) and the other classes' terms (grey), for both clocks; the two heads add to the image's loss. Right: the losses of 256 held-out clocks, with the mean, which is the batch loss.
 {: .figcap}
 
-Read the right-hand dials. On the minute head, one sector is dark: the
-labelled minute, 54, where the model gave 0.14 and was asked for 0.90, so
-its term is $$-0.9 \log 0.14 = 1.75$$. That is most of the loss, and all
-of it for reading one minute late. The other fifty-nine sectors are faint
-but not empty: each contributes $$-(0.1/60)\log p_c$$, tiny on its own,
-0.60 in total. That ring is the smoothing's floor. It can't be reduced by
+Read the middle panel. On the boundary clock the minute head's bar is
+mostly blue: the labelled minute, 54, got probability 0.14 where 0.90 was
+asked, so its term is $$-0.9 \log 0.14 = 1.75$$, most of the loss and all
+of it for reading one minute late. The grey part, 0.60, is the sum of the
+other fifty-nine terms, $$-(0.1/60)\log p_c$$ each: tiny on their own,
+never zero. That grey is the smoothing's floor; it can't be reduced by
 reading the clock better, only by never being completely sure of any
-class. On the hour head the labelled sector is pale, because the model
-gave the right hour 0.94 and there is little to charge, and the ring
-carries nearly all of the 0.53. Two sums, added: this image costs 2.88,
-and it is one of 256 whose average is the number the optimiser sees.
+class. The hour head's bar is almost all grey, because the model gave the
+right hour 0.94 and there is little to charge. The easy clock's bars are
+nearly all grey on both heads: 1.26 in total, a hair above the 1.25 a
+perfect model would score. The right panel is what the optimiser sees: a
+batch of 256 such numbers, most near the floor, a tail of one-minute
+misses, averaged to one value.
 
-For comparison, the easy clock of Figure 2.3 gave 0.92 to the right hour
-and 0.92 to the right minute, and scores 0.53 + 0.74 = 1.26, a hair above
-the 1.25 floor that a perfect model can't go below. Same model, one
-minute off on the other clock, and the loss more than doubles. At
-inference each head takes its argmax. There were three other ways to set
-this up, and each was rejected for a reason worth stating.
+Same model, one minute off, and the loss more than doubles, from 1.26
+to 2.88. At inference each head takes its argmax. There were three other
+ways to set this up, and each was rejected for a reason worth stating.
 
 **One 720-way softmax over (hour, minute) pairs.** The most literal
 framing: every time is a class. It's strictly harder to learn. Each class
