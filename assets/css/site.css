@@ -312,3 +312,4 @@ html.lightbox-open { overflow: hidden; }
 .posts li.series .series-parts { font-size: 14px; color: var(--muted); margin-top: 4px; }
 .posts li.series .series-parts a { color: var(--muted); text-decoration: none; border-bottom: 1px dotted var(--muted); }
 .posts li.series .series-parts a:hover { color: var(--accent); border-bottom-color: var(--accent); }
+.posts li.series .series-badge { grid-column: 1; justify-self: start; margin-left: 0; }
