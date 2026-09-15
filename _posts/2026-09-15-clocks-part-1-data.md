@@ -166,7 +166,8 @@ def draw_clock(hour, minute, size=512, ss=3):
     # Sixty tick marks, longer every five minutes.
     for i in range(60):
         long = i % 5 == 0
-        d.line([polar(R * 0.92, i * 6), polar(R * (0.82 if long else 0.88), i * 6)],
+        inner = R * (0.82 if long else 0.88)
+        d.line([polar(R * 0.92, i * 6), polar(inner, i * 6)],
                fill=INK, width=ss * (4 if long else 2))
 
     # Numerals, in any TrueType font Pillow can find.
@@ -175,7 +176,8 @@ def draw_clock(hour, minute, size=512, ss=3):
     except OSError:
         font = ImageFont.load_default()
     for h in range(1, 13):
-        d.text(polar(R * 0.70, h * 30), str(h), fill=INK, font=font, anchor="mm")
+        d.text(polar(R * 0.70, h * 30), str(h), fill=INK, font=font,
+               anchor="mm")
 
     # The hour hand moves with the minute: 30 degrees per hour plus half a
     # degree per minute. The minute hand moves six degrees per minute.
