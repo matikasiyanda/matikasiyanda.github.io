@@ -17,9 +17,11 @@ capital markets, insurance and research. I lead data and AI initiatives from
 scope to production, across the full range of data: large structured datasets
 in SQL, Spark and Hadoop, ETL pipelines, statistical analysis, and
 unstructured text, image and video data, through to machine learning and LLM
-systems in production. In research, I collaborated on data pipelines for
-petabyte-scale radio astronomy data on the path to the Square Kilometre Array
-(SKA), as part of international science collaborations.
+systems in production. In research, I worked on international science
+experiments in radio astronomy, collaborating on the data pipelines that
+processed petabyte-scale telescope data for the Hydrogen Epoch of
+Reionization Array (HERA), a precursor experiment to the Square Kilometre
+Array (SKA).
 
 <p class="cv-actions"><a class="btn-download" href="/assets/files/siyanda-matika-resume.pdf" download>Download PDF</a></p>
 
