@@ -396,10 +396,12 @@ sits on the GPU as uint8, 5.9 GB, and each batch is gathered by index. There's n
 CPU-side decoding, so the small models are bounded by the forward and
 backward pass: cnn_small trains 120k images per epoch in 37 seconds.
 
-Two metrics matter. "Exact" means hour and minute are both right. "±1 min"
-means the hour is right and the minute is within one of the truth. Every
-number is from one seed, and the differences between models within a family
-are inside single-seed noise. Part 3 quantifies that.
+Two metrics appear in this part. "Exact" means hour and minute are both
+right. "±1 min" means the hour is right and the minute is within one of
+the truth. Exact is what the loss trains for, but it says nothing about
+how far off a miss is, so Part 3 switches to the time error in minutes
+and shows the ordering it gives. Every number is from one seed, and the
+differences between models within a family are inside single-seed noise.
 
 ## Results at 30 epochs
 
