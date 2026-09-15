@@ -27,8 +27,9 @@ counts, on one RTX 4090. Three parts, read in order:
 
 3. **[Part 3 — What the models get wrong](/blog/clocks/part-3-evaluation/)**
    Predictions on clocks in fonts never seen in training, the off-by-one
-   wall every model hits, which clock styles are hard, and where the CNN and
-   the ViT disagree.
+   wall every model hits and where it comes from, every big miss shown,
+   which clock styles are hard, and then 3,228 real photographs: 37% within
+   a minute, and why.
 
 **Headline:** three ResNets, in 30 epochs, and one modified ViT, in 86,
 all land at 88 to 90% exact and 99.5% within a minute, on unseen fonts as

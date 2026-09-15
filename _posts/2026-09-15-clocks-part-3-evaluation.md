@@ -5,7 +5,7 @@ permalink: /blog/clocks/part-3-evaluation/
 series: "Lost in time"
 series_url: /blog/clocks/
 part: 3
-description: "Predictions on clocks in fonts never seen in training. Nearly every miss is one minute late, and the reason is a design choice in the renderer, not the models."
+description: "Predictions on clocks in fonts never seen in training, then on 3,228 real photographs. Nearly every synthetic miss is one minute late, and the reason is a design choice in the renderer; on photographs the models read 37% within a minute, and the reasons are the things the renderer never drew."
 tags: [vision, vit, cnn, evaluation]
 image: /assets/clocks/err_by_second.png
 math: true
