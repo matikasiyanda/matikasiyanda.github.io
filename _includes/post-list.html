@@ -3,6 +3,7 @@
 {% assign shown = 0 %}
 <ul class="posts">
 {% for post in site.posts %}
+  {% if post.unlisted %}{% continue %}{% endif %}
   {% if include.limit and shown >= include.limit %}{% break %}{% endif %}
   {% if post.series %}
     {% if seen contains post.series %}{% continue %}{% endif %}

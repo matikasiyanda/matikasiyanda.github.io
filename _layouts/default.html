@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#0f1420">
   {% seo %}
+  {% if page.unlisted %}<meta name="robots" content="noindex, nofollow">{% endif %}
   {% if page.authors %}{% for a in page.authors %}<meta name="author" content="{{ a.given }} {{ a.family }}">
   <meta name="citation_author" content="{{ a.family }}, {{ a.given }}">
   {% endfor %}<meta name="citation_title" content="{{ page.title | escape }}">
