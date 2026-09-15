@@ -193,13 +193,13 @@ came from.
 Here it is on the real model, following one stamp from the clock to its
 description:
 
-![One patch followed from the image to its token: cut, flatten to 192 numbers, multiply by the learned matrix E, add the position vector, one of 256 tokens](/assets/clocks/tokeniser_steps.png){: .no-invert}
+![One patch followed from the image to its token: cut, flatten to 192 numbers, multiply by the learned matrix E, add the position vector, one of 256 tokens. The clock is shown at 512 px for legibility](/assets/clocks/tokeniser_steps.png){: .no-invert}
 
 Step by step, with the sizes:
 
 1. **Cut.** The 128 by 128 image is divided into a 16 by 16 grid of
-   patches, each 8 by 8 pixels. That's 256 patches. The red square is one
-   of them, on the minute hand.
+   patches, each 8 by 8 pixels. That's 256 patches. The yellow square is
+   one of them, on the minute hand.
 2. **Flatten.** Each patch is 8 × 8 pixels × 3 colours = 192 numbers. They
    are read off in a fixed order into one long list. The picture of the
    patch is gone; what's left is the list.
