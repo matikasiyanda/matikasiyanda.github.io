@@ -236,10 +236,10 @@ the time, says their errors are mostly coin flips at the boundary rather
 than systematic blind spots. Averaging the two heads would gain a few
 points, and wouldn't mean anything.
 
-For completeness, the eight worst misses by circular minute error for each
-model:
+For completeness, the worst misses by circular minute error for each
+model, drawn the same way as the panels at the top of the post:
 
-![The eight largest minute errors on held-out fonts for each model](/assets/clocks/worst_heldout.png){: .no-invert}
+![The four largest minute errors on held-out fonts for each model, with both models' hands drawn over the clock](/assets/clocks/overlay_worst.png){: .no-invert}
 
 These are the one-in-six-hundred cases, and they're a different kind of
 error: the model swapped the hands. At 8:08 the hour hand sits at 244
