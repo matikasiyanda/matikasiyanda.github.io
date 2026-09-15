@@ -246,10 +246,22 @@ steps ([Figure 1.5](#fig-1-5)):
 At each step the renderer samples from a list of options. This is what it
 varies, with the share of the training set each option got ([Figure 1.6](#fig-1-6)):
 
+At each step the renderer samples from a list of options. Here is one
+example of each, so the names used from here on mean something
+([Figure 1.6](#fig-1-6)):
+
+![One example clock for every option: six numeral styles, four face shapes, four hand styles, three tick styles, with and without a second hand, rotated and upright](/assets/clocks/options.png){: .no-invert}
+
+**Figure 1.6.** One example of every option the renderer chooses between, grouped by attribute, rendered at 512 px.
+{: .figcap #fig-1-6}
+
+This is what it varies, with the share of the training set each option got
+([Figure 1.7](#fig-1-7)):
+
 ![Share of training images with each numeral style, face shape, tick style, hand style, second hand and rotation](/assets/clocks/knobs.png)
 
-**Figure 1.6.** Share of training images with each numeral style, face shape, tick style, hand style, second hand and rotation.
-{: .figcap #fig-1-6}
+**Figure 1.7.** Share of training images with each numeral style, face shape, tick style, hand style, second hand and rotation.
+{: .figcap #fig-1-7}
 
 Beyond those categorical choices, every continuous quantity is sampled too:
 the face radius (30% to 47% of the image), the centre offset (up to 6% off
@@ -274,8 +286,8 @@ Here is what all of that produces for one fixed time ([Figure 1.7](#fig-1-7)):
 
 ![4:58 rendered sixteen ways](/assets/clocks/same_time.png){: .no-invert}
 
-**Figure 1.7.** 4:58 rendered sixteen ways.
-{: .figcap #fig-1-7}
+**Figure 1.8.** 4:58 rendered sixteen ways.
+{: .figcap #fig-1-8}
 
 Every clock above says 4:58. The model has to learn that the pink one, the
 one with no numerals, the one rotated on a green square, and the blurred one
@@ -286,12 +298,12 @@ are the same answer.
 The first version of the renderer was a hundred lines and produced clocks a
 model could learn from in an afternoon. Most of the work after that was
 finding the ways it was subtly wrong. Four decisions, each with a
-before-and-after ([Figure 1.8](#fig-1-8)):
+before-and-after ([Figure 1.9](#fig-1-9)):
 
 ![Four design decisions: supersampling, the colour contrast rule, and when rotation is a legal augmentation](/assets/clocks/design_decisions.png){: .no-invert}
 
-**Figure 1.8.** Four design decisions: supersampling, the colour contrast rule, and when rotation is a legal augmentation.
-{: .figcap #fig-1-8}
+**Figure 1.9.** Four design decisions: supersampling, the colour contrast rule, and when rotation is a legal augmentation.
+{: .figcap #fig-1-9}
 
 **Draw at three times the size, then shrink.** Anti-aliasing is what makes
 a diagonal line look smooth on a screen: the pixels along its edge are
@@ -355,23 +367,23 @@ entirely.
 
 Fonts are that axis. If a model learns to read the numeral nearest each hand
 tip rather than the hand's angle, it will be thrown by a typeface it hasn't
-seen. If it reads angles, the typeface is irrelevant ([Figure 1.9](#fig-1-9)).
+seen. If it reads angles, the typeface is irrelevant ([Figure 1.10](#fig-1-10)).
 
 ![Fourteen training fonts and fourteen held-out fonts, each rendering "12 3", with the font file name under each](/assets/clocks/fonts.png){: .no-invert}
 
-**Figure 1.9.** Fourteen training fonts and fourteen held-out fonts, each rendering "12 3", with the font file name under each.
-{: .figcap #fig-1-9}
+**Figure 1.10.** Fourteen training fonts and fourteen held-out fonts, each rendering "12 3", with the font file name under each.
+{: .figcap #fig-1-10}
 
 The 250 fonts that survive the filter are split by family directory, so all
 the weights of one family land on the same side: 211 for training, 39 held
 out. The held-out test set is rendered with the 39 only. Here is what that
 looks like at the level of whole clocks, seen typefaces above and unseen
-below ([Figure 1.10](#fig-1-10)):
+below ([Figure 1.11](#fig-1-11)):
 
 ![Eight test clocks rendered with training fonts above eight rendered with held-out fonts](/assets/clocks/seen_unseen.png){: .no-invert}
 
-**Figure 1.10.** Eight test clocks rendered with training fonts above eight rendered with held-out fonts.
-{: .figcap #fig-1-10}
+**Figure 1.11.** Eight test clocks rendered with training fonts above eight rendered with held-out fonts.
+{: .figcap #fig-1-11}
 
 To a person the two rows are the same kind of thing. To a model that has
 learned to match numeral shapes, the bottom row is new. That difference is
@@ -393,33 +405,33 @@ from. There is no stratification step, and none is needed: with 120,000
 draws from the same distribution, every category lands at the share the
 renderer's probabilities say it should, in every split. The plot below is
 the check. Each group of four bars is one option; the bars are the four
-splits; they match ([Figure 1.11](#fig-1-11)).
+splits; they match ([Figure 1.12](#fig-1-12)).
 
 ![Share of each numeral style, face shape, tick style, hand style, second hand and rotation in each of the four splits](/assets/clocks/splits.png)
 
-**Figure 1.11.** Share of each numeral style, face shape, tick style, hand style, second hand and rotation in each of the four splits.
-{: .figcap #fig-1-11}
+**Figure 1.12.** Share of each numeral style, face shape, tick style, hand style, second hand and rotation in each of the four splits.
+{: .figcap #fig-1-12}
 
 The labels are uniform by construction. Each image draws its hour from 12
 values and its minute from 60, independently, so all 720 possible times
 appear, about 167 times each in the training set. The second, which is
 never labelled, is uniform too; it matters later because the minute hand
 sometimes moves with it. The rotation angle, when applied, is uniform on
-±12 degrees, with the un-rotated images making up the other 54% ([Figure 1.12](#fig-1-12)).
+±12 degrees, with the un-rotated images making up the other 54% ([Figure 1.13](#fig-1-13)).
 
 ![Training images per (hour, minute) pair, the distribution of seconds, and the distribution of rotation angles](/assets/clocks/labels.png)
 
-**Figure 1.12.** Training images per (hour, minute) pair, the distribution of seconds, and the distribution of rotation angles.
-{: .figcap #fig-1-12}
+**Figure 1.13.** Training images per (hour, minute) pair, the distribution of seconds, and the distribution of rotation angles.
+{: .figcap #fig-1-13}
 
 Fonts are sampled uniformly from whichever pool the split uses, so every
 training font appears on about 570 images and every held-out font on
-about 260. No font appears in both ([Figure 1.13](#fig-1-13)).
+about 260. No font appears in both ([Figure 1.14](#fig-1-14)).
 
 ![Images per font in the training pool and in the held-out pool](/assets/clocks/fonts_usage.png)
 
-**Figure 1.13.** Images per font in the training pool and in the held-out pool.
-{: .figcap #fig-1-13}
+**Figure 1.14.** Images per font in the training pool and in the held-out pool.
+{: .figcap #fig-1-14}
 
 None of the above is about the pixels. The renderer's colour, lighting and
 damage choices aren't recorded in the metadata, so the last plot measures
@@ -428,21 +440,21 @@ contrast (the standard deviation of its pixels), and its average colour.
 The training set and the held-out set sit on top of each other, which is
 what "only the fonts differ" should look like. And there is no favourite
 palette, no preferred brightness, and a wide spread of contrast, from
-near-monochrome faces to hard black-on-white ([Figure 1.14](#fig-1-14)).
+near-monochrome faces to hard black-on-white ([Figure 1.15](#fig-1-15)).
 
 ![Per-image brightness, contrast and mean colour for a 20,000-image training sample and the held-out test set](/assets/clocks/photometrics.png)
 
-**Figure 1.14.** Per-image brightness, contrast and mean colour for a 20,000-image training sample and the held-out test set.
-{: .figcap #fig-1-14}
+**Figure 1.15.** Per-image brightness, contrast and mean colour for a 20,000-image training sample and the held-out test set.
+{: .figcap #fig-1-15}
 
 The whole set is 128 px RGB, 6.7 GB as uint8, and takes about three
 minutes to build on 12 cores. Here it is, finally, as clocks rather than
-histograms, from the held-out split with its labels ([Figure 1.15](#fig-1-15)):
+histograms, from the held-out split with its labels ([Figure 1.16](#fig-1-16)):
 
 ![24 held-out-font clocks with their labels](/assets/clocks/samples_heldout.png){: .no-invert}
 
-**Figure 1.15.** 24 held-out-font clocks with their labels.
-{: .figcap #fig-1-15}
+**Figure 1.16.** 24 held-out-font clocks with their labels.
+{: .figcap #fig-1-16}
 
 One consequence of the size: the whole training split fits on the GPU at
 once. Part 2 uses that to skip the dataloader entirely.
