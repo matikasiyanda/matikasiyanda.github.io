@@ -109,19 +109,13 @@ Kilometre Array (SKA), as part of international science collaborations.
 ## Skills
 
 <dl class="cv-skills">
-  <dt>Data engineering</dt><dd>SQL, Spark, Hadoop, Databricks, Delta Lake; ETL pipelines over large datasets</dd>
-  <dt>Statistics and analytics</dt><dd>Bayesian inference, time series, segmentation, forecasting, recommendation, A/B testing</dd>
-  <dt>Unstructured data</dt><dd>text, images and video: extraction, OCR, embeddings and retrieval</dd>
-  <dt>Machine learning</dt><dd>model design, training, evaluation and fine-tuning across classical ML, deep learning and transformers; PyTorch, scikit-learn, XGBoost</dd>
-  <dt>LLMs</dt><dd>open-weight models (Llama, Mistral, Qwen) and GPT models via Azure OpenAI; retrieval (RAG, hybrid search), fine-tuning (LoRA, Azure OpenAI Service), intent classification and agent routing, reinforcement learning (GRPO), guardrails</dd>
-  <dt>Scripting</dt><dd>Python, Bash, SQL</dd>
-  <dt>Cloud services</dt><dd>AWS (SageMaker, ECS, Fargate, EMR), Azure (Azure ML, App Service), GCP</dd>
-  <dt>GPU infrastructure and deployment</dt><dd>Linux GPU servers (RunPod), open-weight model serving with vLLM, concurrency tuning, Docker</dd>
-  <dt>MLOps and LLMOps</dt><dd>deployment and data pipelines, CI/CD (GitHub Actions, Azure DevOps), infrastructure as code with Terraform, Kubeflow on Kubernetes, network-isolated pods for agent workloads</dd>
-  <dt>Monitoring</dt><dd>Prometheus, Grafana, model and drift monitoring, alerts that trigger pipelines on cost, warnings and errors</dd>
-  <dt>Identity and access</dt><dd>IAM on AWS and Azure, Amazon Cognito, Azure App Service Authentication (Easy Auth)</dd>
-  <dt>Security and governance</dt><dd>Data Protection Impact Assessments (DPIAs), penetration-test reviews with security teams, adversarial testing of chatbots and LLMs, data governance</dd>
-  <dt>Services</dt><dd>FastAPI, Flask</dd>
+  <dt>Data engineering</dt><dd>Pipelines from raw source to modelling table over bank-scale customer data, in Spark, Hadoop and Databricks with Delta Lake for versioned tables. SQL is the working language; Python and Bash do the rest.</dd>
+  <dt>Statistics and modelling</dt><dd>Bayesian inference, time-series forecasting, segmentation and recommendation, and A/B tests designed for the power they need and read with the error bars they deserve. Classical machine learning through deep learning in PyTorch, scikit-learn and XGBoost, with evaluation that separates a real gain from single-seed noise.</dd>
+  <dt>Language models</dt><dd>Open-weight models (Llama, Mistral, Qwen) and Azure OpenAI in production. Hybrid retrieval built and measured end to end, fine-tuning with LoRA, reinforcement learning with GRPO, intent classification and agent routing, and guardrails tested adversarially before anything reaches a customer.</dd>
+  <dt>Unstructured data</dt><dd>Text, images and video: extraction and OCR, embeddings, and retrieval systems evaluated against held-out sets rather than demos.</dd>
+  <dt>Infrastructure and deployment</dt><dd>AWS (SageMaker, ECS, Fargate, EMR), Azure (Azure ML, App Service) and GCP, provisioned with Terraform. Kubeflow on Kubernetes with network-isolated pods for agent workloads. GPU serving with vLLM on Linux servers and RunPod, tuned for concurrent users and scheduled to keep spend bounded. Docker, FastAPI and Flask services, CI/CD on GitHub Actions and Azure DevOps.</dd>
+  <dt>Operations and monitoring</dt><dd>Prometheus and Grafana for services, model and drift monitoring for what they serve, and alerts wired to pipelines so that cost, warnings and errors trigger an action rather than an email.</dd>
+  <dt>Security, identity and governance</dt><dd>IAM on AWS and Azure, Amazon Cognito and App Service authentication. Data Protection Impact Assessments, penetration-test reviews with security teams, adversarial testing of chatbots and language models, and data governance.</dd>
 </dl>
 
 ## Education
