@@ -271,7 +271,7 @@ Fonts are that axis. If a model learns to read the numeral nearest each hand
 tip rather than the hand's angle, it will be thrown by a typeface it hasn't
 seen. If it reads angles, the typeface is irrelevant.
 
-![Fourteen training fonts and fourteen held-out fonts, each rendering "12 3"](/assets/clocks/fonts.png){: .no-invert}
+![Fourteen training fonts and fourteen held-out fonts, each rendering "12 3", with the font file name under each](/assets/clocks/fonts.png){: .no-invert}
 
 The 250 fonts that survive the filter are split by family directory, so all
 the weights of one family land on the same side: 211 for training, 39 held
