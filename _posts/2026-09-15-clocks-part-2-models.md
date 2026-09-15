@@ -127,13 +127,13 @@ for the minute, each list summing to one. The model's answer is the
 largest entry in each list.
 
 Here is what that means as literal numbers, for one held-out clock. The
-yellow box on the image is 16 of its 16,384 pixels, and the enlarged block
-shows the three numbers each of those pixels is made of. Those, times
-16,384, are what the model receives. What it returns is printed below the
-model: twelve numbers and sixty numbers. Its answer is the largest of each
-list.
+image is stored as three grids of 128 by 128 values, one for red, one for
+green, one for blue, and a row of the actual values is printed under them.
+Those 49,152 numbers are what the model receives. What it returns is
+printed below the model: twelve numbers and sixty numbers. Its answer is
+the largest of each list.
 
-![The input as pixels with their numbers, the model, and the output as the twelve and sixty numbers it returns](/assets/clocks/io_numbers.png){: .no-invert}
+![The input as a clock and its three colour channels, the model, and the output as the twelve and sixty numbers it returns](/assets/clocks/io_numbers.png){: .no-invert}
 
 The model put 0.94 on hour 9, and on the minute list 0.73 on 55 and 0.14
 on 54. Its answer is 9:55. The label, the yellow cell, is 9:54. So this
