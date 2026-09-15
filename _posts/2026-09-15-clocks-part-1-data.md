@@ -130,6 +130,36 @@ about three minutes and never sit in RAM all at once. Every sampled choice
 is also written to a CSV alongside the labels, which is what Part 3 uses to
 ask which kinds of clock are hard.
 
+This is the whole interface. One call draws one clock, at whatever size
+you ask for, and hands back the image and a record of every choice it made:
+
+```python
+import random
+from clockcheck.render_analog import render_analog
+from clockcheck import fonts as F
+
+rng = random.Random(42)
+img, spec = render_analog(rng, out_size=512, font_pool=F.train_fonts(), hour=10, minute=8)
+img.save("clock_512.png")
+print(spec)
+```
+
+![One clock rendered at 512 px by the snippet above](/assets/clocks/snippet_clock.png){: .no-invert}
+
+And what `print(spec)` says about it:
+
+```
+AnalogSpec(hour=10, minute=8, second=40, face='circle', numerals='roman4',
+           font='LinLibertine_RI.otf', ticks='all', hand_style='tapered',
+           show_second=True, rotate=3.82, cx=258.2, cy=285.1, radius=207.5)
+```
+
+Every field is a choice the renderer made from the lists below: a circular
+face, Roman numerals with IIII, all sixty tick marks, tapered hands, a second
+hand at 40 seconds, a 3.8 degree rotation, and the centre and radius in
+pixels. The dataset builder calls this function 145,000 times with different
+seeds and writes each `spec` as one row of the metadata CSV.
+
 The renderer draws at three times the output size and downsamples, so thin
 hands and small numerals come out anti-aliased rather than jagged. Five
 steps:
