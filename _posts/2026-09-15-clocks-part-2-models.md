@@ -237,8 +237,9 @@ that a token is a fixed linear recipe applied to 192 pixel values, the
 same recipe for all 256 patches, applied to each patch alone.
 
 Now the problem. The matrix in step 3 sees one patch at a time and never
-sees the neighbours, so it cannot know that the hand in patch *a* points
-towards the centre of the clock: it has no idea where the centre is. It
+sees the neighbours, so it cannot know that the hand in the yellow patch
+points towards the centre of the clock: it has no idea where the centre
+is. It
 can say "there's a pink diagonal stripe in this stamp", and that's all it
 can say. Every geometric fact about the hands, their angles about a shared
 centre, has to be reconstructed by the attention layers afterwards from
@@ -266,9 +267,10 @@ is certain and correct, and large when it's confident and wrong. With label
 smoothing $$\varepsilon = 0.1$$, the target isn't "all the probability on the
 right class" but "90% on the right class, the rest spread evenly":
 
-$$\mathcal{L} = \mathrm{CE}_\varepsilon(\ell_h, h) + \mathrm{CE}_\varepsilon(\ell_m, m), \qquad
-\mathrm{CE}_\varepsilon(\ell, y) = -\sum_{c=1}^{C} q_c \log \mathrm{softmax}(\ell)_c, \quad
-q_c = (1-\varepsilon)\,[c = y] + \frac{\varepsilon}{C}.$$
+$$\mathcal{L} = \mathrm{CE}_\varepsilon(\ell_h, h) + \mathrm{CE}_\varepsilon(\ell_m, m),$$
+
+$$\mathrm{CE}_\varepsilon(\ell, y) = -\sum_{c=1}^{C} q_c \log \mathrm{softmax}(\ell)_c,
+\qquad q_c = (1-\varepsilon)\,[c = y] + \frac{\varepsilon}{C}.$$
 
 At inference each head takes its argmax. There were three other ways to set
 this up, and each was rejected for a reason worth stating.
