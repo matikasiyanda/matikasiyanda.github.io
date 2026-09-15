@@ -109,7 +109,7 @@ Kilometre Array (SKA), as part of international science collaborations.
 ## Skills
 
 <dl class="cv-skills">
-  <dt>Data engineering</dt><dd>Pipelines from raw source to modelling table over bank-scale customer data, in Spark, Hadoop and Databricks with Delta Lake for versioned tables. SQL is the working language; Python and Bash do the rest.</dd>
+  <dt>Data engineering</dt><dd>Pipelines from raw source to modelling table, at two scales: petabytes of radio-interferometer data in international science collaborations, and bank-scale customer data in Spark, Hadoop and Databricks with Delta Lake for versioned tables. SQL is the working language; Python and Bash do the rest.</dd>
   <dt>Statistics and modelling</dt><dd>Bayesian inference, time-series forecasting, segmentation and recommendation, and A/B tests designed for the power they need and read with the error bars they deserve. Classical machine learning through deep learning in PyTorch, scikit-learn and XGBoost, with evaluation that separates a real gain from single-seed noise.</dd>
   <dt>Language models</dt><dd>Open-weight models (Llama, Mistral, Qwen) and Azure OpenAI in production. Hybrid retrieval built and measured end to end, fine-tuning with LoRA, reinforcement learning with GRPO, intent classification and agent routing, and guardrails tested adversarially before anything reaches a customer.</dd>
   <dt>Unstructured data</dt><dd>Text, images and video: extraction and OCR, embeddings, and retrieval systems evaluated against held-out sets rather than demos.</dd>
