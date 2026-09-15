@@ -86,9 +86,9 @@ hour, and how much it gave the right minute.
 The top clock is the easy case. One dark green sector at 12, one dark blue
 sector at 22, hands on top of the dashes. The model gave 92% to the right
 hour and 92% to the right minute, so the loss is small: −log 0.92 twice,
-0.17 in total. With label smoothing, which asks for 90% rather than 100%,
-the same probabilities score 1.26 against a floor of 1.25. That is what a
-solved clock looks like.
+0.17 in total; 1.26 with the label smoothing used in training, whose floor
+is 1.25 (the loss section explains the smoothing). That is what a solved
+clock looks like.
 
 The bottom clock is the boundary case that Part 3 is about. The hour ring
 is as certain as before. But the minute ring has two shaded sectors: a
@@ -153,8 +153,8 @@ in what the unit does and what it can see.
 
 
 The ResNets [[ResNet]](#references) use a 3x3 stride-1 stem instead of the
-ImageNet 7x7 stride-2 convolution plus max-pool. At 128 px the first thing a
-stride-4 stem would throw away is the minute hand. The ViTs
+ImageNet 7x7 stride-2 convolution plus max-pool; the resolution section
+below says why. The ViTs
 [[ViT]](#references) are the plain recipe: one patch-by-patch strided
 convolution as the tokeniser, learned position embeddings, a class token,
 stochastic depth up to 0.1.
@@ -250,22 +250,16 @@ results section shows what that costs.
 
 ## The loss: two classifications, not one, and not a regression
 
-Whatever the encoder is, it ends by producing a single vector
-$$f \in \mathbb{R}^d$$ that summarises the image: the average of the last
-feature map for the ResNet, the class token or the mean of all tokens for
-the ViT. Two linear layers turn that vector into scores, one set of 12 for
-the hour and one set of 60 for the minute. These raw scores are called
-logits; a softmax turns them into probabilities that sum to one, and the
-answer is the highest.
+The plumbing section showed the loss on two clocks. Here it is in
+symbols, and then the three other ways it could have been set up and why
+they weren't. The encoder's summary vector $$f \in \mathbb{R}^d$$ (the
+averaged last feature map for a ResNet, the class token or the mean token
+for a ViT) goes through two linear layers, one per hand:
 
 $$\ell_h = W_h f + b_h \in \mathbb{R}^{12}, \qquad \ell_m = W_m f + b_m \in \mathbb{R}^{60}.$$
 
-The loss is the number training tries to push down. Here it's the sum of
-two cross-entropies, one per head, each of which is the negative log
-probability the model gave to the right answer, so it's zero when the model
-is certain and correct, and large when it's confident and wrong. With label
-smoothing $$\varepsilon = 0.1$$, the target isn't "all the probability on the
-right class" but "90% on the right class, the rest spread evenly":
+Softmax turns each into probabilities, and the loss is the two
+cross-entropies added, with label smoothing $$\varepsilon = 0.1$$:
 
 $$\mathcal{L} = \mathrm{CE}_\varepsilon(\ell_h, h) + \mathrm{CE}_\varepsilon(\ell_m, m),$$
 
@@ -307,11 +301,11 @@ gives zero credit and regression gives almost full credit. Whether that
 changes what the model *learns*, as opposed to how it's scored, is the
 experiment to run.
 
-**Cross-entropy without smoothing.** Label smoothing asks the model to be
-90% sure rather than 100% sure. That sounds like a small thing. It is
-standard
-[[LabelSmoothing]](#references) and cheap, and on this task it has a
-specific justification. Part 1 showed that the last minute is worth three
+**Cross-entropy without smoothing.** The smoothed target $$q$$ above puts
+90% on the right class and spreads the other 10% evenly, so the model is
+asked to be 90% sure rather than certain. That sounds like a small thing.
+It is standard [[LabelSmoothing]](#references) and cheap, and on this task
+it has a specific justification. Part 1 showed that the last minute is worth three
 or four pixels, and after blur and JPEG some training images genuinely
 don't contain it. Unsmoothed cross-entropy would push the model to be
 certain on those images anyway, memorising noise. Smoothing caps the
@@ -385,9 +379,8 @@ making the rotation augmentation legal.
 and 88.9% exact, and all of them are at 99.5% within one minute and 99.7%
 on the hour. Tripling the parameter count from cnn_small to cnn_r34 buys one
 point. The 11% of misses are almost entirely off-by-one minutes. My first
-hypothesis was a resolution ceiling: Part 1 worked out that one minute is
-three or four pixels of hand-tip travel at 128 px, and blur, noise and JPEG
-eat into that. It turned out to be mostly something else, and something I
+hypothesis was a resolution ceiling (the pixel budget is worked out two
+sections down). It turned out to be mostly something else, and something I
 built in myself. Part 3 has the analysis; the short version is that half the
 clocks let the minute hand creep towards the next minute with the seconds,
 and the label doesn't. The models are reading the hand correctly. The label
@@ -409,25 +402,15 @@ first layer.
 
 ![One clock under a 16, 8 and 4 px patch grid](/assets/clocks/patch_grids.png){: .no-invert}
 
-As the tokeniser section showed, a plain ViT's first operation is to
-flatten each patch into a list of pixel values and multiply it by one
-fixed matrix to get a token. That
-multiplication is the same for every patch, and it happens before the
-model has looked at anything else. In symbols, For patch $$i$$ with pixels flattened into
-$$x_i \in \mathbb{R}^{3p^2}$$,
-
-$$z_i = E\,x_i + \mathrm{pos}_i, \qquad E \in \mathbb{R}^{d \times 3p^2},$$
-
-with the same $$E$$ for every patch and a position vector $$\mathrm{pos}_i$$
-that is added, not multiplied. Whatever $$E$$ can't express about a patch is
-gone before any attention happens. With 16 px patches on a 128 px image the
-clock is an 8x8 grid of 64 tokens. The minute hand lies inside two or three
-of them, and its angle has to be recovered from 768 pixel values by a single
-matrix multiply that is shared across every patch position. That projection
-has no idea where the patch centre is relative to the clock centre, so it
-can't compute an angle even in principle. It can only describe local
-texture, and the attention layers then have to reconstruct geometry from
-texture descriptions.
+The tokeniser section followed one 8 px patch to its token. Now change
+the patch size. With 16 px patches on a 128 px image the clock is an 8 by 8
+grid of 64 tokens, each made from 768 pixel values, and the minute hand
+lies inside two or three of them. Whatever the one matrix can't express
+about those 768 values is gone before any attention happens, and the
+matrix, applied to each patch alone, can't express "which way is the
+centre". At 4 px the hand runs through a dozen tokens, each holding a
+short piece of it, and the attention layers have a line to reassemble
+rather than a smudge to guess from.
 
 ![The same clock as the mean of each 4, 8 and 16 px patch](/assets/clocks/patch_means.png){: .no-invert}
 
@@ -442,10 +425,9 @@ that measures a line's orientation.
 Everything in this series is at 128 by 128 pixels, and that number is doing
 more work than it looks. A clock at 128 px is roughly a wall clock seen
 from across a room: you can tell the time, but you'd take a step closer to
-be sure of the minute. Part 1 worked out that the minute-hand tip moves
-$$2\pi r / 60$$ per minute, which for a typical face is three or four
-pixels. The tip's *radius* scales with the image, so the budget scales
-too:
+be sure of the minute. The minute-hand tip moves $$2\pi r / 60$$ per minute, which for a
+typical face at 128 px is three or four pixels (Part 1 derived it). The
+radius $$r$$ scales with the image, so the budget scales too:
 
 ![The same clock rendered at 64, 128 and 256 px](/assets/clocks/resolution.png){: .no-invert}
 
