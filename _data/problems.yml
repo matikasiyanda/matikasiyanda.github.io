@@ -27,3 +27,16 @@ items:
     description: >
       Everything so far was bring-up at 1.7B, where bugs reproduce in minutes.
       Qwen3-4B-Instruct-2507 with FP8 is the next rung.
+  - title: "Speech in South African languages, from scratch"
+    status: parked
+    description: >
+      Text-to-speech and speech-to-text models trained from scratch for
+      South African languages, where the big multilingual models are thin.
+      The idea is clear; the time to play with it isn't there yet.
+  - title: "Segment by prompt"
+    status: exploring
+    description: >
+      Point a model at an image and describe what to cut out in words, and
+      get the mask back. The Moondream team and the Segment Anything 2 team
+      have both shown versions of this; the question is what a small model
+      trained for it can do.
