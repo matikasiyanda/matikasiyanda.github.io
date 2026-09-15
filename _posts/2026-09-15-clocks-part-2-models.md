@@ -610,9 +610,9 @@ two test splits, on CPU:
 
 Figure 2.13 puts every model on one chart.
 
-![Test exact accuracy against parameter count for every model](/assets/clocks/params.png)
+![Test exact accuracy against parameter count for every model, marker size proportional to parameters, beside per-model bars for seen fonts, held-out fonts and within a minute](/assets/clocks/params.png)
 
-**Figure 2.13.** Test exact accuracy against parameter count for every model.
+**Figure 2.13.** Left: test exact accuracy against parameter count for every model, with the marker drawn in proportion to the model's size. Right: exact accuracy on seen and held-out fonts, and the within-a-minute rate, per model.
 {: .figcap}
 
 So a 3.8M-parameter ViT with a different tokeniser ends up level with a
