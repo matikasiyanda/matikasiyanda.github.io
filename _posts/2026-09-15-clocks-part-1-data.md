@@ -282,7 +282,7 @@ different time, so the whole-image rotation is applied only when the face
 has numerals or tick marks that fix which way is up. Otherwise the label
 would be ambiguous and the model would be trained on noise.
 
-Here is what all of that produces for one fixed time ([Figure 1.7](#fig-1-7)):
+Here is what all of that produces for one fixed time ([Figure 1.8](#fig-1-8)):
 
 ![4:58 rendered sixteen ways](/assets/clocks/same_time.png){: .no-invert}
 
