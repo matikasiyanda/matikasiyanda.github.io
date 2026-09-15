@@ -31,79 +31,10 @@ more once it has enough data. The families are matched in parameter count
 rather than in compute or training time, because the question is about
 what a given amount of model can learn.
 
-| model | params | design |
-|---|---|---|
-| cnn_small | 2.8M | ResNet, widths 32 to 256, two blocks per stage |
-| cnn_r18 | 11.2M | ResNet-18 layout |
-| cnn_r34 | 21.3M | ResNet-34 layout |
-| vit_tiny | 3.7M | patch 8, width 192, depth 8, 3 heads |
-| vit_small | 14.4M | patch 8, width 384, depth 8, 6 heads |
-| vit_p16 | 14.5M | patch 16, width 384, depth 8, 6 heads |
-
-Here are the two families as data flows, with the shape of the tensor at
-each stage for a 128 px input. Read them top to bottom. The ResNet shrinks
-the image four times while widening the channels; the ViT shrinks it once,
-at the very start, and then keeps the same 256 tokens through every layer.
-
-```mermaid
-flowchart TB
-  subgraph R ["ResNet-18 layout (cnn_r18, 11.2M)"]
-    direction TB
-    r0["image<br/>128 × 128 × 3"] --> r1["stem: 3×3 conv, stride 1, BatchNorm, ReLU<br/>128 × 128 × 64"]
-    r1 --> r2["stage 1: 2 residual blocks<br/>128 × 128 × 64"]
-    r2 --> r3["stage 2: 2 blocks, first has stride 2<br/>64 × 64 × 128"]
-    r3 --> r4["stage 3: 2 blocks, stride 2<br/>32 × 32 × 256"]
-    r4 --> r5["stage 4: 2 blocks, stride 2<br/>16 × 16 × 512"]
-    r5 --> r6["global average pool<br/>512"]
-    r6 --> r7["two linear heads<br/>12 hour logits, 60 minute logits"]
-  end
-  subgraph V ["ViT tiny (vit_tiny, 3.7M)"]
-    direction TB
-    v0["image<br/>128 × 128 × 3"] --> v1["patchify: 8×8 patches, one linear map each<br/>16 × 16 = 256 tokens × 192"]
-    v1 --> v2["+ learned position embedding, + class token<br/>257 × 192"]
-    v2 --> v3["8 × encoder block:<br/>LayerNorm → 3-head self-attention → add<br/>LayerNorm → MLP 192→768→192 → add<br/>257 × 192"]
-    v3 --> v4["class token<br/>192"]
-    v4 --> v5["two linear heads<br/>12 hour logits, 60 minute logits"]
-  end
-```
-
-A residual block is two 3x3 convolutions with a skip connection that adds
-the block's input to its output, so each block only has to learn a
-correction. An encoder block is the transformer's unit: self-attention
-lets every token gather information from every other token, weighted by
-learned relevance, and the MLP then processes each token on its own. Both
-families are deep stacks of one repeated unit; the difference is entirely
-in what the unit does and what it can see.
-
-The modified ViT in the second half of this post keeps the eight encoder
-blocks and changes the three parts around them:
-
-```mermaid
-flowchart TB
-  subgraph V2 ["ViT tiny v2 (vit_tiny_v2, 3.8M)"]
-    direction TB
-    w0["image<br/>128 × 128 × 3"] --> w1["conv stem: 3×3 conv stride 2, BatchNorm, GELU → 64 × 64 × 96<br/>3×3 conv stride 2, BatchNorm, GELU → 32 × 32 × 192, then 1×1 conv<br/>32 × 32 = 1,024 tokens × 192"]
-    w1 --> w2["+ fixed 2D sine-cosine positions, no class token<br/>1024 × 192"]
-    w2 --> w3["8 × encoder block, as before<br/>1024 × 192"]
-    w3 --> w4["mean over all tokens<br/>192"]
-    w4 --> w5["two linear heads<br/>12 hour logits, 60 minute logits"]
-  end
-```
-
-The ResNets [[ResNet]](#references) use a 3x3 stride-1 stem instead of the
-ImageNet 7x7 stride-2 convolution plus max-pool. At 128 px the first thing a
-stride-4 stem would throw away is the minute hand. The ViTs
-[[ViT]](#references) are the plain recipe: one patch-by-patch strided
-convolution as the tokeniser, learned position embeddings, a class token,
-stochastic depth up to 0.1.
-
-Both families end in the same head, and the head is where the task is
-defined, so it gets its own section.
-
 ## What goes in, what comes out
 
-Before the loss, the plumbing, because the loss only makes sense once the
-input and output are concrete.
+Before the models, the plumbing. What goes in and what comes out is the
+same for every model in this post, so it comes first.
 
 ```mermaid
 flowchart TB
@@ -174,6 +105,60 @@ how far the model's two probability lists are from the target lists, added
 up. Training is the process of nudging the encoder's weights so that
 number, averaged over the batch, goes down.
 
+## The two families
+
+| model | params | design |
+|---|---|---|
+| cnn_small | 2.8M | ResNet, widths 32 to 256, two blocks per stage |
+| cnn_r18 | 11.2M | ResNet-18 layout |
+| cnn_r34 | 21.3M | ResNet-34 layout |
+| vit_tiny | 3.7M | patch 8, width 192, depth 8, 3 heads |
+| vit_small | 14.4M | patch 8, width 384, depth 8, 6 heads |
+| vit_p16 | 14.5M | patch 16, width 384, depth 8, 6 heads |
+
+Here are the two families as data flows, with the shape of the tensor at
+each stage for a 128 px input. Read them top to bottom. The ResNet shrinks
+the image four times while widening the channels; the ViT shrinks it once,
+at the very start, and then keeps the same 256 tokens through every layer.
+
+```mermaid
+flowchart TB
+  subgraph R ["ResNet-18 layout (cnn_r18, 11.2M)"]
+    direction TB
+    r0["image<br/>128 × 128 × 3"] --> r1["stem: 3×3 conv, stride 1, BatchNorm, ReLU<br/>128 × 128 × 64"]
+    r1 --> r2["stage 1: 2 residual blocks<br/>128 × 128 × 64"]
+    r2 --> r3["stage 2: 2 blocks, first has stride 2<br/>64 × 64 × 128"]
+    r3 --> r4["stage 3: 2 blocks, stride 2<br/>32 × 32 × 256"]
+    r4 --> r5["stage 4: 2 blocks, stride 2<br/>16 × 16 × 512"]
+    r5 --> r6["global average pool<br/>512"]
+    r6 --> r7["two linear heads<br/>12 hour logits, 60 minute logits"]
+  end
+  subgraph V ["ViT tiny (vit_tiny, 3.7M)"]
+    direction TB
+    v0["image<br/>128 × 128 × 3"] --> v1["patchify: 8×8 patches, one linear map each<br/>16 × 16 = 256 tokens × 192"]
+    v1 --> v2["+ learned position embedding, + class token<br/>257 × 192"]
+    v2 --> v3["8 × encoder block:<br/>LayerNorm → 3-head self-attention → add<br/>LayerNorm → MLP 192→768→192 → add<br/>257 × 192"]
+    v3 --> v4["class token<br/>192"]
+    v4 --> v5["two linear heads<br/>12 hour logits, 60 minute logits"]
+  end
+```
+
+A residual block is two 3x3 convolutions with a skip connection that adds
+the block's input to its output, so each block only has to learn a
+correction. An encoder block is the transformer's unit: self-attention
+lets every token gather information from every other token, weighted by
+learned relevance, and the MLP then processes each token on its own. Both
+families are deep stacks of one repeated unit; the difference is entirely
+in what the unit does and what it can see.
+
+
+The ResNets [[ResNet]](#references) use a 3x3 stride-1 stem instead of the
+ImageNet 7x7 stride-2 convolution plus max-pool. At 128 px the first thing a
+stride-4 stem would throw away is the minute hand. The ViTs
+[[ViT]](#references) are the plain recipe: one patch-by-patch strided
+convolution as the tokeniser, learned position embeddings, a class token,
+stochastic depth up to 0.1.
+
 ## How a ViT turns the image into tokens
 
 A ResNet takes the image as it is: a grid of pixels, and its filters slide
@@ -220,16 +205,36 @@ $$x_i$$:
 
 $$z_i = E\,x_i + \mathrm{pos}_i, \qquad E \in \mathbb{R}^{192 \times 192}.$$
 
-Six patches from a second clock, with the token the trained model
-produces for each, so you can see what the descriptions look like:
+What does step 3 actually compute? Here it is drawn out, with the real
+numbers from the trained vit_tiny for the minute-hand patch above:
 
-![Six patches from a second clock, shown at 512 px, and the 192-number token the trained patch embedding produces for each](/assets/clocks/tokeniser.png){: .no-invert}
+![The token calculation drawn as a matrix-vector product: the 192 × 192 learned matrix E with its first row highlighted, the 192 pixel values, the 192 offsets, and the resulting token](/assets/clocks/token_calc.png){: .no-invert}
 
-Read each row left to right: the patch, then its token as 192 coloured
-stripes (red positive, blue negative, pale near zero). The two background
-patches, *e* and *f*, produce nearly blank tokens: there is nothing to
-describe. The hand, numeral and rim patches produce busy ones. So far so
-good; the descriptions do distinguish the stamps.
+Read it left to right. The big square is the matrix $$E$$: 192 rows, 192
+columns, 36,864 numbers that were random before training and were nudged
+into place by it. The pink column is the patch's 192 pixel values (the
+first eight are all +1.00 because that corner of the patch is saturated
+red). To get the first entry of the token, take the first row of the
+matrix, multiply it element by element with the pixel column, add up the
+192 products, and add the first offset. Here that gives −0.16, the
+highlighted cell in the blue column. Do the same with row 2 to get the
+second entry, and so on down all 192 rows. The blue column is the token.
+
+Two patches from the same clock, worked the same way, with the first eight
+entries of each list shown:
+
+| | patch on the minute hand | patch of plain background |
+|---|---|---|
+| pixel values $$x$$ (first 8 of 192) | 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00 | 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00 |
+| token $$Ex + b$$ (first 8 of 192) | −0.16, 0.15, −0.19, 0.04, −0.16, 0.05, −0.27, −0.41 | −0.36, 0.21, 0.06, 0.18, 0.11, 0.12, 0.18, 1.28 |
+| mean size of the 192 token entries | 0.33 | 0.20 |
+
+The first eight pixel values are identical in both patches, and the tokens
+still differ, because the other 184 values differ and every one of them
+touches every output through the matrix. None of the individual numbers
+is interpretable on its own, and it doesn't need to be. The point is only
+that a token is a fixed linear recipe applied to 192 pixel values, the
+same recipe for all 256 patches, applied to each patch alone.
 
 Now the problem. The matrix in step 3 sees one patch at a time and never
 sees the neighbours, so it cannot know that the hand in patch *a* points
@@ -513,6 +518,20 @@ that are each standard elsewhere:
   the first step.
 - Global average pooling over tokens instead of a class token
   [[PlainViT]](#references).
+
+As a data flow, next to the plain ViT drawn earlier:
+
+```mermaid
+flowchart TB
+  subgraph V2 ["ViT tiny v2 (vit_tiny_v2, 3.8M)"]
+    direction TB
+    w0["image<br/>128 × 128 × 3"] --> w1["conv stem: 3×3 conv stride 2, BatchNorm, GELU → 64 × 64 × 96<br/>3×3 conv stride 2, BatchNorm, GELU → 32 × 32 × 192, then 1×1 conv<br/>32 × 32 = 1,024 tokens × 192"]
+    w1 --> w2["+ fixed 2D sine-cosine positions, no class token<br/>1024 × 192"]
+    w2 --> w3["8 × encoder block, as before<br/>1024 × 192"]
+    w3 --> w4["mean over all tokens<br/>192"]
+    w4 --> w5["two linear heads<br/>12 hour logits, 60 minute logits"]
+  end
+```
 
 It also trains for 100 epochs with a 10% warmup rather than 30 and 5%, which
 makes the comparison unclean. I'll come back to that.
