@@ -9,9 +9,6 @@ description: "Predictions on clocks in fonts never seen in training, then on 3,2
 tags: [vision, vit, cnn, evaluation]
 image: /assets/clocks/err_by_second.png
 math: true
-unlisted: true
-draft: true
-sitemap: false
 ---
 
 *Lost in time, part 3 of 3. [Part 1](/blog/clocks/part-1-data/) built the
@@ -497,9 +494,11 @@ Left to do, in order:
   authors used, is the obvious next experiment, and the test set to
   measure it on now exists.
 
-The models themselves are available as PyTorch checkpoints; see the
-[code repository](https://github.com/matikasiyanda/clock-check) for the
-files and a loading snippet.
+The code is at
+[github.com/matikasiyanda/clock-check](https://github.com/matikasiyanda/clock-check):
+the renderer, the training loop, the evaluation scripts and a loading
+snippet for the checkpoints. The checkpoints themselves are 275 MB and
+not in the repository; they'll be linked from its README once hosted.
 
 ## References
 
