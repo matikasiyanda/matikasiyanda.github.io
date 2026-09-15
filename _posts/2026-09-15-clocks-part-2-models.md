@@ -126,9 +126,25 @@ twelve) and the minute from 0 to 59.
 for the minute, each list summing to one. The model's answer is the
 largest entry in each list.
 
+Here is what that means as literal numbers, for one held-out clock. The
+yellow box on the image is 16 of its 16,384 pixels, and the enlarged block
+shows the three numbers each of those pixels is made of. Those, times
+16,384, are what the model receives. What it returns is printed below the
+model: twelve numbers and sixty numbers. Its answer is the largest of each
+list.
+
+![The input as pixels with their numbers, the model, and the output as the twelve and sixty numbers it returns](/assets/clocks/io_numbers.png){: .no-invert}
+
+The model put 0.94 on hour 9, and on the minute list 0.73 on 55 and 0.14
+on 54. Its answer is 9:55. The label, the yellow cell, is 9:54. So this
+clock counts as a miss, by one minute. Hold on to this example; the next
+figure draws the same two lists on a dial, and the section after works out
+what the loss charges for it.
+
 The easiest way to see those two lists is to draw them on a clock face.
-Below, the inner ring is the hour list, one sector per hour, shaded darker
-the more probability the model put there. The outer ring is the minute
+Below, for an easy clock and then for the clock above, the inner ring is
+the hour list, one sector per hour, shaded darker the more probability the
+model put there. The outer ring is the minute
 list, one sector per minute. The model's answer is drawn as solid hands,
 the labelled time as yellow dashes, and the loss is worked out on the
 right from two numbers: how much probability the model gave the right
