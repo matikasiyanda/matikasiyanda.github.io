@@ -313,3 +313,11 @@ html.lightbox-open { overflow: hidden; }
 .posts li.series .series-parts a { color: var(--muted); text-decoration: none; border-bottom: 1px dotted var(--muted); }
 .posts li.series .series-parts a:hover { color: var(--accent); border-bottom-color: var(--accent); }
 .posts li.series .series-badge { grid-column: 1; justify-self: start; margin-left: 0; }
+
+/* colour for series entries */
+.posts li.series .series-badge { color: var(--mint); border-color: var(--mint); background: color-mix(in srgb, var(--mint) 12%, transparent); font-weight: 600; letter-spacing: 0.02em; }
+.posts li.series .series-parts { line-height: 2; }
+.posts li.series .series-parts a { color: var(--mint); border-bottom: none; }
+.posts li.series .series-parts a:hover { color: var(--accent); }
+.posts li.series .series-parts .part-no { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--accent); border: 1px solid var(--accent); border-radius: 9px; padding: 0 7px; margin-right: 4px; vertical-align: 1px; }
+.posts li.series .series-parts .sep { color: var(--muted); }
