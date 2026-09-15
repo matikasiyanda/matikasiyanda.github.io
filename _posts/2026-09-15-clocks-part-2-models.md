@@ -124,24 +124,34 @@ twelve) and the minute from 0 to 59.
 
 **The output** is two lists of probabilities: twelve for the hour, sixty
 for the minute, each list summing to one. The model's answer is the
-largest entry in each list. That's the whole interface; a person reading
-the clock produces the same two numbers.
+largest entry in each list.
 
-Here is the trained ViT doing it on two held-out clocks. The green bars
-are the probabilities it produced, the red outline is the smoothed target
-it was trained towards, and the number in the corner is the loss those two
-things produce together:
+The easiest way to see those two lists is to draw them on a clock face.
+Below, the inner ring is the hour list, one sector per hour, shaded darker
+the more probability the model put there. The outer ring is the minute
+list, one sector per minute. The model's answer is drawn as solid hands,
+the labelled time as yellow dashes, and the loss is worked out on the
+right from two numbers: how much probability the model gave the right
+hour, and how much it gave the right minute.
 
-![One clock through the trained ViT: input, the two probability vectors it outputs, the smoothed target, and the loss](/assets/clocks/objective.png){: .no-invert}
+![Two clocks through the trained ViT: the input, its output drawn as a probability dial, and the loss worked out](/assets/clocks/objective_dial.png){: .no-invert}
 
-The top clock is the easy case: nearly all the probability on the right
-hour and the right minute, and a loss of 1.26, within a hair of the floor.
-The bottom clock is the boundary case that Part 3 is about. The hour is
-certain. The minute head puts 73% on 55 and 14% on 54, and the label says 54. The
-model isn't confused about the clock; it is reporting, honestly,
-that the hand is between two minute marks and nearer the later one. The
-loss for that image is 2.88, more than twice the floor, all of it from
-the minute head, and all of it for being one minute late.
+The top clock is the easy case. One dark green sector at 12, one dark blue
+sector at 22, hands on top of the dashes. The model gave 92% to the right
+hour and 92% to the right minute, so the loss is small: −log 0.92 twice,
+0.17 in total. With label smoothing, which asks for 90% rather than 100%,
+the same probabilities score 1.26 against a floor of 1.25. That is what a
+solved clock looks like.
+
+The bottom clock is the boundary case that Part 3 is about. The hour ring
+is as certain as before. But the minute ring has two shaded sectors: a
+dark one at 55 and a lighter one at 54. The model put 73% on 55 and 14%
+on 54, and the label says 54. Look at the input: the minute hand is
+between the two marks, nearer 55. The model isn't confused about the
+clock. It is reporting, in probabilities, exactly where the hand is. It's
+marked wrong all the same, and the loss says so: −log 0.14 is 1.94 on the
+minute head alone, and the total is 2.88 with smoothing, more than twice
+the floor.
 
 That is what "the loss" means for the rest of this post: for each image,
 how far the model's two probability lists are from the target lists, added
@@ -150,30 +160,71 @@ number, averaged over the batch, goes down.
 
 ## How a ViT turns the image into tokens
 
-The ResNet consumes the 128 by 128 grid directly. The ViT can't: a
-transformer works on a sequence of vectors, so the image has to be cut up
-first. This step is called tokenising, and Part 2's main finding is that
-it's where the plain ViTs go wrong, so here it is on the actual model.
+A ResNet takes the image as it is: a grid of pixels, and its filters slide
+over that grid. A transformer can't do that. It was built for sentences,
+where the input is a list of words, and it still needs its input as a
+list. So before a Vision Transformer can look at a clock, the clock has to
+be turned into a list. That step is the tokeniser, and it's the one place
+where the plain ViTs in this post lose.
 
-![The input clock under vit_tiny's 8 px patch grid, six patches pulled out, and the 192-number token the trained patch embedding produces for each](/assets/clocks/tokeniser.png){: .no-invert}
+The analogy: cut the photo into 256 postage stamps, write a short
+description of each stamp on the back, throw the stamps away and hand
+someone the pile of descriptions. That's what the transformer receives.
+It never sees the photo. Everything it works out about the clock, it
+works out from the descriptions and from knowing which stamp each one
+came from.
 
-The image is cut into 16 by 16 squares of 8 by 8 pixels. Each square is
-flattened into a list of 192 numbers (8 × 8 pixels × 3 colours) and
-multiplied by one learned matrix $$E$$ of size 192 × 192, the same matrix
-for every square. The result is the square's *token*: 192 numbers that are
-all the transformer will ever know about those 64 pixels. A position
-vector is added so the transformer can tell square (3, 7) from square
-(12, 2), and the 256 tokens go into the encoder blocks.
+Here it is on the real model, following one stamp from the clock to its
+description:
 
-Look at the six pulled-out patches. Patch *a* sits on the minute hand, *b*
-on the hour hand, *c* on a numeral, *d* on the rim, and *e* and *f* are flat
-background. Their tokens differ, which is what the matrix is for: the two
-background tokens are nearly blank, the hand and numeral tokens are busy.
-But the matrix cannot know that the hand in patch *a* points towards the
-centre of the clock, because it never sees the centre; it sees 64 pixels. Every geometric fact about the hands has to be
-reassembled by the attention layers from these local descriptions. The
-smaller the patch, the more of the geometry survives into the tokens, and
-the next section shows that in the results.
+![One patch followed from the image to its token: cut, flatten to 192 numbers, multiply by the learned matrix E, add the position vector, one of 256 tokens](/assets/clocks/tokeniser_steps.png){: .no-invert}
+
+Step by step, with the sizes:
+
+1. **Cut.** The 128 by 128 image is divided into a 16 by 16 grid of
+   patches, each 8 by 8 pixels. That's 256 patches. The red square is one
+   of them, on the minute hand.
+2. **Flatten.** Each patch is 8 × 8 pixels × 3 colours = 192 numbers. They
+   are read off in a fixed order into one long list. The picture of the
+   patch is gone; what's left is the list.
+3. **Multiply.** The list is multiplied by a matrix with 192 rows and 192
+   columns. Every entry of that matrix is a number the model learned
+   during training, and it is the *same* matrix for all 256 patches. The
+   result is a new list of 192 numbers.
+4. **That new list is the token.** It's the description on the back of the
+   stamp. Nothing else about those 64 pixels survives.
+5. **Add the position.** A second list of 192 numbers, one per grid cell,
+   also learned, is added to the token, so the transformer can tell a
+   token from the top-left of the image from one at the centre.
+6. **Repeat.** 256 patches give 256 tokens, a table of 256 rows and 192
+   columns. That table, and only that table, goes into the encoder blocks.
+
+In symbols, for patch $$i$$ with its 192 pixel values in the vector
+$$x_i$$:
+
+$$z_i = E\,x_i + \mathrm{pos}_i, \qquad E \in \mathbb{R}^{192 \times 192}.$$
+
+Six more patches from the same clock, with the token the trained model
+produces for each, so you can see what the descriptions look like:
+
+![Six patches from one clock and the 192-number token the trained patch embedding produces for each](/assets/clocks/tokeniser.png){: .no-invert}
+
+Read each row left to right: the patch, then its token as 192 coloured
+stripes (red positive, blue negative, pale near zero). The two background
+patches, *e* and *f*, produce nearly blank tokens: there is nothing to
+describe. The hand, numeral and rim patches produce busy ones. So far so
+good; the descriptions do distinguish the stamps.
+
+Now the problem. The matrix in step 3 sees one patch at a time and never
+sees the neighbours, so it cannot know that the hand in patch *a* points
+towards the centre of the clock: it has no idea where the centre is. It
+can say "there's a pink diagonal stripe in this stamp", and that's all it
+can say. Every geometric fact about the hands, their angles about a shared
+centre, has to be reconstructed by the attention layers afterwards from
+256 such local descriptions. The bigger the patch, the more of the hand
+disappears into one description before that reconstruction can start.
+With 16 pixel patches the whole minute hand is two or three stamps. The
+results section shows what that costs.
 
 ## The loss: two classifications, not one, and not a regression
 
