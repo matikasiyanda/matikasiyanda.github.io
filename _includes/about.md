@@ -1,19 +1,19 @@
 <p class="lead">I work with data at every scale, from a bank's customer records to petabytes of radio telescope data, and build AI systems on top of it.</p>
 
-I'm a Data and AI Lead in Johannesburg with 8 years of experience across
-banking, capital markets, insurance and research. That has meant Spark and
-Hadoop over customer data at Absa, GPU infrastructure and retrieval systems at
-Navigare, including [Elections Navigator](/resume/), a voter-education chatbot
-for South Africa's 2024 elections, and conversational AI, monitoring and
-security reviews at Discovery Insure. In research, I collaborated on data
-pipelines for radio astronomy on the path to the Square Kilometre Array, as
-part of international science collaborations.
+I'm in Johannesburg, and for eight years my job has been making sense of
+data that doesn't want to be made sense of: bank transactions, market
+feeds, insurance claims, and before any of that, the raw output of radio
+telescopes on the road to the Square Kilometre Array. The part I like is
+when the problem is still messy and nobody's sure what the right question
+is. I'm the one who goes and finds out.
 
-I also train small language models to do things they weren't built
-for. Lately that's a [document-search agent](/blog/agent-rl/) trained with GRPO
-on a single RTX 4090, and before it a [LangGraph research agent](/blog/research-agent-langgraph/)
-that planned its own searches months before "deep research" was a product.
+Most of my spare GPU time goes on training small models to do things they
+weren't built for, and writing up what happened, including the parts that
+didn't work. Lately that's been a [document-search agent](/blog/agent-rl/)
+trained with GRPO on a single RTX 4090, a [research agent](/blog/research-agent-langgraph/)
+that planned its own searches months before "deep research" was a product,
+and a growing list of side projects on the [Now](/now/) page.
 
-Get in touch about retrieval, search agents that know when to say "not here",
-reinforcement learning for small models, or data problems that don't fit neatly
-in a table. The [full resume](/resume/) has the details.
+This site is where the write-ups live, with the numbers, the plots and the
+mistakes left in. There's a [resume](/resume/) for anyone who needs the
+serious version.
