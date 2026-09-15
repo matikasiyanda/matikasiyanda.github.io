@@ -69,9 +69,9 @@ Kilometre Array (SKA), as part of international science collaborations.
   open-weight LLMs (Llama, Mistral, Qwen), tuned serving for concurrent
   users, and introduced RunPod scheduling with run/sleep cycles to keep GPU
   spend bounded.
-- Designed and ran the AWS ML stack: serverless model services on ECS and
-  Fargate, CI/CD pipelines on GitHub Actions, and data pipelines on Spark and
-  EMR with Delta Lake.
+- Designed and ran the AWS ML stack, provisioned with Terraform: serverless
+  model services on ECS and Fargate, CI/CD pipelines on GitHub Actions, and
+  data pipelines on Spark and EMR with Delta Lake.
 - Led conversational AI for capital-markets clients, including the decision to
   design an in-house hybrid retrieval framework when off-the-shelf retrieval
   fell short on precision.
@@ -117,7 +117,7 @@ Kilometre Array (SKA), as part of international science collaborations.
   <dt>Scripting</dt><dd>Python, Bash, SQL</dd>
   <dt>Cloud services</dt><dd>AWS (SageMaker, ECS, Fargate, EMR), Azure (Azure ML, App Service), GCP</dd>
   <dt>GPU infrastructure and deployment</dt><dd>Linux GPU servers (RunPod), open-weight model serving with vLLM, concurrency tuning, Docker</dd>
-  <dt>MLOps and LLMOps</dt><dd>deployment and data pipelines, CI/CD (GitHub Actions, Azure DevOps), Kubeflow on Kubernetes, network-isolated pods for agent workloads</dd>
+  <dt>MLOps and LLMOps</dt><dd>deployment and data pipelines, CI/CD (GitHub Actions, Azure DevOps), infrastructure as code with Terraform, Kubeflow on Kubernetes, network-isolated pods for agent workloads</dd>
   <dt>Monitoring</dt><dd>Prometheus, Grafana, model and drift monitoring, alerts that trigger pipelines on cost, warnings and errors</dd>
   <dt>Identity and access</dt><dd>IAM on AWS and Azure, Amazon Cognito, Azure App Service Authentication (Easy Auth)</dd>
   <dt>Security and governance</dt><dd>Data Protection Impact Assessments (DPIAs), penetration-test reviews with security teams, adversarial testing of chatbots and LLMs, data governance</dd>
