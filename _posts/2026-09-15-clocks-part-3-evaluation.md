@@ -287,11 +287,13 @@ is the same swap the other way. A person would need a second look too.
 ## What this changes
 
 The question in Part 1 was which architecture learns clock geometry more
-easily from scratch. The answer from Part 2 was: the ResNets straight away,
-the ViTs only after the tokeniser was changed, and then a 3.8M ViT matches
-a 21M ResNet. This part adds that both of them hit the same 90%, that the
-90% is the labels and not the models, and that the two architectures'
-remaining errors are the same errors on the same clocks.
+easily from scratch. The answer from Part 2 was: the ResNets straight
+away, in 30 epochs; the ViTs not at all until the tokeniser was changed,
+and even then a 3.8M ViT needed nearly three times the training to draw
+level with a 21M ResNet. On equal epochs the ResNets are ahead. This part
+adds that once both are at the same 90%, the 90% is the labels and not
+the models, and the two architectures' remaining errors are the same
+errors on the same clocks.
 
 Left to do, in order:
 

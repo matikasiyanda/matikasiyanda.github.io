@@ -21,15 +21,17 @@ counts, on one RTX 4090. Three parts, read in order:
 2. **[Part 2 — ResNets against ViTs](/blog/clocks/part-2-models/)**
    Six models from scratch. The CNNs read 89% of clocks exactly; plain ViTs
    underfit and get worse as they grow. Why the tokeniser is the problem,
-   and the three changes that got a 3.8M ViT past a 21M ResNet.
+   and the three changes that let a 3.8M ViT draw level with a 21M
+   ResNet, given three times the training.
 
 3. **[Part 3 — What the models get wrong](/blog/clocks/part-3-evaluation/)**
    Predictions on clocks in fonts never seen in training, the off-by-one
    wall every model hits, which clock styles are hard, and where the CNN and
    the ViT disagree.
 
-**Headline:** three ResNets and one modified ViT all land at 88 to 90% exact
-and 99.5% within a minute, on unseen fonts as well as seen ones. The last
-minute is the whole problem.
+**Headline:** three ResNets, in 30 epochs, and one modified ViT, in 86,
+all land at 88 to 90% exact and 99.5% within a minute, on unseen fonts as
+well as seen ones. The last minute is the whole problem, and it's in the
+labels.
 
 </div>

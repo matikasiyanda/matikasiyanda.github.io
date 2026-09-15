@@ -5,7 +5,7 @@ permalink: /blog/clocks/part-2-models/
 series: "Lost in time"
 series_url: /blog/clocks/
 part: 2
-description: "Six encoders from random init on synthetic clocks. The ResNets read 89% exactly after 30 epochs. Plain ViTs got half that and got worse as they grew, until the tokeniser changed."
+description: "Six encoders from random init on synthetic clocks. The ResNets read 89% exactly after 30 epochs. Plain ViTs got half that and got worse as they grew. A ViT with a fixed tokeniser drew level, but needed three times the training."
 tags: [vision, vit, cnn, pytorch]
 math: true
 mermaid: true
@@ -608,18 +608,33 @@ Figure 2.13 puts every model on one chart.
 **Figure 2.13.** Test exact accuracy against parameter count for every model.
 {: .figcap}
 
-A 3.8M-parameter ViT with a different tokeniser matches a 21M ResNet on
-this task. Now the caveat. The ResNets got 30 epochs and the v2 ViT got 86
-of a 100-epoch cosine. The green curve in the figure above is at 0.85 at
-epoch 30, below the CNNs at the same point, with its learning rate still
-high. The control that separates "better tokeniser" from "trained longer" is
-the plain vit_tiny at 100 epochs, and it was next in the queue when the
-sweep stopped, along with four ablations that each undo one change (patch 8,
-plain patchify stem, learned positions, class token). Until those run, the
-defensible claim is narrower: the three changes plus a longer schedule got a
-tiny ViT past the CNNs, and the training loss says the tokeniser is doing
-most of the work. v2's loss is 1.8 at epoch 30 and 1.3 at epoch 86, where
-the plain vit_tiny never got below 2.4.
+So a 3.8M-parameter ViT with a different tokeniser ends up level with a
+21M ResNet on this task. Here is the honest version of that sentence. The
+ResNets got 30 epochs. The v2 ViT got 86 of a 100-epoch schedule, nearly
+three times the training, and it needed them. At epoch 30, where the
+ResNets stopped, its validation accuracy was 0.828, five to six points
+below every ResNet's best. It did not pass the best ResNet's 0.891 until
+epoch 63, and it reached its own best, 0.902, at epoch 85. On equal
+training time the ResNets win, and the ViT would have needed still longer
+to get clearly ahead.
+
+What the three changes did was make the ViT *learn faster than a plain
+ViT*, not faster than a CNN. That was the point of them: the plain
+vit_tiny was going nowhere, with a training loss of 2.44 after 30 epochs
+and no sign of fitting the data, so rather than pour more epochs or more
+data into an architecture that couldn't see the hands, I changed the
+part that couldn't see them. v2's training loss is 1.65 at epoch 30 and
+1.3 at epoch 86; the ResNets are at 1.28 by epoch 30. The tokeniser
+change closed most of the gap to the CNNs' learning speed, and the extra
+epochs closed the rest.
+
+The control that would separate "better tokeniser" from "trained longer"
+is the plain vit_tiny at 100 epochs, and it was next in the queue when the
+sweep stopped, along with four ablations that each undo one change (patch
+8, plain patchify stem, learned positions, class token). Until those run,
+the claim is what the numbers above support: with the tokeniser fixed and
+three times the epochs, a tiny ViT matches the ResNets; with the same
+epochs, it doesn't.
 
 Two things I'd want before believing any ordering within a family. First,
 more than one seed: two runs of vit_tiny_v2 with the same seed, differing
