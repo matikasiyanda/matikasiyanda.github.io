@@ -65,13 +65,14 @@ Here is what that means as literal numbers, for one held-out clock. The
 image is stored as three grids of 128 by 128 values, one for red, one for
 green, one for blue, and a row of the actual values is printed under them.
 Those 49,152 numbers are what the model receives. What it returns is
-charted on the right: twelve numbers as twelve bars, sixty numbers as
-sixty bars, with the busy end of the minute list zoomed in. Its answer is
-the longest bar of each chart (Figure 2.2).
+drawn on the right as two clocks. The hour clock has twelve sectors, one
+per hour, and the minute clock sixty, one per minute; each sector is
+shaded by the probability the model put on it, and the model's answer,
+the darkest sector of each, is drawn as a hand (Figure 2.2).
 
 ![The input as a clock and its three colour channels, the model, and the output as the twelve and sixty numbers it returns](/assets/clocks/io_numbers.png){: .no-invert}
 
-**Figure 2.2.** One clock through the model. Left: the input and its three colour channels. Right: the two output lists as bars, twelve for the hour and sixty for the minute, with a zoom on the ten minutes where the probability sits. The orange tick marks the labelled class.
+**Figure 2.2.** One clock through the model. Left: the input and its three colour channels. Right: its two outputs drawn as clocks, the twelve hour probabilities as sectors of one dial and the sixty minute probabilities as sectors of another. Darker means more probability; the solid hand is the model's answer with its value; the orange dashes mark the label.
 {: .figcap}
 
 The model put 0.94 on hour 9, and on the minute chart 0.73 on 55 and 0.14
@@ -80,25 +81,21 @@ clock counts as a miss, by one minute. Hold on to this example; the next
 figure draws the same two lists on a dial, and the section after works out
 what the loss charges for it.
 
-The easiest way to see those two lists is to draw them on a clock face.
-Below, for an easy clock and then for the clock above, the inner ring is
-the hour list, one sector per hour, shaded darker the more probability the
-model put there. The outer ring is the minute
-list, one sector per minute. The model's answer is drawn as solid hands,
-the labelled time as yellow dashes (Figure 2.3).
+Figure 2.3 shows the same two clocks of probabilities for an easy clock
+and then for the clock above, so the two cases can be compared.
 
 ![Two clocks through the trained ViT: the input, its output drawn as a probability dial, and the loss worked out](/assets/clocks/objective_dial.png){: .no-invert}
 
-**Figure 2.3.** Two clocks through the trained ViT: the input, and its output drawn as a probability dial. Inner ring: the twelve hour probabilities. Outer ring: the sixty minute probabilities. Solid hands: the model's answer. Yellow dashes: the label.
+**Figure 2.3.** Two clocks through the trained ViT. Each row: the input, the hour probabilities as a twelve-sector clock, the minute probabilities as a sixty-sector clock. Solid hand: the model's answer. Orange dashes: the label.
 {: .figcap}
 
-The top clock is the easy case. One dark green sector at 12, one dark blue
-sector at 22, hands on top of the dashes. The model gave 92% to the right
+The top row is the easy case. One dark green sector at 12, one dark blue
+sector at 22, each hand on top of its dashes. The model gave 92% to the right
 hour and 92% to the right minute. That is what a solved clock looks like,
 and the loss section works out what it scores.
 
-The bottom clock is the boundary case that Part 3 is about. The hour ring
-is as certain as before. But the minute ring has two shaded sectors: a
+The bottom row is the boundary case that Part 3 is about. The hour clock
+is as certain as before. But the minute clock has two shaded sectors: a
 dark one at 55 and a lighter one at 54. The model put 73% on 55 and 14%
 on 54, and the label says 54. Look at the input: the minute hand is
 between the two marks, nearer 55. The model isn't confused about the
