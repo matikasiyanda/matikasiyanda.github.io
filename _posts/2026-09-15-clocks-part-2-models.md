@@ -220,10 +220,10 @@ $$x_i$$:
 
 $$z_i = E\,x_i + \mathrm{pos}_i, \qquad E \in \mathbb{R}^{192 \times 192}.$$
 
-Six more patches from the same clock, with the token the trained model
+Six patches from a second clock, with the token the trained model
 produces for each, so you can see what the descriptions look like:
 
-![Six patches from one clock and the 192-number token the trained patch embedding produces for each](/assets/clocks/tokeniser.png){: .no-invert}
+![Six patches from a second clock, shown at 512 px, and the 192-number token the trained patch embedding produces for each](/assets/clocks/tokeniser.png){: .no-invert}
 
 Read each row left to right: the patch, then its token as 192 coloured
 stripes (red positive, blue negative, pale near zero). The two background
