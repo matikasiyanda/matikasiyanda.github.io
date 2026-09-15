@@ -259,24 +259,59 @@ for a ViT) goes through two linear layers, one per hand:
 
 $$\ell_h = W_h f + b_h \in \mathbb{R}^{12}, \qquad \ell_m = W_m f + b_m \in \mathbb{R}^{60}.$$
 
-Softmax turns each into probabilities, and the loss is the two
-cross-entropies added, with label smoothing $$\varepsilon = 0.1$$:
+Softmax turns each list of logits into probabilities:
 
-$$\mathcal{L} = \mathrm{CE}_\varepsilon(\ell_h, h) + \mathrm{CE}_\varepsilon(\ell_m, m),$$
+$$p_c = \mathrm{softmax}(\ell)_c = \frac{e^{\ell_c}}{\sum_{j} e^{\ell_j}},$$
 
-$$\mathrm{CE}_\varepsilon(\ell, y) = -\sum_{c=1}^{C} q_c \log \mathrm{softmax}(\ell)_c,
-\qquad q_c = (1-\varepsilon)\,[c = y] + \frac{\varepsilon}{C}.$$
+so the twelve hour probabilities sum to one and so do the sixty minute
+probabilities. The target for each head is not "all the weight on the
+labelled class" but a smoothed version with $$\varepsilon = 0.1$$:
 
-For the two clocks of Figure 2.3: the easy one gave 0.92 to the right
-hour and 0.92 to the right minute, so without smoothing the loss would be
-−log 0.92 − log 0.92 = 0.17; with the smoothed target it is 0.53 + 0.74 =
-1.26, against a floor of 1.25 that a perfect model can't go below. The
-boundary one gave 0.94 to the right hour but only 0.14 to the right
-minute, having put 0.73 on the next minute, so the minute term alone is
-2.35 and the total 2.88. Same clock, same model, one minute off, and the
-loss more than doubles. At inference each head takes its argmax. There
-were three other ways to set this up, and each was rejected for a reason
-worth stating.
+$$q_c = (1-\varepsilon)\,[c = y] + \frac{\varepsilon}{C},$$
+
+which puts 0.9 on the label and $$0.1/C$$ on every class, including the
+label. The cross-entropy of one head is the sum over its classes of the
+target weight times the negative log of the model's probability:
+
+$$\mathrm{CE}_\varepsilon(p, y) = -\sum_{c=1}^{C} q_c \log p_c .$$
+
+Written out in full for one image $$i$$ with label $$(h_i, m_i)$$, then
+averaged over the $$B = 256$$ images of a batch, the number that training
+pushes down is
+
+$$\mathcal{L} = \frac{1}{B} \sum_{i=1}^{B} \Bigg[
+-\sum_{c=0}^{11} \Big( 0.9\,[c = h_i] + \tfrac{0.1}{12} \Big) \log p^{h}_{i,c}
+\;-\; \sum_{c=0}^{59} \Big( 0.9\,[c = m_i] + \tfrac{0.1}{60} \Big) \log p^{m}_{i,c}
+\Bigg].$$
+
+That is the whole objective: two sums over classes, added, averaged over
+the batch. The sum over classes is where the smoothing does its work.
+Without it, only the labelled class's term survives (the others are
+multiplied by zero); with it, every class contributes a little, and the
+model is charged for putting probability *exactly* zero anywhere. Figure
+2.7 shows the sum term by term for the boundary clock of Figure 2.3.
+
+![The loss term by term for the boundary clock: the model's sixty minute probabilities against the smoothed target, the sixty per-class terms with the labelled class's 1.75 and the other fifty-nine summing to 0.60, and the assembly into a per-image and a per-batch loss](/assets/clocks/loss_terms.png)
+
+**Figure 2.7.** The loss, term by term, for the boundary clock. Top: the model's minute probabilities p beside the smoothed target q. Middle: the sixty terms of the sum, one per class; the labelled class dominates, the other fifty-nine add a small constant. Bottom: the two heads add to one loss per image, and the batch averages 256 of those.
+{: .figcap}
+
+Read the middle panel. The labelled minute, 54, got probability 0.14, so
+its term is $$-0.9 \log 0.14 = 1.75$$: most of the loss, and all of it
+for reading one minute late. The other fifty-nine classes each contribute
+$$-(0.1/60)\log p_c$$, tiny individually but summing to 0.60 because the
+model put almost nothing on them. That 0.60 is the smoothing's floor
+showing up: it can't be reduced by reading the clock better, only by
+never being completely sure. The hour head does the same over twelve
+classes and comes to 0.53, so this image costs 2.88, and it is one of 256
+in its batch.
+
+For comparison, the easy clock of Figure 2.3 gave 0.92 to the right hour
+and 0.92 to the right minute, and scores 0.53 + 0.74 = 1.26, a hair above
+the 1.25 floor that a perfect model can't go below. Same model, one
+minute off on the other clock, and the loss more than doubles. At
+inference each head takes its argmax. There were three other ways to set
+this up, and each was rejected for a reason worth stating.
 
 **One 720-way softmax over (hour, minute) pairs.** The most literal
 framing: every time is a class. It's strictly harder to learn. Each class
@@ -371,11 +406,11 @@ held-out fonts:
 | vit_small | 14.4M | 0.422 | 0.432 | 0.829 | 0.724 | 29 min |
 | vit_p16 | 14.5M | 0.074 | 0.075 | 0.261 | 0.139 | 7 min |
 
-Figure 2.7 shows how they got there, epoch by epoch.
+Figure 2.8 shows how they got there, epoch by epoch.
 
 ![Validation exact accuracy and training loss per epoch for all seven runs](/assets/clocks/curves.png)
 
-**Figure 2.7.** Validation exact accuracy and training loss per epoch for all seven runs.
+**Figure 2.8.** Validation exact accuracy and training loss per epoch for all seven runs.
 {: .figcap}
 
 Read the table as a person would: the ResNets get about nine clocks in
@@ -412,11 +447,11 @@ The ViT paper [[ViT]](#references) says ViTs lose to CNNs on small data
 without pre-training, because they lack the locality prior. That's true and
 it isn't specific enough. The ordering here, patch 16 far worse than patch
 8, and the bigger patch-8 model worse than the smaller one, points at the
-first layer (Figure 2.8).
+first layer (Figure 2.9).
 
 ![One clock under a 16, 8 and 4 px patch grid](/assets/clocks/patch_grids.png){: .no-invert}
 
-**Figure 2.8.** One clock under a 16, 8 and 4 px patch grid.
+**Figure 2.9.** One clock under a 16, 8 and 4 px patch grid.
 {: .figcap}
 
 The tokeniser section followed one 8 px patch to its token. Now change
@@ -427,11 +462,11 @@ about those 768 values is gone before any attention happens, and the
 matrix, applied to each patch alone, can't express "which way is the
 centre". At 4 px the hand runs through a dozen tokens, each holding a
 short piece of it, and the attention layers have a line to reassemble
-rather than a smudge to guess from (Figure 2.9).
+rather than a smudge to guess from (Figure 2.10).
 
 ![The same clock as the mean of each 4, 8 and 16 px patch](/assets/clocks/patch_means.png){: .no-invert}
 
-**Figure 2.9.** The same clock as the mean of each 4, 8 and 16 px patch.
+**Figure 2.10.** The same clock as the mean of each 4, 8 and 16 px patch.
 {: .figcap}
 
 Averaging each patch is a crude stand-in for what a linear projection keeps,
@@ -447,11 +482,11 @@ more work than it looks. A clock at 128 px is roughly a wall clock seen
 from across a room: you can tell the time, but you'd take a step closer to
 be sure of the minute. The minute-hand tip moves $$2\pi r / 60$$ per minute, which for a
 typical face at 128 px is three or four pixels (Part 1 derived it). The
-radius $$r$$ scales with the image, so the budget scales too (Figure 2.10):
+radius $$r$$ scales with the image, so the budget scales too (Figure 2.11):
 
 ![The same clock rendered at 64, 128 and 256 px](/assets/clocks/resolution.png){: .no-invert}
 
-**Figure 2.10.** The same clock rendered at 64, 128 and 256 px.
+**Figure 2.11.** The same clock rendered at 64, 128 and 256 px.
 {: .figcap}
 
 | image size | typical tip radius | pixels per minute |
@@ -526,7 +561,7 @@ that are each standard elsewhere:
 - Global average pooling over tokens instead of a class token
   [[PlainViT]](#references).
 
-As a data flow, next to the plain ViT drawn earlier (Figure 2.11):
+As a data flow, next to the plain ViT drawn earlier (Figure 2.12):
 
 ```mermaid
 flowchart TB
@@ -540,7 +575,7 @@ flowchart TB
   end
 ```
 
-**Figure 2.11.** ViT tiny v2 as a data flow: a convolutional stem to stride 4, fixed sincos positions, average pooling.
+**Figure 2.12.** ViT tiny v2 as a data flow: a convolutional stem to stride 4, fixed sincos positions, average pooling.
 {: .figcap}
 
 
@@ -566,11 +601,11 @@ two test splits, on CPU:
 | test, training fonts | 0.892 | 0.998 | 0.893 | 0.997 | 0.11 min |
 | test, held-out fonts | 0.899 | 0.998 | 0.899 | 0.998 | 0.11 min |
 
-Figure 2.12 puts every model on one chart.
+Figure 2.13 puts every model on one chart.
 
 ![Test exact accuracy against parameter count for every model](/assets/clocks/params.png)
 
-**Figure 2.12.** Test exact accuracy against parameter count for every model.
+**Figure 2.13.** Test exact accuracy against parameter count for every model.
 {: .figcap}
 
 A 3.8M-parameter ViT with a different tokeniser matches a 21M ResNet on
