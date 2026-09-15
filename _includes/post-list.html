@@ -14,7 +14,7 @@
       <time datetime="{{ post.date | date_to_xmlschema }}">{{ post.date | date: "%b %Y" }}</time>
       <span class="series-badge">{{ parts.size }}-part series</span>
       {% if landing.description %}<p>{{ landing.description }}</p>{% elsif post.description %}<p>{{ post.description }}</p>{% endif %}
-      <p class="series-parts">{% for p in parts %}<a href="{{ p.url | relative_url }}">Part {{ p.part }}: {{ p.title | remove_first: "Part " | remove_first: p.part | remove_first: " — " }}</a>{% unless forloop.last %}<span class="sep"> · </span>{% endunless %}{% endfor %}</p>
+      {% unless include.parts == false %}<p class="series-parts">{% for p in parts %}<a href="{{ p.url | relative_url }}">Part {{ p.part }}: {{ p.title | remove_first: "Part " | remove_first: p.part | remove_first: " — " }}</a>{% unless forloop.last %}<span class="sep"> · </span>{% endunless %}{% endfor %}</p>{% endunless %}
     </li>
   {% else %}
     <li>

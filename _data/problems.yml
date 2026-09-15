@@ -1,25 +1,29 @@
 # Shown on / (first 4) and /now/ (all).
 # status: running | exploring | stuck | next | parked  (each gets its own colour)
-updated: 2026-09-13
+updated: 2026-09-15
 items:
-  - title: "Scaling the search agent to 4B"
+  - title: "Where was this photo taken?"
+    status: exploring
+    description: >
+      A vision-language model that guesses the location of an image from
+      what is in it: signage, road markings, vegetation, architecture, the
+      side of the road people drive on. Scored GeoGuessr-style, by distance
+      from the true place.
+  - title: "Detecting damage in items"
+    status: running
+    description: >
+      A pipeline that uses a vision-language model alongside other models to
+      find and describe damage in photographs of items, with the VLM trained
+      by GRPO and on-policy distillation rather than by labelled examples
+      alone.
+  - title: "Closing the gap between rendered and photographed clocks"
     status: next
+    description: >
+      The clock readers hit 99.7% within a minute on renders and 37% on
+      3,228 real photographs. The renderer never drew perspective, shadows,
+      reflections or decorated dials. Add them, retrain, re-measure.
+  - title: "Scaling the search agent to 4B"
+    status: parked
     description: >
       Everything so far was bring-up at 1.7B, where bugs reproduce in minutes.
       Qwen3-4B-Instruct-2507 with FP8 is the next rung.
-  - title: "Turn-level credit assignment"
-    status: exploring
-    description: >
-      Privileged self-distillation (PBSD-style): a teacher that sees the gold
-      documents reweights the student's own per-turn advantages. Plain GRPO
-      only scores the whole episode.
-  - title: "Situational precision stuck at 0.193"
-    status: stuck
-    description: >
-      The agent finds the right neighbourhood and then hedges around it
-      instead of committing to the document.
-  - title: "Abstention-aware fusion"
-    status: exploring
-    description: >
-      RRF@4 is worth +0.095 NDCG, but one non-empty rollout currently
-      overrides three rollouts that correctly abstained.
