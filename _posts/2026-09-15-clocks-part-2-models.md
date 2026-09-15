@@ -34,7 +34,7 @@ what a given amount of model can learn.
 ## What goes in, what comes out
 
 Before the models, the plumbing. What goes in and what comes out is the
-same for every model in this post, so it comes first.
+same for every model in this post, so it comes first (Figure 2.1).
 
 ```mermaid
 flowchart TB
@@ -46,6 +46,10 @@ flowchart TB
   H --> J["loss = the two added: one number per image, averaged over the batch, pushed down by training"]
   I --> J
 ```
+
+**Figure 2.1.** From one image to one loss number: the data flow shared by every model in this post.
+{: .figcap}
+
 
 **The input** is one image, 128 by 128 pixels, three colour channels,
 scaled from the 0 to 255 of the file to the range −1 to 1. That's 49,152
@@ -62,9 +66,12 @@ image is stored as three grids of 128 by 128 values, one for red, one for
 green, one for blue, and a row of the actual values is printed under them.
 Those 49,152 numbers are what the model receives. What it returns is
 printed below the model: twelve numbers and sixty numbers. Its answer is
-the largest of each list.
+the largest of each list (Figure 2.2).
 
 ![The input as a clock and its three colour channels, the model, and the output as the twelve and sixty numbers it returns](/assets/clocks/io_numbers.png){: .no-invert}
+
+**Figure 2.2.** The input as a clock and its three colour channels, the model, and the output as the twelve and sixty numbers it returns.
+{: .figcap}
 
 The model put 0.94 on hour 9, and on the minute list 0.73 on 55 and 0.14
 on 54. Its answer is 9:55. The label, the yellow cell, is 9:54. So this
@@ -79,9 +86,12 @@ model put there. The outer ring is the minute
 list, one sector per minute. The model's answer is drawn as solid hands,
 the labelled time as yellow dashes, and the loss is worked out on the
 right from two numbers: how much probability the model gave the right
-hour, and how much it gave the right minute.
+hour, and how much it gave the right minute (Figure 2.3).
 
 ![Two clocks through the trained ViT: the input, its output drawn as a probability dial, and the loss worked out](/assets/clocks/objective_dial.png){: .no-invert}
+
+**Figure 2.3.** Two clocks through the trained ViT: the input, its output drawn as a probability dial, and the loss worked out.
+{: .figcap}
 
 The top clock is the easy case. One dark green sector at 12, one dark blue
 sector at 22, hands on top of the dashes. The model gave 92% to the right
@@ -119,7 +129,7 @@ number, averaged over the batch, goes down.
 Here are the two families as data flows, with the shape of the tensor at
 each stage for a 128 px input. Read them top to bottom. The ResNet shrinks
 the image four times while widening the channels; the ViT shrinks it once,
-at the very start, and then keeps the same 256 tokens through every layer.
+at the very start, and then keeps the same 256 tokens through every layer (Figure 2.4).
 
 ```mermaid
 flowchart TB
@@ -142,6 +152,10 @@ flowchart TB
     v4 --> v5["two linear heads<br/>12 hour logits, 60 minute logits"]
   end
 ```
+
+**Figure 2.4.** ResNet-18 and ViT tiny as data flows, with the tensor shape at each stage for a 128 px input.
+{: .figcap}
+
 
 A residual block is two 3x3 convolutions with a skip connection that adds
 the block's input to its output, so each block only has to learn a
@@ -176,9 +190,12 @@ works out from the descriptions and from knowing which stamp each one
 came from.
 
 Here it is on the real model, following one stamp from the clock to its
-description:
+description (Figure 2.5):
 
 ![One patch followed from the image to its token: cut, flatten to 192 numbers, multiply by the learned matrix E, add the position vector, one of 256 tokens. The clock is shown at 512 px for legibility](/assets/clocks/tokeniser_steps.png){: .no-invert}
+
+**Figure 2.5.** One patch followed from the image to its token: cut, flatten to 192 numbers, multiply by the learned matrix E, add the position vector, one of 256 tokens. The clock is shown at 512 px for legibility.
+{: .figcap}
 
 Step by step, with the sizes:
 
@@ -206,9 +223,12 @@ $$x_i$$:
 $$z_i = E\,x_i + \mathrm{pos}_i, \qquad E \in \mathbb{R}^{192 \times 192}.$$
 
 What does step 3 actually compute? Here it is drawn out, with the real
-numbers from the trained vit_tiny for the minute-hand patch above:
+numbers from the trained vit_tiny for the minute-hand patch above (Figure 2.6):
 
 ![The token calculation drawn as a matrix-vector product: the 192 × 192 learned matrix E with its first row highlighted, the 192 pixel values, the 192 offsets, and the resulting token](/assets/clocks/token_calc.png){: .no-invert}
+
+**Figure 2.6.** The token calculation drawn as a matrix-vector product: the 192 × 192 learned matrix E with its first row highlighted, the 192 pixel values, the 192 offsets, and the resulting token.
+{: .figcap}
 
 Read it left to right. The big square is the matrix $$E$$: 192 rows, 192
 columns, 36,864 numbers that were random before training and were nudged
@@ -362,7 +382,12 @@ held-out fonts:
 | vit_small | 14.4M | 0.422 | 0.432 | 0.829 | 0.724 | 29 min |
 | vit_p16 | 14.5M | 0.074 | 0.075 | 0.261 | 0.139 | 7 min |
 
+Figure 2.7 shows how they got there, epoch by epoch.
+
 ![Validation exact accuracy and training loss per epoch for all seven runs](/assets/clocks/curves.png)
+
+**Figure 2.7.** Validation exact accuracy and training loss per epoch for all seven runs.
+{: .figcap}
 
 Read the table as a person would: the ResNets get about nine clocks in
 ten exactly right and almost all of the rest within a minute, whether or
@@ -398,9 +423,12 @@ The ViT paper [[ViT]](#references) says ViTs lose to CNNs on small data
 without pre-training, because they lack the locality prior. That's true and
 it isn't specific enough. The ordering here, patch 16 far worse than patch
 8, and the bigger patch-8 model worse than the smaller one, points at the
-first layer.
+first layer (Figure 2.8).
 
 ![One clock under a 16, 8 and 4 px patch grid](/assets/clocks/patch_grids.png){: .no-invert}
+
+**Figure 2.8.** One clock under a 16, 8 and 4 px patch grid.
+{: .figcap}
 
 The tokeniser section followed one 8 px patch to its token. Now change
 the patch size. With 16 px patches on a 128 px image the clock is an 8 by 8
@@ -410,9 +438,12 @@ about those 768 values is gone before any attention happens, and the
 matrix, applied to each patch alone, can't express "which way is the
 centre". At 4 px the hand runs through a dozen tokens, each holding a
 short piece of it, and the attention layers have a line to reassemble
-rather than a smudge to guess from.
+rather than a smudge to guess from (Figure 2.9).
 
 ![The same clock as the mean of each 4, 8 and 16 px patch](/assets/clocks/patch_means.png){: .no-invert}
+
+**Figure 2.9.** The same clock as the mean of each 4, 8 and 16 px patch.
+{: .figcap}
 
 Averaging each patch is a crude stand-in for what a linear projection keeps,
 but it makes the point: at 16 px the hands are a smudge, at 8 px they are a
@@ -427,9 +458,12 @@ more work than it looks. A clock at 128 px is roughly a wall clock seen
 from across a room: you can tell the time, but you'd take a step closer to
 be sure of the minute. The minute-hand tip moves $$2\pi r / 60$$ per minute, which for a
 typical face at 128 px is three or four pixels (Part 1 derived it). The
-radius $$r$$ scales with the image, so the budget scales too:
+radius $$r$$ scales with the image, so the budget scales too (Figure 2.10):
 
 ![The same clock rendered at 64, 128 and 256 px](/assets/clocks/resolution.png){: .no-invert}
+
+**Figure 2.10.** The same clock rendered at 64, 128 and 256 px.
+{: .figcap}
 
 | image size | typical tip radius | pixels per minute |
 |---|---|---|
@@ -503,7 +537,7 @@ that are each standard elsewhere:
 - Global average pooling over tokens instead of a class token
   [[PlainViT]](#references).
 
-As a data flow, next to the plain ViT drawn earlier:
+As a data flow, next to the plain ViT drawn earlier (Figure 2.11):
 
 ```mermaid
 flowchart TB
@@ -516,6 +550,10 @@ flowchart TB
     w4 --> w5["two linear heads<br/>12 hour logits, 60 minute logits"]
   end
 ```
+
+**Figure 2.11.** ViT tiny v2 as a data flow: a convolutional stem to stride 4, fixed sincos positions, average pooling.
+{: .figcap}
+
 
 It also trains for 100 epochs with a 10% warmup rather than 30 and 5%, which
 makes the comparison unclean. I'll come back to that.
@@ -539,7 +577,12 @@ two test splits, on CPU:
 | test, training fonts | 0.892 | 0.998 | 0.893 | 0.997 | 0.11 min |
 | test, held-out fonts | 0.899 | 0.998 | 0.899 | 0.998 | 0.11 min |
 
+Figure 2.12 puts every model on one chart.
+
 ![Test exact accuracy against parameter count for every model](/assets/clocks/params.png)
+
+**Figure 2.12.** Test exact accuracy against parameter count for every model.
+{: .figcap}
 
 A 3.8M-parameter ViT with a different tokeniser matches a 21M ResNet on
 this task. Now the caveat. The ResNets got 30 epochs and the v2 ViT got 86
