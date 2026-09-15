@@ -291,20 +291,22 @@ multiplied by zero); with it, every class contributes a little, and the
 model is charged for putting probability *exactly* zero anywhere. Figure
 2.7 shows the sum term by term for the boundary clock of Figure 2.3.
 
-![The loss term by term for the boundary clock: the model's sixty minute probabilities against the smoothed target, the sixty per-class terms with the labelled class's 1.75 and the other fifty-nine summing to 0.60, and the assembly into a per-image and a per-batch loss](/assets/clocks/loss_terms.png)
+![The loss for the boundary clock drawn on clocks: for each head, the model's probabilities as a dial, the smoothed target as a dial, and the per-class loss terms as a dial, then the two sums added](/assets/clocks/loss_terms.png){: .no-invert}
 
-**Figure 2.7.** The loss, term by term, for the boundary clock. Top: the model's minute probabilities p beside the smoothed target q. Middle: the sixty terms of the sum, one per class; the labelled class dominates, the other fifty-nine add a small constant. Bottom: the two heads add to one loss per image, and the batch averages 256 of those.
+**Figure 2.7.** The loss on clocks, for the boundary clock. Each row is one head. Left: what the model said, p. Middle: what it was asked to say, q, with 0.9 on the label and a little on every sector. Right: the product, −q log p, one term per sector, which the loss adds up. Bottom right: the two sums added.
 {: .figcap}
 
-Read the middle panel. The labelled minute, 54, got probability 0.14, so
-its term is $$-0.9 \log 0.14 = 1.75$$: most of the loss, and all of it
-for reading one minute late. The other fifty-nine classes each contribute
-$$-(0.1/60)\log p_c$$, tiny individually but summing to 0.60 because the
-model put almost nothing on them. That 0.60 is the smoothing's floor
-showing up: it can't be reduced by reading the clock better, only by
-never being completely sure. The hour head does the same over twelve
-classes and comes to 0.53, so this image costs 2.88, and it is one of 256
-in its batch.
+Read the right-hand dials. On the minute head, one sector is dark: the
+labelled minute, 54, where the model gave 0.14 and was asked for 0.90, so
+its term is $$-0.9 \log 0.14 = 1.75$$. That is most of the loss, and all
+of it for reading one minute late. The other fifty-nine sectors are faint
+but not empty: each contributes $$-(0.1/60)\log p_c$$, tiny on its own,
+0.60 in total. That ring is the smoothing's floor. It can't be reduced by
+reading the clock better, only by never being completely sure of any
+class. On the hour head the labelled sector is pale, because the model
+gave the right hour 0.94 and there is little to charge, and the ring
+carries nearly all of the 0.53. Two sums, added: this image costs 2.88,
+and it is one of 256 whose average is the number the optimiser sees.
 
 For comparison, the easy clock of Figure 2.3 gave 0.92 to the right hour
 and 0.92 to the right minute, and scores 0.53 + 0.74 = 1.26, a hair above
