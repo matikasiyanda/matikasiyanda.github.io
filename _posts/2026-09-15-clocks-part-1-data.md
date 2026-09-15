@@ -130,55 +130,64 @@ about three minutes and never sit in RAM all at once. Every sampled choice
 is also written to a CSV alongside the labels, which is what Part 3 uses to
 ask which kinds of clock are hard.
 
-Before the full renderer, here is the whole idea in forty lines that need
+Before the full renderer, here is the whole idea in fifty lines that need
 nothing but Pillow. Copy it into a file, run it, and you get a 512 px clock
 reading 10:08:
 
 ```python
-"""A self-contained clock renderer in forty lines: only Pillow is needed.
-This is the idea behind clockcheck/render_analog.py, without the random styling.
+"""A self-contained clock renderer: only Pillow is needed.
+It is the idea behind clockcheck/render_analog.py without the random styling.
 Run it and you get clock_512.png."""
 import math
 from PIL import Image, ImageDraw, ImageFont
 
+INK, FACE, BG, RED = (30, 30, 40), (250, 250, 245), (245, 240, 225), (200, 40, 40)
+
+
 def draw_clock(hour, minute, size=512, ss=3):
-    S = size * ss                                  # draw big, shrink later: that is the anti-aliasing
-    img = Image.new("RGB", (S, S), (245, 240, 225))
+    S = size * ss                      # draw at 3x, shrink at the end: anti-aliasing
+    img = Image.new("RGB", (S, S), BG)
     d = ImageDraw.Draw(img)
     cx = cy = S / 2
-    R = S * 0.42                                   # face radius
-    d.ellipse([cx - R, cy - R, cx + R, cy + R], fill=(30, 30, 40))           # bezel
-    d.ellipse([cx - R * 0.96, cy - R * 0.96, cx + R * 0.96, cy + R * 0.96], fill=(250, 250, 245))  # face
+    R = S * 0.42                       # face radius
 
-    def polar(r, deg):                             # point at radius r, angle clockwise from 12 o'clock
+    def polar(r, deg):                 # point at radius r, angle clockwise from 12
         a = math.radians(deg - 90)
         return cx + r * math.cos(a), cy + r * math.sin(a)
 
-    for i in range(60):                            # tick marks: long every 5 minutes
+    d.ellipse([cx - R, cy - R, cx + R, cy + R], fill=INK)                # bezel
+    r = R * 0.96
+    d.ellipse([cx - r, cy - r, cx + r, cy + r], fill=FACE)               # face
+
+    for i in range(60):                # tick marks, long ones every five minutes
         long = i % 5 == 0
         d.line([polar(R * 0.92, i * 6), polar(R * (0.82 if long else 0.88), i * 6)],
-               fill=(30, 30, 40), width=ss * (4 if long else 2))
+               fill=INK, width=ss * (4 if long else 2))
+
     try:
         font = ImageFont.truetype("DejaVuSans.ttf", int(R * 0.16))
     except OSError:
         font = ImageFont.load_default()
-    for h in range(1, 13):                         # numerals
-        x, y = polar(R * 0.70, h * 30)
-        d.text((x, y), str(h), fill=(30, 30, 40), font=font, anchor="mm")
+    for h in range(1, 13):             # numerals
+        d.text(polar(R * 0.70, h * 30), str(h), fill=INK, font=font, anchor="mm")
 
-    hour_angle = (hour % 12) * 30 + minute * 0.5   # the hour hand moves continuously with the minute
+    hour_angle = (hour % 12) * 30 + minute * 0.5   # hour hand moves with the minute
     minute_angle = minute * 6
-    d.line([polar(-R * 0.05, hour_angle), polar(R * 0.55, hour_angle)], fill=(30, 30, 40), width=ss * 10)
-    d.line([polar(-R * 0.05, minute_angle), polar(R * 0.85, minute_angle)], fill=(30, 30, 40), width=ss * 6)
-    d.ellipse([cx - ss * 8, cy - ss * 8, cx + ss * 8, cy + ss * 8], fill=(200, 40, 40))  # centre cap
+    d.line([polar(-R * 0.05, hour_angle), polar(R * 0.55, hour_angle)],
+           fill=INK, width=ss * 10)
+    d.line([polar(-R * 0.05, minute_angle), polar(R * 0.85, minute_angle)],
+           fill=INK, width=ss * 6)
+    c = ss * 8
+    d.ellipse([cx - c, cy - c, cx + c, cy + c], fill=RED)                # centre cap
 
     return img.resize((size, size), Image.LANCZOS)
+
 
 if __name__ == "__main__":
     draw_clock(10, 8).save("clock_512.png")
 ```
 
-![The clock drawn by the forty-line snippet above](/assets/clocks/minimal_clock.png){: .no-invert}
+![The clock drawn by the fifty-line snippet above](/assets/clocks/minimal_clock.png){: .no-invert}
 
 Three things in it are the same three things the full renderer is built
 around. It draws at three times the size and shrinks with a Lanczos filter,
