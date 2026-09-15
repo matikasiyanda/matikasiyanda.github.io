@@ -9,6 +9,9 @@ description: "GPT-4o reads 8% of analogue clocks correctly. Before training anyt
 tags: [vision, synthetic-data, pytorch]
 math: true
 image: /assets/clocks/same_time.png
+unlisted: true
+draft: true
+sitemap: false
 ---
 
 *Lost in time, part 1 of 3. [Part 2](/blog/clocks/part-2-models/) trains

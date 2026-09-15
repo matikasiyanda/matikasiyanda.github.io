@@ -16,12 +16,13 @@ items:
       find and describe damage in photographs of items, with the VLM trained
       by GRPO and on-policy distillation rather than by labelled examples
       alone.
-  - title: "Closing the gap between rendered and photographed clocks"
-    status: next
-    description: >
-      The clock readers hit 99.7% within a minute on renders and 37% on
-      3,228 real photographs. The renderer never drew perspective, shadows,
-      reflections or decorated dials. Add them, retrain, re-measure.
+# (unlisted until the Lost in time series is published)
+#  - title: "Closing the gap between rendered and photographed clocks"
+#    status: next
+#    description: >
+#      The clock readers hit 99.7% within a minute on renders and 37% on
+#      3,228 real photographs. The renderer never drew perspective, shadows,
+#      reflections or decorated dials. Add them, retrain, re-measure.
   - title: "Scaling the search agent to 4B"
     status: parked
     description: >

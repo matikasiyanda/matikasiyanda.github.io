@@ -2,6 +2,9 @@
 title: "Lost in time"
 description: "Multimodal models can't read analogue clocks. Vision encoders trained from scratch on synthetic clock faces, CNNs against ViTs at matched size, then tested on real photographs. Three parts."
 permalink: /blog/clocks/
+unlisted: true
+draft: true
+sitemap: false
 ---
 
 <div class="prose" markdown="1">
