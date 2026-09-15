@@ -23,48 +23,60 @@ parameters, stopped at epoch 86). The plain vit_tiny appears for contrast.
 Everything below is on the 10,000-image test set rendered with the 39 fonts
 no model saw in training, and every number is from one seed.
 
-## The metrics
+## The metric: how far off, in minutes
 
-Three numbers are reported for every model. *Exact* means the hour and
-the minute are both right. *Within one minute* means the hour is right and
-the minute is at most one off. The *circular minute error* is how far off
-the minute is, counted the short way round the dial, so 59 and 0 are one
-apart. With predicted hour $$\hat h$$ and minute $$\hat m$$, and truth
-$$(h, m)$$:
+Part 2 scored the models by *exact* accuracy: hour and minute both right,
+or wrong. That is the number the loss trains for, but it is a poor way to
+compare readers of clocks, because it treats 9:54 read as 9:55 the same as
+9:54 read as 3:20. A person judging a clock reader would ask how far off
+it was.
 
-$$\text{exact} = [\hat h = h]\,[\hat m = m], \qquad
-\text{within} \pm 1 = [\hat h = h]\,[\delta \le 1],$$
+So this part uses the time error: the distance between the read time and
+the labelled time, in minutes, measured the short way round a 12-hour
+dial, so that 3:59 read as 4:00 is one minute, not an hour and a minute.
+With the read time $$\hat t = 60\hat h + \hat m$$ and the labelled time
+$$t = 60h + m$$, both in minutes since twelve o'clock,
 
-$$\delta = \min\big(|\hat m - m|,\ 60 - |\hat m - m|\big).$$
+$$\delta = \min\big(|\hat t - t| \bmod 720,\ 720 - |\hat t - t| \bmod 720\big).$$
 
-$$\delta$$ is the circular minute error, so a prediction of 59 for a true 0
-counts as one minute off, not 59. The signed version
-$$(\hat m - m + 30) \bmod 60 - 30$$ tells early from late.
+One number per clock, zero when exact, 360 at the worst possible. Two
+views of it are more informative than any average: the *tolerance curve*,
+the fraction of clocks read within $$k$$ minutes for every $$k$$, and the
+split of clocks into exact, one minute off, two to four, and five or more
+([Figure 3.1](#fig-3-1)).
 
-| held-out fonts | exact | hour | minute | ±1 min | mean $$\delta$$ |
+![Tolerance curves for all seven models on held-out fonts, and the error split for the four good ones](/assets/clocks/tolerance.png)
+
+**Figure 3.1.** Left: for every model, the fraction of held-out clocks read within k minutes, against k; the legend gives each model's mean time error. Right: for the four models that read clocks, the share of clocks that are exact, one minute off, two to four off, and five or more off.
+{: .figcap #fig-3-1}
+
+| held-out fonts, 10,000 clocks | mean error | exact | within 1 min | within 5 min | 5 min or more off |
 |---|---|---|---|---|---|
-| cnn_r34 | 0.894 | 0.997 | 0.895 | 0.996 | 0.12 min |
-| vit_tiny_v2 (86 ep) | 0.899 | 0.998 | 0.900 | 0.998 | 0.10 min |
-| vit_tiny | 0.544 | 0.946 | 0.549 | 0.892 | 1.1 min |
+| cnn_small | 0.33 min | 88.0% | 99.60% | 99.76% | 25 clocks |
+| cnn_r18 | 0.29 min | 88.9% | 99.65% | 99.83% | 17 |
+| cnn_r34 | 0.29 min | 89.4% | 99.73% | 99.83% | 17 |
+| vit_tiny | 7.30 min | 54.4% | 89.7% | 94.2% | 584 |
+| vit_small | 27.7 min | 43.2% | 73.8% | 82.3% | 1,778 |
+| vit_p16 | 165 min | 7.5% | 13.5% | 16.2% | 8,402 |
+| vit_tiny_v2 (86 ep) | 0.22 min | 89.9% | 99.88% | 99.91% | 9 |
 
-Read across a row: the hour is almost never wrong, the minute is wrong one
-time in ten, and nearly all of those are within one minute. Counting the
-hour and minute together as one time on a 12-hour dial, so that 3:59 read
-as 4:00 is one minute off rather than an hour and a minute:
+Read the curves. The four good models rise to 99.6% or better by one
+minute of tolerance and then go flat: nearly everything they get wrong,
+they get wrong by exactly one minute. Their mean error is a fifth to a
+third of a minute. The plain ViTs are a different shape: vit_tiny needs
+five minutes of tolerance to reach 94%, and vit_p16 never gets there. On
+this metric the ordering is clear where exact accuracy made it look like
+a tie: the v2 ViT's mean error is 0.22 minutes against the ResNets' 0.29
+to 0.33, and it has half as many clocks off by five minutes or more.
 
-| held-out fonts, 10,000 clocks | exactly right | one minute off | two to four minutes off | five minutes or more off |
-|---|---|---|---|---|
-| cnn_r34 | 8,938 | 1,035 | 10 | 17 |
-| vit_tiny_v2 (86 ep) | 8,986 | 1,002 | 3 | 9 |
-
-That last column is the one to keep in mind. A one-minute miss on a hand
-that is most of the way to the next mark is a call a person would make
-too, and this post shows below that it's the renderer's doing; a two- or
-three-minute miss on a blurred face is not much different. So the panels
-in this post that show the models getting it *wrong* show only the last
-column: the 17 and the 9 clocks in ten thousand where a model was off by
-five minutes or more. Those are the unmistakable mistakes, and they're
-rare enough to look at one by one.
+A one-minute miss on a hand that is most of the way to the next mark is a
+call a person would make too, and the section on the renderer's creep
+shows it is the labels' doing; a two- or three-minute miss on a blurred
+face is not much different. So the panels in this post that show the
+models getting it *wrong* show only the last column: the 17 and the 9
+clocks in ten thousand where a model was off by five minutes or more.
+Those are the unmistakable mistakes, and they're rare enough to look at
+every one.
 
 ## What the predictions look like
 
@@ -82,12 +94,12 @@ re-rendering each test image from its seed, which reproduces it pixel for
 pixel, and reading the centre and radius the renderer used.
 
 The images are enlarged without smoothing, so the pixels are the pixels
-the models saw, only paler ([Figure 3.1](#fig-3-1)).
+the models saw, only paler ([Figure 3.2](#fig-3-2)).
 
 ![Predicted hands from both models, ResNet in red and ViT in blue, drawn over twelve held-out clocks in three rows: both right, one wrong, both wrong](/assets/clocks/overlay_heldout.png){: .no-invert}
 
-**Figure 3.1.** Predicted hands from both models, ResNet in red and ViT in blue, drawn over twelve held-out clocks: a row where both are exactly right, a row where the ResNet is off by five minutes or more, a row where the ViT is.
-{: .figcap #fig-3-1}
+**Figure 3.2.** Predicted hands from both models, ResNet in red and ViT in blue, drawn over twelve held-out clocks: a row where both are exactly right, a row where the ResNet is off by five minutes or more, a row where the ViT is.
+{: .figcap #fig-3-2}
 
 In the top row the three sets of hands are on top of each other. In the
 other two rows the misses are not subtle, and they come in two kinds. One
@@ -105,39 +117,39 @@ draw it as a clean clock, next to the clock it was given. Red hands are
 the ResNet's reading, blue hands the ViT's. If the model read the clock,
 the drawn clock shows the same time as the unseen one. The last four rows
 are misses of five minutes or more: the drawn clock shows an hour hand on
-the wrong numeral, or the two hands the wrong way round ([Figure 3.2](#fig-3-2)).
+the wrong numeral, or the two hands the wrong way round ([Figure 3.3](#fig-3-3)).
 
 ![Six held-out clocks, each beside a clean clock drawn from the ResNet's reading in red and one from the ViT's reading in blue](/assets/clocks/readback_heldout.png){: .no-invert}
 
-**Figure 3.2.** Six held-out clocks, each beside a clean clock drawn from the ResNet's reading in red and one from the ViT's reading in blue. Rows 1 and 2 both right; rows 3 and 4 the ResNet off by five minutes or more; rows 5 and 6 the ViT.
-{: .figcap #fig-3-2}
+**Figure 3.3.** Six held-out clocks, each beside a clean clock drawn from the ResNet's reading in red and one from the ViT's reading in blue. Rows 1 and 2 both right; rows 3 and 4 the ResNet off by five minutes or more; rows 5 and 6 the ViT.
+{: .figcap #fig-3-3}
 
 Eight more clocks each model read exactly, and eight of its misses of five
-minutes or more, from the held-out set. The wrong readings are in red ([Figures 3.3](#fig-3-3)
-and [3.4](#fig-3-4)).
+minutes or more, from the held-out set. The wrong readings are in red ([Figures 3.4](#fig-3-4)
+and [3.5](#fig-3-5)).
 
 ![ResNet-34 predictions on held-out fonts: eight right, eight wrong](/assets/clocks/preds_cnn_r34.png){: .no-invert}
 
-**Figure 3.3.** ResNet-34 predictions on held-out fonts: eight read exactly, and eight of its misses of five minutes or more.
-{: .figcap #fig-3-3}
+**Figure 3.4.** ResNet-34 predictions on held-out fonts: eight read exactly, and eight of its misses of five minutes or more.
+{: .figcap #fig-3-4}
 
 ![ViT tiny v2 predictions on held-out fonts: eight right, eight wrong](/assets/clocks/preds_vit_tiny_v2.png){: .no-invert}
 
-**Figure 3.4.** ViT tiny v2 predictions on held-out fonts: eight read exactly, and eight of its misses of five minutes or more.
-{: .figcap #fig-3-4}
+**Figure 3.5.** ViT tiny v2 predictions on held-out fonts: eight read exactly, and eight of its misses of five minutes or more.
+{: .figcap #fig-3-5}
 
 And the same on the test set rendered with training-pool fonts, which is
-the distribution the models were trained on ([Figures 3.5](#fig-3-5) and [3.6](#fig-3-6)):
+the distribution the models were trained on ([Figures 3.6](#fig-3-6) and [3.7](#fig-3-7)):
 
 ![ResNet-34 predictions on the seen-font test set: eight right, eight wrong](/assets/clocks/preds_test_cnn_r34.png){: .no-invert}
 
-**Figure 3.5.** ResNet-34 predictions on the seen-font test set: eight read exactly, and eight of its misses of five minutes or more.
-{: .figcap #fig-3-5}
+**Figure 3.6.** ResNet-34 predictions on the seen-font test set: eight read exactly, and eight of its misses of five minutes or more.
+{: .figcap #fig-3-6}
 
 ![ViT tiny v2 predictions on the seen-font test set: eight right, eight wrong](/assets/clocks/preds_test_vit_tiny_v2.png){: .no-invert}
 
-**Figure 3.6.** ViT tiny v2 predictions on the seen-font test set: eight read exactly, and eight of its misses of five minutes or more.
-{: .figcap #fig-3-6}
+**Figure 3.7.** ViT tiny v2 predictions on the seen-font test set: eight read exactly, and eight of its misses of five minutes or more.
+{: .figcap #fig-3-7}
 
 Look at the wrong rows and notice what is *not* there: nothing has been
 thrown by a typeface, the very thing this test set was built to catch.
@@ -145,30 +157,60 @@ What is there is the hour hand read one numeral over, and a few swapped
 hands. The one-minute misses, ten times more common than these, are dealt
 with next.
 
-## Every miss is one minute, and usually late
+## The big misses, every one of them
 
-The prediction panels above excluded misses under five minutes. This
-section is about those excluded misses, because they are ten times more
-common than the ones shown. The signed error over all 10,000 held-out
-images, on a log scale so the tail is visible ([Figure 3.7](#fig-3-7)):
+Before the one-minute misses, the rare big ones, because there are few
+enough to show in full. [Figures 3.8](#fig-3-8) and [3.9](#fig-3-9) are every held-out clock the
+ResNet and the ViT read five or more minutes wrong, worst first, with the
+model's hands drawn on and the label in yellow.
 
-![Distribution of predicted minus true minute on held-out fonts, log scale](/assets/clocks/minute_errors.png)
+![All 17 of the ResNet's misses of five minutes or more on held-out fonts, worst first, with the kind of miss and the error in minutes](/assets/clocks/misses_resnet.png){: .no-invert}
 
-**Figure 3.7.** Distribution of predicted minus true minute on held-out fonts, log scale. This figure counts every miss, and almost all of them are within one minute: the ±1 bars are the one-minute misses the prediction panels above leave out.
-{: .figcap #fig-3-7}
+**Figure 3.8.** Every held-out clock the ResNet-34 read five or more minutes wrong: 17 of 10,000, worst first. Red hands are its reading, yellow the label. Each is labelled with its kind and its error.
+{: .figcap #fig-3-8}
 
-For the ResNet, 7.0% of predictions are one minute late and 3.4% one minute
-early. Errors of two or more minutes are 0.16% of images, one in six
-hundred. The ViT's tail is shorter still: 0.05%. The plain vit_tiny is the
-contrast case, with 17% early and 20% late and a tail that reaches every
-value on the axis.
+![All 9 of the ViT's misses of five minutes or more on held-out fonts, worst first](/assets/clocks/misses_vit.png){: .no-invert}
 
-Put plainly: when these models are wrong, they are wrong by one minute,
-and more often they say the *next* minute than the previous one. Two things
-about this distribution needed explaining. The errors are
-almost all exactly one minute, and they're twice as often late as early.
-A resolution limit would give the first but not the second: pixels don't
-know which direction is later.
+**Figure 3.9.** The same for the ViT tiny v2: 9 of 10,000. Blue hands are its reading.
+{: .figcap #fig-3-9}
+
+They sort into four kinds, counted in [Figure 3.10](#fig-3-10) for both models on both
+test splits:
+
+- **The hour read one numeral over,** with the minute right: 9:00 read as
+  8:00, 11:16 as 10:16. The hour hand sits on or beside a numeral and the
+  model picks the wrong side. Sixty minutes off, and the commonest kind.
+- **The minute read across the top with the hour kept:** 7:59 read as
+  7:00, 3:00 as 3:59. The minute hand is at the twelve, the model reads it
+  as :00 or :59 correctly enough, but doesn't carry the hour. Fifty-nine
+  minutes off. A person reading 7:59:59 says eight o'clock; the model
+  half did.
+- **The hands swapped:** 1:43 read as 8:09, 10:34 as 6:53, 1:31 as 6:07,
+  on faces where the two hands are nearly the same length. Hours off.
+- **Other:** a blurred face, a hand read against a numeral, one reading
+  ten minutes out. The genuinely odd ones, and there are six of them for
+  the ResNet and one for the ViT in ten thousand clocks.
+
+![Stacked bars of the kinds of five-minute-plus misses per model on held-out and seen fonts](/assets/clocks/miss_kinds.png)
+
+**Figure 3.10.** What the big misses are, for both models on both test splits: hour read one over, minute over the top with the hour kept, hands swapped, or other.
+{: .figcap #fig-3-10}
+
+None of these is a resolution problem, and none is a typeface problem,
+which is the thing the held-out set was built to catch. They are the
+mistakes a person makes at a glance, on the clocks a person would find
+awkward.
+
+## The one-minute misses, and why they happen
+
+Now the common case. Of the 10,000 held-out clocks, the ResNet reads
+1,035 one minute off and the ViT 1,002, ten times the big misses put
+together, and more often late than early: for the ResNet 7.0% of clocks
+are read one minute late and 3.4% one minute early; for the ViT 6.0% and
+4.1%. Two things about that needed explaining. The errors are almost all
+exactly one minute, and they're twice as often late as early. A resolution
+limit would give the first but not the second: pixels don't know which
+direction is later.
 
 ## The wall is in the renderer
 
@@ -185,12 +227,12 @@ $$m$$. The second hand itself is drawn on 45% of clocks and never labelled.
 So a quarter of the training images (creep on, seconds past 30) show a
 minute hand that is nearer the next minute than the labelled one. A model
 that reads the angle honestly will round up on those, and be marked wrong.
-Here is the error rate as a function of the second the renderer sampled ([Figure 3.8](#fig-3-8)):
+Here is the error rate as a function of the second the renderer sampled ([Figure 3.11](#fig-3-11)):
 
 ![Late-by-one errors and exact accuracy as a function of the second, for both models](/assets/clocks/err_by_second.png)
 
-**Figure 3.8.** Late-by-one errors and exact accuracy as a function of the second, for both models. These are one-minute misses, within the threshold the prediction panels exclude; this figure is about why they happen.
-{: .figcap #fig-3-8}
+**Figure 3.11.** Late-by-one errors and exact accuracy as a function of the second, for both models. These are one-minute misses, within the threshold the prediction panels exclude; this figure is about why they happen.
+{: .figcap #fig-3-11}
 
 Both models are at 96 to 97% exact for seconds 0 to 14 and fall to 70% for
 seconds 45 to 59, on the same curve. In the last quarter of the minute,
@@ -198,15 +240,15 @@ seconds 45 to 59, on the same curve. In the last quarter of the minute,
 architectures with nothing in common except the data draw the same line,
 which is what you'd expect if the line belongs to the data.
 
-The hour errors, rare as they are, are the same thing. [Figure 3.9](#fig-3-9)
+The hour errors, rare as they are, are the same thing. [Figure 3.12](#fig-3-12)
 puts both error rates on dials, one column per model: the top row is how
 often the model got the *hour* wrong at each true minute, the bottom row
 how often it got the *minute* wrong.
 
 ![Two rows of dials, one column per model: hour error rate by true minute on top, minute error rate by true minute beneath](/assets/clocks/hour_err_by_minute.png){: .no-invert}
 
-**Figure 3.9.** Errors around the dial, on held-out fonts. Top row: hour error rate by true minute (red). Bottom row: minute error rate by true minute (blue). One column per model; darker sectors mean more errors at that minute, and the rows use different colour scales. Both rows count one-minute misses as errors; the :00 and :59 hour errors are 3:59 read as 4:00 and the like, one minute off in time.
-{: .figcap #fig-3-9}
+**Figure 3.12.** Errors around the dial, on held-out fonts. Top row: hour error rate by true minute (red). Bottom row: minute error rate by true minute (blue). One column per model; darker sectors mean more errors at that minute, and the rows use different colour scales. Both rows count one-minute misses as errors; the :00 and :59 hour errors are 3:59 read as 4:00 and the like, one minute off in time.
+{: .figcap #fig-3-12}
 
 The top row is the boundary again. The two good models get the hour wrong
 only at :00 and :59, and nowhere else above 0.7%; the plain ViT fails all
@@ -248,12 +290,12 @@ real clock says four o'clock too.
 
 The renderer wrote every sampled choice to a CSV, so accuracy can be split
 by what was drawn. The y axis starts at 0.80, because on these two models
-everything lives between 0.85 and 0.92 ([Figure 3.10](#fig-3-10)):
+everything lives between 0.85 and 0.92 ([Figure 3.13](#fig-3-13)):
 
 ![Exact accuracy on held-out fonts by numeral style, face shape, hand style, tick marks, second hand and rotation](/assets/clocks/acc_by_attribute.png)
 
-**Figure 3.10.** Exact accuracy on held-out fonts by numeral style, face shape, hand style, tick marks, second hand and rotation. Exact means both hands right, so a one-minute miss counts as wrong here.
-{: .figcap #fig-3-10}
+**Figure 3.13.** Exact accuracy on held-out fonts by numeral style, face shape, hand style, tick marks, second hand and rotation. Exact means both hands right, so a one-minute miss counts as wrong here.
+{: .figcap #fig-3-13}
 
 With 10,000 images split six ways, each bar rests on a few hundred to a
 few thousand clocks, and a two-point gap is about the noise level. So most
@@ -287,12 +329,12 @@ all the same. The models read hands.
 
 On the held-out set, the ResNet and the ViT are both right on 83.9% of
 clocks and both wrong on 4.7%. The ResNet alone is right on 5.4% and the
-ViT alone on 5.9%. Either one right: 95.3% ([Figure 3.11](#fig-3-11)).
+ViT alone on 5.9%. Either one right: 95.3% ([Figure 3.14](#fig-3-14)).
 
 ![Held-out clocks where both models are right, only the ResNet is right, only the ViT is right, and both are wrong](/assets/clocks/compare_heldout.png){: .no-invert}
 
-**Figure 3.11.** Held-out clocks where both models are exactly right, where only the ResNet is off by five minutes or more, where only the ViT is, and the three where both are.
-{: .figcap #fig-3-11}
+**Figure 3.14.** Held-out clocks where both models are exactly right, where only the ResNet is off by five minutes or more, where only the ViT is, and the three where both are.
+{: .figcap #fig-3-14}
 
 Those percentages count one-minute misses as wrong, and on that count the
 two models miss *different* clocks 6% of the time each, which on a task
@@ -306,12 +348,12 @@ models would gain a few points on the one-minute misses, and wouldn't mean
 anything.
 
 For completeness, the worst misses by circular minute error for each
-model, drawn the same way as the panels at the top of the post ([Figure 3.12](#fig-3-12)):
+model, drawn the same way as the panels at the top of the post ([Figure 3.15](#fig-3-15)):
 
 ![The four largest minute errors on held-out fonts for each model, with both models' hands drawn over the clock](/assets/clocks/overlay_worst.png){: .no-invert}
 
-**Figure 3.12.** The four largest errors on held-out fonts for each model, with both models' hands drawn over the clock. All are hours off, far beyond the one-minute threshold.
-{: .figcap #fig-3-12}
+**Figure 3.15.** The four largest errors on held-out fonts for each model, with both models' hands drawn over the clock. All are hours off, far beyond the one-minute threshold.
+{: .figcap #fig-3-15}
 
 These are the one-in-six-hundred cases, and they're a different kind of
 error: the model swapped the hands. At 8:08 the hour hand sits at 244
