@@ -297,7 +297,7 @@ multiplied by zero); with it, every class contributes a little, and the
 model is charged for putting probability *exactly* zero anywhere. Figure
 2.7 shows the sum term by term for the boundary clock of Figure 2.3.
 
-![The loss in three panels: the penalty curve minus log p with the easy and boundary clocks marked; the decomposition of each head's cross-entropy into the labelled class's term and the rest, for both clocks; and a histogram of the losses of 256 held-out clocks with the batch mean](/assets/clocks/loss_terms.png)
+![The loss in three panels: the penalty curve minus log p with the easy and boundary clocks marked; the decomposition of each head's cross-entropy into the labelled class's term and the rest, for both clocks; and a histogram of the losses of 256 held-out clocks with the batch mean](/assets/clocks/loss_terms.png){: .no-invert}
 
 **Figure 2.7.** The loss, in three panels. Left: the penalty for giving the labelled class probability p is −log p, cheap near 1 and steep near 0; the easy clock and the boundary clock are marked. Middle: each head's cross-entropy split into the labelled class's term (coloured) and the other classes' terms (grey), for both clocks; the two heads add to the image's loss. Right: the losses of 256 held-out clocks, with the mean, which is the batch loss.
 {: .figcap}
