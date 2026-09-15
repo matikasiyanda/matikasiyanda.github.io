@@ -75,11 +75,11 @@ the darkest sector of each, is drawn as a hand (Figure 2.2).
 **Figure 2.2.** One clock through the model. Left: the input and its three colour channels. Right: its two outputs drawn as clocks, the twelve hour probabilities as sectors of one dial and the sixty minute probabilities as sectors of another. Darker means more probability; the solid hand is the model's answer with its value; the orange dashes mark the label.
 {: .figcap}
 
-The model put 0.94 on hour 9, and on the minute chart 0.73 on 55 and 0.14
-on 54. Its answer is 9:55. The label, marked by the orange tick, is 9:54. So this
-clock counts as a miss, by one minute. Hold on to this example; the next
-figure draws the same two lists on a dial, and the section after works out
-what the loss charges for it.
+The model put 0.94 on hour 9, and on the minute clock 0.73 on 55 and 0.14
+on 54: two shaded sectors side by side, one dark, one pale. Its answer is
+9:55. The label, the orange dashes, is 9:54. So this clock counts as a
+miss, by one minute. Hold on to this example; the next figure puts an easy
+clock beside it, and the loss section works out what the miss costs.
 
 Figure 2.3 shows the same two clocks of probabilities for an easy clock
 and then for the clock above, so the two cases can be compared.
