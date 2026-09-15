@@ -294,8 +294,10 @@ That is the whole objective: two sums over classes, added, averaged over
 the batch. The sum over classes is where the smoothing does its work.
 Without it, only the labelled class's term survives (the others are
 multiplied by zero); with it, every class contributes a little, and the
-model is charged for putting probability *exactly* zero anywhere. Figure
-2.7 shows the sum term by term for the boundary clock of Figure 2.3.
+model is charged for putting probability *exactly* zero anywhere.
+Figure 2.7 shows what that adds up to: what one class costs, where the
+loss of the two clocks in Figure 2.3 comes from, and what a whole batch
+looks like.
 
 ![The loss in three panels: the penalty curve minus log p with the easy and boundary clocks marked; the decomposition of each head's cross-entropy into the labelled class's term and the rest, for both clocks; and a histogram of the losses of 256 held-out clocks with the batch mean](/assets/clocks/loss_terms.png){: .no-invert}
 
