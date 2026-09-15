@@ -264,7 +264,7 @@ Left to do, in order:
   resolution question is back.
 - **Finish the ViT sweep.** The plain vit_tiny at 100 epochs, and the four
   ablations, so that the tokeniser claim in Part 2 stands on more than one
-  run.
+  run. This needs a power cable I trust first; see Part 2 for why.
 - **The angle head.** Regressing $$(\sin\theta, \cos\theta)$$ per hand is
   the loss that would treat a crept clock as almost right rather than
   wrong. It's wired in and unimplemented.

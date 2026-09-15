@@ -517,10 +517,16 @@ that are each standard elsewhere:
 It also trains for 100 epochs with a 10% warmup rather than 30 and 5%, which
 makes the comparison unclean. I'll come back to that.
 
-The run reached epoch 86 of 100 and stopped there. The machine rebooted with
-the job paused, the GPU then fell off the PCIe bus, and I stopped the rerun
-at epoch 26 rather than keep 380 W through a power cable I'd started to
-distrust. So there is no finished 100-epoch model. What survives is the best
+The run reached epoch 86 of 100 and stopped there, and the reason is worth
+a paragraph because it decided what this post can and can't claim. The
+machine rebooted with the job paused and the GPU then dropped off the PCIe
+bus. I restarted the run from scratch, and about half an hour in the
+room started to smell of hot plastic. The 16-pin power connector on the
+4090, the one with a reputation, was too hot to keep a finger on. The card
+was pulling 380 W and had been for hours. I killed the job at epoch 26
+rather than find out how that story ends. So there is no finished
+100-epoch model, and the rest of the ViT sweep, the control run and the
+four ablations, never happened. What survives is the best
 checkpoint through epoch 86, at 0.902 exact on validation, above every CNN's
 best validation score (cnn_r34 peaked at 0.891). Evaluated afterwards on the
 two test splits, on CPU:
