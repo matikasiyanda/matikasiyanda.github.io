@@ -89,18 +89,22 @@ the models saw, only paler ([Figure 3.1](#fig-3-1)).
 {: .figcap #fig-3-1}
 
 In the top row the three sets of hands are on top of each other. In the
-middle row one model is a minute off and the other isn't, and the two
-readings differ by a few degrees at the tip. In the bottom row both models
-agree with each other and disagree with the label, and the red and blue
-minute hands sit just clockwise of the yellow dashes, one minute's worth. That is the
-whole story of this post, and the rest of it is measuring that picture.
+other two rows the misses are not subtle, and they come in two kinds. One
+is the hour read into the neighbouring numeral with the minute right:
+11:16 read as 10:16, 7:59 read as 7:00, where the hour hand sits on or
+next to a numeral and the model picks the wrong side. The other is the
+hands swapped: 1:43 read as 8:09, 10:34 read as 6:53, 1:31 read as 6:07,
+on faces where the two hands are nearly the same length. Neither kind is
+a resolution problem. Both are the kind of mistake a person makes at a
+glance, and both are rare: those rows are drawn from 27 clocks in ten
+thousand for the ResNet and 12 for the ViT.
 
 Another way to look at the same thing: take what each model answered and
 draw it as a clean clock, next to the clock it was given. Red hands are
 the ResNet's reading, blue hands the ViT's. If the model read the clock,
-the drawn clock shows the same time as the unseen one; if it was a minute
-late, the blue or red minute hand is one tick past where the real one
-points ([Figure 3.2](#fig-3-2)).
+the drawn clock shows the same time as the unseen one. The last four rows
+are real misses: the drawn clock shows an hour hand on the wrong numeral,
+or the two hands the wrong way round ([Figure 3.2](#fig-3-2)).
 
 ![Six held-out clocks, each beside a clean clock drawn from the ResNet's reading in red and one from the ViT's reading in blue](/assets/clocks/readback_heldout.png){: .no-invert}
 
@@ -287,13 +291,16 @@ ViT alone on 5.9%. Either one right: 95.3% ([Figure 3.11](#fig-3-11)).
 **Figure 3.11.** Held-out clocks where both models are exactly right, where only the ResNet is off by more than a minute, where only the ViT is, and the three where both are.
 {: .figcap #fig-3-11}
 
-The disagreements are all one-minute disagreements, in both directions,
-and the "both wrong" row is mostly the renderer's creep again: both models
-late by one on the same clock. That the two models are wrong on *different* clocks
-6% of the time each, on a task where the labels are ambiguous a quarter of
-the time, says their errors are mostly coin flips at the boundary rather
-than systematic blind spots. Averaging the two heads would gain a few
-points, and wouldn't mean anything.
+Those percentages count one-minute misses as wrong, and on that count the
+two models miss *different* clocks 6% of the time each, which on a task
+where the labels are ambiguous a quarter of the time says their errors
+are mostly coin flips at the boundary rather than systematic blind spots.
+The figure uses the stricter rule, more than a minute off, and there the
+numbers are small: 24 clocks where only the ResNet was off by more than a
+minute, 9 where only the ViT was, and 3 where both were. The three shared
+misses are a swap and two hour-on-the-numeral reads. Averaging the two
+models would gain a few points on the one-minute misses, and wouldn't mean
+anything.
 
 For completeness, the worst misses by circular minute error for each
 model, drawn the same way as the panels at the top of the post ([Figure 3.12](#fig-3-12)):
