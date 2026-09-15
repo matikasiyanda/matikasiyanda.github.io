@@ -34,7 +34,7 @@ what a given amount of model can learn.
 ## What goes in, what comes out
 
 Before the models, the plumbing. What goes in and what comes out is the
-same for every model in this post, so it comes first (Figure 2.1).
+same for every model in this post, so it comes first ([Figure 2.1](#fig-2-1)).
 
 ```mermaid
 flowchart TB
@@ -48,7 +48,7 @@ flowchart TB
 ```
 
 **Figure 2.1.** From one image to one loss number: the data flow shared by every model in this post.
-{: .figcap}
+{: .figcap #fig-2-1}
 
 
 **The input** is one image, 128 by 128 pixels, three colour channels,
@@ -68,12 +68,12 @@ Those 49,152 numbers are what the model receives. What it returns is
 drawn on the right as two clocks. The hour clock has twelve sectors, one
 per hour, and the minute clock sixty, one per minute; each sector is
 shaded by the probability the model put on it, and the model's answer,
-the darkest sector of each, is drawn as a hand (Figure 2.2).
+the darkest sector of each, is drawn as a hand ([Figure 2.2](#fig-2-2)).
 
 ![The input as a clock and its three colour channels, the model, and the output as the twelve and sixty numbers it returns](/assets/clocks/io_numbers.png){: .no-invert}
 
 **Figure 2.2.** One clock through the model. Left: the input and its three colour channels. Right: its two outputs drawn as clocks, the twelve hour probabilities as sectors of one dial and the sixty minute probabilities as sectors of another. Darker means more probability; the solid hand is the model's answer with its value; the orange dashes mark the label.
-{: .figcap}
+{: .figcap #fig-2-2}
 
 The model put 0.94 on hour 9, and on the minute clock 0.73 on 55 and 0.14
 on 54: two shaded sectors side by side, one dark, one pale. Its answer is
@@ -81,13 +81,13 @@ on 54: two shaded sectors side by side, one dark, one pale. Its answer is
 miss, by one minute. Hold on to this example; the next figure puts an easy
 clock beside it, and the loss section works out what the miss costs.
 
-Figure 2.3 shows the same two clocks of probabilities for an easy clock
+[Figure 2.3](#fig-2-3) shows the same two clocks of probabilities for an easy clock
 and then for the clock above, so the two cases can be compared.
 
 ![Two clocks through the trained ViT: the input, its output drawn as a probability dial, and the loss worked out](/assets/clocks/objective_dial.png){: .no-invert}
 
 **Figure 2.3.** Two clocks through the trained ViT. Each row: the input, the hour probabilities as a twelve-sector clock, the minute probabilities as a sixty-sector clock. Solid hand: the model's answer. Orange dashes: the label.
-{: .figcap}
+{: .figcap #fig-2-3}
 
 The top row is the easy case. One dark green sector at 12, one dark blue
 sector at 22, each hand on top of its dashes. The model gave 92% to the right
@@ -121,7 +121,7 @@ batch, goes down.
 Here are the two families as data flows, with the shape of the tensor at
 each stage for a 128 px input. Read them top to bottom. The ResNet shrinks
 the image four times while widening the channels; the ViT shrinks it once,
-at the very start, and then keeps the same 256 tokens through every layer (Figure 2.4).
+at the very start, and then keeps the same 256 tokens through every layer ([Figure 2.4](#fig-2-4)).
 
 ```mermaid
 flowchart TB
@@ -146,7 +146,7 @@ flowchart TB
 ```
 
 **Figure 2.4.** ResNet-18 and ViT tiny as data flows, with the tensor shape at each stage for a 128 px input.
-{: .figcap}
+{: .figcap #fig-2-4}
 
 
 A residual block is two 3x3 convolutions with a skip connection that adds
@@ -182,12 +182,12 @@ works out from the descriptions and from knowing which stamp each one
 came from.
 
 Here it is on the real model, following one stamp from the clock to its
-description (Figure 2.5):
+description ([Figure 2.5](#fig-2-5)):
 
 ![One patch followed from the image to its token: cut, flatten to 192 numbers, multiply by the learned matrix E, add the position vector, one of 256 tokens. The clock is shown at 512 px for legibility](/assets/clocks/tokeniser_steps.png){: .no-invert}
 
 **Figure 2.5.** One patch followed from the image to its token: cut, flatten to 192 numbers, multiply by the learned matrix E, add the position vector, one of 256 tokens. The clock is shown at 512 px for legibility.
-{: .figcap}
+{: .figcap #fig-2-5}
 
 Step by step, with the sizes:
 
@@ -217,14 +217,14 @@ $$z_i = E\,x_i + \mathrm{pos}_i, \qquad E \in \mathbb{R}^{192 \times 192}.$$
 What does step 3 actually compute? The clearest way to see it is to
 think of each row of the matrix as a *template*: a tiny pattern the patch
 is compared against. The token entry for that row is how strongly the
-patch matches the pattern, a weighted sum of the pixel values. Figure 2.6
+patch matches the pattern, a weighted sum of the pixel values. [Figure 2.6](#fig-2-6)
 shrinks the whole thing to a size you can check by hand: a patch of four
 grey pixels and a matrix with three rows, so the token has three numbers.
 
 ![A toy tokeniser: a four-pixel patch compared against three templates, average brightness, top minus bottom, left minus right, giving a three-number token; beneath, three of the real model's 192 learned 8 × 8 colour templates](/assets/clocks/token_calc.png){: .no-invert}
 
 **Figure 2.6.** A toy tokeniser. Top: a four-pixel patch, three template rows, the multiply-adds, and the three-number token they produce. Bottom: three of vit_tiny's 192 real templates, each 8 × 8 pixels × 3 colours, reshaped from rows of the learned matrix.
-{: .figcap}
+{: .figcap #fig-2-6}
 
 The three toy rows were chosen to have names: "average brightness", "top
 minus bottom", "left minus right". Against a patch that is light on top
@@ -252,7 +252,7 @@ results section shows what that costs.
 
 The loss is where the two probability charts of the first section become
 one number. Here it is in symbols, then worked out for the two clocks in
-Figure 2.3, then the three other ways it could have been set up and why
+[Figure 2.3](#fig-2-3), then the three other ways it could have been set up and why
 they weren't. The encoder's summary vector $$f \in \mathbb{R}^d$$ (the
 averaged last feature map for a ResNet, the class token or the mean token
 for a ViT) goes through two linear layers, one per hand:
@@ -295,14 +295,14 @@ the batch. The sum over classes is where the smoothing does its work.
 Without it, only the labelled class's term survives (the others are
 multiplied by zero); with it, every class contributes a little, and the
 model is charged for putting probability *exactly* zero anywhere.
-Figure 2.7 shows what that adds up to: what one class costs, where the
-loss of the two clocks in Figure 2.3 comes from, and what a whole batch
+[Figure 2.7](#fig-2-7) shows what that adds up to: what one class costs, where the
+loss of the two clocks in [Figure 2.3](#fig-2-3) comes from, and what a whole batch
 looks like.
 
 ![The loss in three panels: the penalty curve minus log p with the easy and boundary clocks marked; the decomposition of each head's cross-entropy into the labelled class's term and the rest, for both clocks; and a histogram of the losses of 256 held-out clocks with the batch mean](/assets/clocks/loss_terms.png){: .no-invert}
 
 **Figure 2.7.** The loss, in three panels. Left: the penalty for giving the labelled class probability p is −log p, cheap near 1 and steep near 0; the easy clock and the boundary clock are marked. Middle: each head's cross-entropy split into the labelled class's term (coloured) and the other classes' terms (grey), for both clocks; the two heads add to the image's loss. Right: the losses of 256 held-out clocks, with the mean, which is the batch loss.
-{: .figcap}
+{: .figcap #fig-2-7}
 
 Read the middle panel. On the boundary clock the minute head's bar is
 mostly blue: the labelled minute, 54, got probability 0.14 where 0.90 was
@@ -415,12 +415,12 @@ held-out fonts:
 | vit_small | 14.4M | 0.422 | 0.432 | 0.829 | 0.724 | 29 min |
 | vit_p16 | 14.5M | 0.074 | 0.075 | 0.261 | 0.139 | 7 min |
 
-Figure 2.8 shows how they got there, epoch by epoch.
+[Figure 2.8](#fig-2-8) shows how they got there, epoch by epoch.
 
 ![Validation exact accuracy and training loss per epoch for all seven runs](/assets/clocks/curves.png)
 
 **Figure 2.8.** Validation exact accuracy and training loss per epoch for all seven runs.
-{: .figcap}
+{: .figcap #fig-2-8}
 
 Read the table as a person would: the ResNets get about nine clocks in
 ten exactly right and almost all of the rest within a minute, whether or
@@ -456,12 +456,12 @@ The ViT paper [[ViT]](#references) says ViTs lose to CNNs on small data
 without pre-training, because they lack the locality prior. That's true and
 it isn't specific enough. The ordering here, patch 16 far worse than patch
 8, and the bigger patch-8 model worse than the smaller one, points at the
-first layer (Figure 2.9).
+first layer ([Figure 2.9](#fig-2-9)).
 
 ![One clock under a 16, 8 and 4 px patch grid](/assets/clocks/patch_grids.png){: .no-invert}
 
 **Figure 2.9.** One clock under a 16, 8 and 4 px patch grid.
-{: .figcap}
+{: .figcap #fig-2-9}
 
 The tokeniser section followed one 8 px patch to its token. Now change
 the patch size. With 16 px patches on a 128 px image the clock is an 8 by 8
@@ -471,12 +471,12 @@ about those 768 values is gone before any attention happens, and the
 matrix, applied to each patch alone, can't express "which way is the
 centre". At 4 px the hand runs through a dozen tokens, each holding a
 short piece of it, and the attention layers have a line to reassemble
-rather than a smudge to guess from (Figure 2.10).
+rather than a smudge to guess from ([Figure 2.10](#fig-2-10)).
 
 ![The same clock as the mean of each 4, 8 and 16 px patch](/assets/clocks/patch_means.png){: .no-invert}
 
 **Figure 2.10.** The same clock as the mean of each 4, 8 and 16 px patch.
-{: .figcap}
+{: .figcap #fig-2-10}
 
 Averaging each patch is a crude stand-in for what a linear projection keeps,
 but it makes the point: at 16 px the hands are a smudge, at 8 px they are a
@@ -491,12 +491,12 @@ more work than it looks. A clock at 128 px is roughly a wall clock seen
 from across a room: you can tell the time, but you'd take a step closer to
 be sure of the minute. The minute-hand tip moves $$2\pi r / 60$$ per minute, which for a
 typical face at 128 px is three or four pixels (Part 1 derived it). The
-radius $$r$$ scales with the image, so the budget scales too (Figure 2.11):
+radius $$r$$ scales with the image, so the budget scales too ([Figure 2.11](#fig-2-11)):
 
 ![The same clock rendered at 64, 128 and 256 px](/assets/clocks/resolution.png){: .no-invert}
 
 **Figure 2.11.** The same clock rendered at 64, 128 and 256 px.
-{: .figcap}
+{: .figcap #fig-2-11}
 
 | image size | typical tip radius | pixels per minute |
 |---|---|---|
@@ -570,7 +570,7 @@ that are each standard elsewhere:
 - Global average pooling over tokens instead of a class token
   [[PlainViT]](#references).
 
-As a data flow, next to the plain ViT drawn earlier (Figure 2.12):
+As a data flow, next to the plain ViT drawn earlier ([Figure 2.12](#fig-2-12)):
 
 ```mermaid
 flowchart TB
@@ -585,7 +585,7 @@ flowchart TB
 ```
 
 **Figure 2.12.** ViT tiny v2 as a data flow: a convolutional stem to stride 4, fixed sincos positions, average pooling.
-{: .figcap}
+{: .figcap #fig-2-12}
 
 
 It also trains for 100 epochs with a 10% warmup rather than 30 and 5%, which
@@ -610,12 +610,12 @@ two test splits, on CPU:
 | test, training fonts | 0.892 | 0.998 | 0.893 | 0.997 | 0.11 min |
 | test, held-out fonts | 0.899 | 0.998 | 0.899 | 0.998 | 0.11 min |
 
-Figure 2.13 puts every model on one chart.
+[Figure 2.13](#fig-2-13) puts every model on one chart.
 
 ![Test exact accuracy against parameter count for every model, marker size proportional to parameters, beside per-model bars for seen fonts, held-out fonts and within a minute](/assets/clocks/params.png)
 
 **Figure 2.13.** Left: test exact accuracy against parameter count for every model, with the marker drawn in proportion to the model's size. Right: exact accuracy on seen and held-out fonts, and the within-a-minute rate, per model.
-{: .figcap}
+{: .figcap #fig-2-13}
 
 So a 3.8M-parameter ViT with a different tokeniser ends up level with a
 21M ResNet on this task. Here is the honest version of that sentence. The
