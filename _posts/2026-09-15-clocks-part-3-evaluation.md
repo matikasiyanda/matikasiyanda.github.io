@@ -361,72 +361,105 @@ degrees, which as a minute hand would read 41, and the ResNet said 8:41.
 The hands in that image are nearly the same length. The 10:34 read as 6:53
 is the same swap the other way. A person would need a second look too.
 
-## Real photographs, a first look
+## Real photographs
 
 Everything above is synthetic, and a model that has only seen rendered
 clocks has never met glass reflections, perspective, brass hands on brass
-dials, or a photographer's framing. Real clocks are the test that matters,
-and here is a first, small, honest one.
+dials, or a photographer's framing. Real clocks are the test that matters.
+Here it is in two sizes: thirteen photographs I cropped and labelled
+myself, then 3,228 with labels from someone else.
 
-Thirteen photographs of analogue clocks from Wikimedia Commons, all CC0
-or public domain, cropped by hand to the face and resized to 128 px, the
-same input the models trained on. The labels are my own readings of the
-full-resolution photographs; four of them I'm not sure of to the minute,
-and they're marked. The two models read the crops with no adjustment of
-any kind ([Figure 3.16](#fig-3-16)).
+### Thirteen by hand
+
+Thirteen photographs of analogue clocks from Wikimedia Commons, all CC0,
+cropped by hand to the face and resized to 128 px, the same input the
+models trained on. The labels are my own readings of the full-resolution
+photographs; four of them I'm not sure of to the minute, and they're
+marked. The two models read the crops with no adjustment of any kind
+([Figure 3.16](#fig-3-16)).
 
 ![Thirteen real clock faces cropped from public-domain photographs, each with my reading, the ResNet's reading and the ViT's reading](/assets/clocks/real_clocks.png){: .no-invert}
 
 **Figure 3.16.** Thirteen real clocks. Under each: my reading of the time, then the ResNet-34's and the ViT tiny v2's, with the error in minutes. A bold reading is within a minute of the label.
 {: .figcap #fig-3-16}
 
-| 13 real clocks | exact | within 1 min | within 5 min | hour wrong |
+The ResNet reads three within a minute and the ViT five, and each gets the
+hour wrong on more than half. One of my own labels was wrong until the
+models corrected me: I first read the Deutsche Bahn clock as 10:40; both
+models said 9:40, and looking again, the hour hand is two thirds of the way
+from 9 to 10, which is 9:40. Thirteen clocks and my own labels are a
+reason to build a real evaluation, not one.
+
+### 3,228 with published labels
+
+The authors of *It's About Time* [[ClockWild]](#references) released, with
+their paper, a box around the clock face and a hand-labelled time for
+1,911 clocks in COCO photographs and 1,317 in Open Images. Both image
+sets are public, so this is a real test set with someone else's labels.
+Each face was cropped from its box with a 10% margin, made square, and
+resized to 128 px, then read by each of the four models that read
+synthetic clocks. No fine-tuning, no test-time adjustment, no detector:
+the boxes are the published ground truth, so this measures reading, not
+finding.
+
+| 3,228 real clocks | within 1 min | within 5 min | hour right | median error |
 |---|---|---|---|---|
-| cnn_r34 | 1 | 3 | 5 | 8 |
-| vit_tiny_v2 (86 ep) | 3 | 5 | 6 | 7 |
+| cnn_small | 27.2% | 31.2% | 40.8% | 63 min |
+| cnn_r34 | 36.1% | 41.8% | 51.2% | 32 min |
+| vit_tiny | 32.2% | 41.5% | 47.7% | 42 min |
+| vit_tiny_v2 (86 ep) | 37.4% | 46.2% | 53.2% | 18 min |
 
-So: on synthetic clocks both models read 99.7% of faces within a minute;
-on these thirteen photographs the ResNet manages three and the ViT five,
-and each gets the hour wrong on more than half. That is the gap between
-the renderer and the world, measured for the first time, and it is large.
+For scale, the paper's own model, trained on its synthetic clocks plus
+pseudo-labelled real time-lapse footage and using an alignment stage to
+undo perspective, reads 80.4% of the COCO clocks and 77.3% of the Open
+Images clocks within a minute. These models, trained on renders alone and
+handed the raw crop, read 37%. That is the gap between the renderer and
+the world, and it is the number this series would have been dishonest
+without ([Figure 3.17](#fig-3-17)).
 
-Two things in the readings are worth more than the tally. First, the
-misses are the same kinds as on synthetic clocks, only far more frequent:
-the hour read one numeral over (the wall clock at 6:45 read as 5:47 by
-both models, the kitchen clock at 2:00 read as 2:59 and 1:59), and the
-hands swapped where they're similar in length (the watch, the Grand
-Trunk regulator). Second, where the photograph resembles the renderer's
-world, a flat face, plain hands, a clean crop, the models are fine: the
-alarm clock, the Deutsche Bahn clock, the Junghans alarm clock, the
-wooden wall clock. Where it doesn't, they fail: tilted faces, ornate dials,
-reflections, hands of nearly equal length.
+![Tolerance curves on 3,228 real clocks for the four models, with their synthetic curves faint behind, and the error distribution of the best two](/assets/clocks/real_wild_curves.png)
 
-One of my own labels was wrong until the models corrected me. I first
-read the Deutsche Bahn clock as 10:40; both models said 9:40, and looking
-again, the hour hand is two thirds of the way from 9 to 10, which is 9:40.
-A person's first glance has its own creep.
+**Figure 3.17.** Left: the fraction of real clocks read within k minutes, for the four models, with each model's synthetic held-out curve drawn faint behind it. Right: the error split for the ResNet-34 and the ViT tiny v2 on real clocks.
+{: .figcap #fig-3-17}
 
-This is thirteen clocks, hand-cropped, with labels read by the person
-running the experiment. It is not an evaluation; it is the reason to
-build one. The next step is obvious and it is on the list below: a
-proper real-photograph test set, with a detector to find the face rather
-than a hand crop, and training augmentation that covers perspective and
-reflection.
+The shape of the curves says what kind of failure this is. On synthetic
+clocks every good model's curve is flat after one minute; on real clocks
+the curves keep climbing all the way to three hours, and a third of the
+readings are more than ninety minutes out. The models are not slightly
+imprecise on photographs, they are frequently reading a different clock
+entirely. The ordering, though, survives the transfer: the v2 ViT is
+still the best of the four on every measure, the plain vit_tiny is still
+behind it, and the small ResNet is worst.
 
-<details markdown="1">
-<summary>Photo credits (Wikimedia Commons, all CC0)</summary>
+Eight clocks the ViT read within a minute and eight it read more than an
+hour wrong ([Figure 3.18](#fig-3-18)):
 
-Alarm clock on a chair (Szűcs László); Antique wall clock and Antique
-Wooden SEC Wall Clock (Amitbalani); Clock in Brighton railway station
-concourse (Andy Li); Deutsche Bahn clock at Munich Central Station
-(Wilfredor); Grand Trunk Railway clock in Kingston train station (Mr
-Serjeant Buzfuz); Hand watch clock face (Maxim75); Kitchen clock,
-Haas-Lilienthal House (Daderot); 1978-80 Küchenuhr mit Kurzzeitmesser,
-Junghans (Alf van Beem); DCF77-Wecker, analog und digital (Renardo la
-vulpo); 140217 16-20-18 DSCN5044 (Theo Oppewal); Jaren 80, 2009-046-097
-(Studio Alijn); GE 7-4550 Closeup (phreakindee).
+![Eight real clocks the ViT read within a minute and eight it read more than an hour wrong](/assets/clocks/real_wild_examples.png){: .no-invert}
 
-</details>
+**Figure 3.18.** Real clocks from COCO and Open Images, as the 128 px crops the models saw. Top: eight the ViT tiny v2 read within a minute. Bottom: eight it read more than an hour wrong.
+{: .figcap #fig-3-18}
+
+The pattern from the thirteen holds at scale. What the model reads well
+looks like the renderer's world: a flat face, seen square on, with hands
+that differ clearly in length, in a photograph where the clock is a small
+part of the scene. What it gets wrong is the close-up: the ornate
+turret clock at an angle, the glass with a reflection, the dial where the
+hands are the same brass as the numerals. One check makes that concrete.
+Sorting the clocks by how large the face is in the original photograph,
+the models read the *small* faces best and the *large* ones worst
+([Figure 3.19](#fig-3-19)):
+
+![Fraction read within five minutes against the size of the face in the photograph, for both models](/assets/clocks/real_wild_size.png)
+
+**Figure 3.19.** The share of real clocks read within five minutes, by the size of the clock face in the original photograph. The large faces, close-ups with perspective and ornament, are the hardest.
+{: .figcap #fig-3-19}
+
+A face under 64 px in the photograph, blown up to 128, is read within
+five minutes 53% of the time by the ViT; a face over 256 px, shrunk to
+128, only 37%. Resolution is not what's missing. What's missing is
+everything the renderer never drew: a camera at an angle, a bezel casting
+a shadow, a reflection across the glass, a decorated dial. Those are
+renderer changes, and the next section lists them.
 
 ## What this changes
 
@@ -454,10 +487,12 @@ Left to do, in order:
 - **Seeds.** Two runs of the same configuration differed by three points
   mid-training. Nothing in this series that's within two points of
   something else should be read as an ordering.
-- **Real clocks, properly.** The thirteen photographs above say the gap
-  is large; a real test set [[ClockWild]](#references), a face detector
-  instead of hand crops, and perspective and reflection in the renderer
-  are what it takes to measure and close it.
+- **Close the gap to photographs.** The 3,228 real clocks put the
+  models at 37% within a minute against 99.7% on renders. The renderer
+  never drew perspective, shadows, reflections or decorated dials; adding
+  them, and fine-tuning on the real time-lapse data the *It's About Time*
+  authors used, is the obvious next experiment, and the test set to
+  measure it on now exists.
 
 The models themselves are available as PyTorch checkpoints; see the
 [code repository](https://github.com/matikasiyanda/clock-check) for the

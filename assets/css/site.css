@@ -306,3 +306,9 @@ html.lightbox-open { overflow: hidden; }
 .prose p.figcap { color: var(--muted); font-size: 14px; text-align: center; margin: -1.4em 0 2.2em; line-height: 1.45; }
 .prose p.figcap em { font-style: normal; }
 .prose p.figcap strong { font-weight: 600; color: var(--muted); }
+
+/* series entries in the post list */
+.posts li.series .series-badge { font-size: 12px; color: var(--muted); margin-left: 8px; border: 1px solid var(--muted); border-radius: 10px; padding: 1px 8px; }
+.posts li.series .series-parts { font-size: 14px; color: var(--muted); margin-top: 4px; }
+.posts li.series .series-parts a { color: var(--muted); text-decoration: none; border-bottom: 1px dotted var(--muted); }
+.posts li.series .series-parts a:hover { color: var(--accent); border-bottom-color: var(--accent); }

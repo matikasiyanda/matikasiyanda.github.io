@@ -1,6 +1,7 @@
 ---
 title: "Training a document-search agent with GRPO on one RTX 4090"
 permalink: /blog/agent-rl/
+description: "Training a document-search agent with GRPO on one RTX 4090: the data, the environment and the RL loop, and the results, in three parts."
 math: true
 ---
 

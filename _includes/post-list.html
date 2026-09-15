@@ -1,9 +1,28 @@
+{% comment %} Posts that belong to a series are shown once, as the series, linking to its synopsis page; the parts are listed underneath. {% endcomment %}
+{% assign seen = "" | split: "" %}
+{% assign shown = 0 %}
 <ul class="posts">
-{% for post in site.posts limit: include.limit %}
-  <li>
-    <a href="{{ post.url | relative_url }}">{{ post.title }}</a>
-    <time datetime="{{ post.date | date_to_xmlschema }}">{{ post.date | date: "%b %Y" }}</time>
-    {% if post.description %}<p>{{ post.description }}</p>{% endif %}
-  </li>
+{% for post in site.posts %}
+  {% if include.limit and shown >= include.limit %}{% break %}{% endif %}
+  {% if post.series %}
+    {% if seen contains post.series %}{% continue %}{% endif %}
+    {% assign seen = seen | push: post.series %}
+    {% assign parts = site.posts | where: "series", post.series | sort: "part" %}
+    {% assign landing = site.pages | where: "permalink", post.series_url | first %}
+    <li class="series">
+      <a href="{{ post.series_url | relative_url }}">{{ post.series }}</a>
+      <time datetime="{{ post.date | date_to_xmlschema }}">{{ post.date | date: "%b %Y" }}</time>
+      <span class="series-badge">{{ parts.size }}-part series</span>
+      {% if landing.description %}<p>{{ landing.description }}</p>{% elsif post.description %}<p>{{ post.description }}</p>{% endif %}
+      <p class="series-parts">{% for p in parts %}<a href="{{ p.url | relative_url }}">Part {{ p.part }}: {{ p.title | remove_first: "Part " | remove_first: p.part | remove_first: " — " }}</a>{% unless forloop.last %}<span class="sep"> · </span>{% endunless %}{% endfor %}</p>
+    </li>
+  {% else %}
+    <li>
+      <a href="{{ post.url | relative_url }}">{{ post.title }}</a>
+      <time datetime="{{ post.date | date_to_xmlschema }}">{{ post.date | date: "%b %Y" }}</time>
+      {% if post.description %}<p>{{ post.description }}</p>{% endif %}
+    </li>
+  {% endif %}
+  {% assign shown = shown | plus: 1 %}
 {% endfor %}
 </ul>
