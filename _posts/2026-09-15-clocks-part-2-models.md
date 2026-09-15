@@ -275,9 +275,15 @@ target weight times the negative log of the model's probability:
 
 $$\mathrm{CE}_\varepsilon(p, y) = -\sum_{c=1}^{C} q_c \log p_c .$$
 
-Written out in full for one image $$i$$ with label $$(h_i, m_i)$$, then
-averaged over the $$B = 256$$ images of a batch, the number that training
-pushes down is
+One image has two heads, so its loss is the hour head's cross-entropy
+plus the minute head's, with $$C = 12$$ in the first and $$C = 60$$ in the
+second:
+
+$$\mathcal{L}_i = \mathrm{CE}_\varepsilon(p^{h}_i, h_i) + \mathrm{CE}_\varepsilon(p^{m}_i, m_i).$$
+
+A batch has $$B = 256$$ images, and the number training pushes down is
+their mean, $$\mathcal{L} = \frac{1}{B}\sum_i \mathcal{L}_i$$. Written out
+in full, with the smoothed targets substituted in, that is
 
 $$\mathcal{L} = \frac{1}{B} \sum_{i=1}^{B} \Bigg[
 -\sum_{c=0}^{11} \Big( 0.9\,[c = h_i] + \tfrac{0.1}{12} \Big) \log p^{h}_{i,c}
