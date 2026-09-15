@@ -218,11 +218,11 @@ $$z_i = E\,x_i + \mathrm{pos}_i, \qquad E \in \mathbb{R}^{192 \times 192}.$$
 
 What does step 3 actually compute? Shrink it to a toy you can check by
 hand: a patch of four grey pixels instead of 192 colour values, and a
-token of three numbers instead of 192. The pixel values, scaled to
-$$[-1, 1]$$, are
+token of three numbers instead of 192. Say the top two pixels
+are light and the bottom two dark. Scaled to $$[-1, 1]$$ and read off
+top-left, top-right, bottom-left, bottom-right, the pixel values are
 
-$$x = \begin{pmatrix} 0.9 \\ 0.8 \\ -0.7 \\ -0.9 \end{pmatrix}
-\quad\text{(top-left, top-right, bottom-left, bottom-right: light, light, dark, dark).}$$
+$$x = \begin{pmatrix} 0.9 \\ 0.8 \\ -0.7 \\ -0.9 \end{pmatrix}.$$
 
 The tokeniser is a matrix with one row per output number and one column
 per input number, plus an offset per output. Suppose training had left it
@@ -233,8 +233,11 @@ b = \begin{pmatrix} 0 \\ 0 \\ 0 \end{pmatrix}.$$
 
 Then each output is one row times the pixels, added up:
 
-$$z = Ex + b = \begin{pmatrix} 0.5(0.9) + 0.5(0.8) + 0.5(-0.7) + 0.5(-0.9) \\ 0.9 + 0.8 + 0.7 + 0.9 \\ 0.9 - 0.8 - 0.7 + 0.9 \end{pmatrix}
-= \begin{pmatrix} 0.05 \\ 3.3 \\ 0.3 \end{pmatrix}.$$
+$$\begin{aligned}
+z_1 &= 0.5(0.9) + 0.5(0.8) + 0.5(-0.7) + 0.5(-0.9) &&= 0.05 \\
+z_2 &= 0.9 + 0.8 - (-0.7) - (-0.9) &&= 3.3 \\
+z_3 &= 0.9 - 0.8 + (-0.7) - (-0.9) &&= 0.3
+\end{aligned}$$
 
 Read the three numbers: the first is the patch's average brightness
 (about zero, half light and half dark), the second is "how much lighter is
