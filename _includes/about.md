@@ -15,5 +15,4 @@ that planned its own searches months before "deep research" was a product,
 and a growing list of side projects on the [Now](/now/) page.
 
 This site is where the write-ups live, with the numbers, the plots and the
-mistakes left in. There's a [resume](/resume/) for anyone who needs the
-serious version.
+mistakes left in.
