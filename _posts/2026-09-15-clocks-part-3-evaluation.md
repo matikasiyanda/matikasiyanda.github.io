@@ -175,14 +175,22 @@ seconds 45 to 59, on the same curve. In the last quarter of the minute,
 architectures with nothing in common except the data draw the same line,
 which is what you'd expect if the line belongs to the data.
 
-The hour errors, rare as they are, are the same thing. [Figure 3.9](#fig-3-9) puts
-the hour error rate on a dial, one clock per model, each minute's sector
-shaded by how often the model got the *hour* wrong at that minute.
+The hour errors, rare as they are, are the same thing. [Figure 3.9](#fig-3-9)
+puts both error rates on dials, one column per model: the top row is how
+often the model got the *hour* wrong at each true minute, the bottom row
+how often it got the *minute* wrong.
 
-![Hour error rate by true minute drawn on a dial for each model: the ResNet and the v2 ViT are dark only at :00 and :59, the plain ViT is dark everywhere](/assets/clocks/hour_err_by_minute.png){: .no-invert}
+![Two rows of dials, one column per model: hour error rate by true minute on top, minute error rate by true minute beneath](/assets/clocks/hour_err_by_minute.png){: .no-invert}
 
-**Figure 3.9.** Hour error rate by true minute, one dial per model, on held-out fonts. Darker sectors mean more hour errors at that minute. The two good models fail only at :00 and :59; the plain ViT fails all round the dial.
+**Figure 3.9.** Errors around the dial, on held-out fonts. Top row: hour error rate by true minute (red). Bottom row: minute error rate by true minute (blue). One column per model; darker sectors mean more errors at that minute, and the rows use different colour scales.
 {: .figcap #fig-3-9}
+
+The top row is the boundary again. The two good models get the hour wrong
+only at :00 and :59, and nowhere else above 0.7%; the plain ViT fails all
+round the dial. The bottom row is flat: the minute error rate is spread
+evenly around the clock, with no minute much harder than another, which
+is what you'd expect if the errors come from the creep rather than from
+any particular hand position.
 
 The ResNet's hour errors sit at minute 0 (6.5% of those images) and minute
 59 (6.2%); the ViT's at 59 (4.9%) and 0 (3.9%). Everywhere else the rate
