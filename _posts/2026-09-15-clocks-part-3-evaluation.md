@@ -252,7 +252,7 @@ everything lives between 0.85 and 0.92 ([Figure 3.10](#fig-3-10)):
 
 ![Exact accuracy on held-out fonts by numeral style, face shape, hand style, tick marks, second hand and rotation](/assets/clocks/acc_by_attribute.png)
 
-**Figure 3.10.** Exact accuracy on held-out fonts by numeral style, face shape, hand style, tick marks, second hand and rotation.
+**Figure 3.10.** Exact accuracy on held-out fonts by numeral style, face shape, hand style, tick marks, second hand and rotation. Exact means both hands right, so a one-minute miss counts as wrong here.
 {: .figcap #fig-3-10}
 
 With 10,000 images split six ways, each bar rests on a few hundred to a
