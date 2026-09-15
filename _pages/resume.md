@@ -13,16 +13,13 @@ redirect_from:
 </div>
 
 Data and AI Lead in Johannesburg, with 8 years of experience across banking,
-capital markets, insurance and research. I take data and AI work from the
-first scoping conversation to a system running in production, and I have
-done it at both ends of the scale: in research, on petabytes of
-radio-interferometer data as part of the international HERA collaboration on
-the path to the Square Kilometre Array, where the pipelines had to be right
-because the signal being searched for was fainter than everything in front
-of it; and in industry, on bank, capital-markets and insurance data, where
-the same discipline applies to statistical models, retrieval systems and
-language models that customers use. Structured and unstructured data alike,
-with the evaluation to say whether a thing works.
+capital markets, insurance and research. I lead data and AI initiatives from
+scope to production, across the full range of data: large structured datasets
+in SQL, Spark and Hadoop, ETL pipelines, statistical analysis, and
+unstructured text, image and video data, through to machine learning and LLM
+systems in production. In research, I collaborated on data pipelines for
+petabyte-scale radio astronomy data on the path to the Square Kilometre Array
+(SKA), as part of international science collaborations.
 
 <p class="cv-actions"><a class="btn-download" href="/assets/files/siyanda-matika-resume.pdf" download>Download PDF</a></p>
 
