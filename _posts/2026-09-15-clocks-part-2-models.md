@@ -65,16 +65,17 @@ Here is what that means as literal numbers, for one held-out clock. The
 image is stored as three grids of 128 by 128 values, one for red, one for
 green, one for blue, and a row of the actual values is printed under them.
 Those 49,152 numbers are what the model receives. What it returns is
-charted below the model: twelve numbers as twelve bars, sixty numbers as
-sixty bars. Its answer is the tallest bar of each chart (Figure 2.2).
+charted on the right: twelve numbers as twelve bars, sixty numbers as
+sixty bars, with the busy end of the minute list zoomed in. Its answer is
+the longest bar of each chart (Figure 2.2).
 
 ![The input as a clock and its three colour channels, the model, and the output as the twelve and sixty numbers it returns](/assets/clocks/io_numbers.png){: .no-invert}
 
-**Figure 2.2.** The input as a clock and its three colour channels, the model, and its two outputs as bar charts: twelve hour probabilities and sixty minute probabilities. Dark blue is the model's minute, amber the labelled one.
+**Figure 2.2.** One clock through the model. Left: the input and its three colour channels. Right: the two output lists as bars, twelve for the hour and sixty for the minute, with a zoom on the ten minutes where the probability sits. The orange tick marks the labelled class.
 {: .figcap}
 
 The model put 0.94 on hour 9, and on the minute chart 0.73 on 55 and 0.14
-on 54. Its answer is 9:55. The label, the amber bar, is 9:54. So this
+on 54. Its answer is 9:55. The label, marked by the orange tick, is 9:54. So this
 clock counts as a miss, by one minute. Hold on to this example; the next
 figure draws the same two lists on a dial, and the section after works out
 what the loss charges for it.
