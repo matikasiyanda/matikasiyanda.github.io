@@ -217,19 +217,19 @@ direction is later.
 
 ## The wall is in the renderer
 
-Part 1 listed, among the renderer's choices, this one: "half the time the
-hour hand also creeps with the second hand, as some real movements do." The
-minute hand does the same. In the code, with probability one half,
+Part 1 flagged the choice this turns on: each hand creeps with the seconds
+half the time. For the minute hand that means
 
 $$\theta_m = 6m + \tfrac{s}{10},$$
 
-so at $$s = 59$$ seconds the minute hand is 5.9 degrees past the minute
-mark, a tenth of a degree short of the next minute. The label is still
-$$m$$. The second hand itself is drawn on 45% of clocks and never labelled.
+so at $$s = 59$$ the hand sits 5.9 degrees past the minute mark, a tenth of
+a degree short of the next one, while the label still says $$m$$. The
+second hand is drawn on 45% of clocks and never labelled, so on the other
+55% there is nothing in the image to announce the seconds.
 
-So a quarter of the training images (creep on, seconds past 30) show a
-minute hand that is nearer the next minute than the labelled one. A model
-that reads the angle honestly will round up on those, and be marked wrong.
+A quarter of the images (creep on, seconds past 30) therefore show a minute
+hand nearer the next minute than the one the label names. A model that
+rounds the way a person would is marked wrong on all of them.
 Here is the error rate as a function of the second the renderer sampled ([Figure 3.11](#fig-3-11)):
 
 ![Late-by-one errors and exact accuracy as a function of the second, for both models](/assets/clocks/err_by_second.png)
