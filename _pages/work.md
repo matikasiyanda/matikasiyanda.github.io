@@ -18,12 +18,13 @@ read 89% of unseen-font clocks exactly in 30 epochs; plain ViTs got half
 that and got worse as they grew, until the tokeniser was replaced with a
 convolutional stem and fixed positions, after which a 3.8M ViT drew level
 with a 21M ResNet, given three times the training. The 10% of misses
-turned out to be one minute late by the renderer's own design, not a limit
-of the models. Then 3,228 real photographs, with published labels, put the
-same models at 37% within a minute.
+turned out to be one minute late by a rounding rule in my own labels:
+corrected, and retrained in the same 21 minutes, the smallest ResNet reads
+95.3%. Then 3,228 real photographs, with published labels, put the same
+models at 37% within a minute.
 
 <div class="stats">
-  <div class="stat"><b>0.899</b><span>exact on 10,000 clocks in unseen fonts (ViT tiny v2, 3.8M)</span></div>
+  <div class="stat"><b>0.953</b><span>exact on 10,000 clocks in unseen fonts, once the labels were corrected</span></div>
   <div class="stat"><b>99.9%</b><span>within a minute on renders</span></div>
   <div class="stat"><b>37%</b><span>within a minute on 3,228 real photographs</span></div>
 </div>

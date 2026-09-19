@@ -30,13 +30,15 @@ counts, on one RTX 4090. Three parts, read in order:
 
 3. **[Part 3 — What the models get wrong](/blog/clocks/part-3-evaluation/)**
    Predictions on clocks in fonts never seen in training, the off-by-one
-   wall every model hits and where it comes from, every big miss shown,
-   which clock styles are hard, and then 3,228 real photographs: 37% within
-   a minute, and why.
+   wall every model hits, traced to a labelling rule and then fixed by
+   retraining, every big miss shown one by one, and 3,228 real
+   photographs, where the models manage 37% within a minute.
 
 **Headline:** three ResNets, in 30 epochs, and one modified ViT, in 86,
-all land at 88 to 90% exact and 99.5% within a minute, on unseen fonts as
-well as seen ones. The last minute is the whole problem, and it's in the
-labels.
+all land at 88 to 90% exact on unseen fonts, and all of them stop in the
+same place. That wall turned out to be a rounding rule in my own labels,
+not the models: corrected, the smallest ResNet reads 95.3% in the same 21
+minutes. On real photographs, all of them drop to about 37% within a
+minute.
 
 </div>

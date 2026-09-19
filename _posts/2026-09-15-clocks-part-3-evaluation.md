@@ -5,7 +5,7 @@ permalink: /blog/clocks/part-3-evaluation/
 series: "Lost in time"
 series_url: /blog/clocks/
 part: 3
-description: "Predictions on clocks in fonts never seen in training, then on 3,228 real photographs. Nearly every synthetic miss is one minute late, and the reason is a design choice in the renderer; on photographs the models read 37% within a minute, and the reasons are the things the renderer never drew."
+description: "Predictions on clocks in fonts never seen in training, then on 3,228 real photographs. Nearly every synthetic miss is one minute late, and the reason is a labelling choice in the renderer: correct it and the same small model reads 95% instead of 88%. On photographs both models read 37% within a minute."
 tags: [vision, vit, cnn, evaluation]
 image: /assets/clocks/err_by_second.png
 math: true
@@ -275,30 +275,68 @@ and from 7.0% to 4.7% for the ViT. Nobody labelled the second hand. The
 models learned that a second hand at 50 next to a minute hand just past the
 mark means "not yet", because it lowered the loss.
 
-This reframes the headline number. The 89 to 90% exact isn't a ceiling on
-what the models can read. It's roughly what a perfect reader would score
-against these labels. In the first quarter of the minute, where the creep
-is under 1.5 degrees, both models are at 97%. The remaining 3% is the
-combination of genuine resolution limits, the renderer's blur and noise,
-and single-seed variance, and separating those is the next experiment. The
-first thing to do is not to render at 224 px; it's to fix the labels, or
-turn the creep off, and retrain.
+The bug isn't the creep, which is realistic, since real clocks do it. It's
+labelling a crept clock with the floor of the minute. A person reading
+3:59:59 says four o'clock, and so does the model.
 
-I'd rather report this than hide it. The renderer's creep is a realistic
-choice, since real clocks do it, and the bug isn't the creep, it's labelling
-a crept clock with the floor of the minute. A person reading 3:59:59 on a
-real clock says four o'clock too.
+## Fixing the labels
+
+That was a hypothesis until I ran it. The renderer now has a second
+labelling mode: instead of the sampled $$(h, m)$$, it writes down the time
+the hands actually show, rounded to the nearest minute, carrying into the
+hour when the minute rounds past 59. The images are byte-for-byte the same,
+the rendering seeds are the same, and 24.7% of the held-out labels change,
+every one of them by a single minute. Then cnn_small was retrained on the
+corrected set with the same settings and the same 30 epochs
+([Figure 3.13](#fig-3-13)).
+
+![Validation accuracy per epoch for cnn_small on the original and corrected labels, and the old models scored against the corrected labels](/assets/clocks/label_fix.png)
+
+**Figure 3.13.** Left: cnn_small trained on the original labels and on the corrected ones, same images, same 30 epochs. Right: what each model scores on held-out fonts, trained and scored on the original labels, then scored again against the corrected labels, with the retrained cnn_small marked.
+{: .figcap #fig-3-13}
+
+| cnn_small, held-out fonts, 30 epochs | exact | within 1 min | mean error |
+|---|---|---|---|
+| original labels | 0.880 | 99.5% | 0.33 min |
+| corrected labels | 0.953 | 99.7% | 0.06 min |
+
+Seven points, from relabelling. The 2.8M ResNet now reads 95.3% of unseen
+clocks exactly, in 21 minutes of training, which is four points above
+anything in Part 2 including the ViT that took eight times as long. The
+mean error falls by a factor of six. The wall was the labels.
+
+The right-hand panel of the figure says something I didn't expect, though,
+and it complicates the tidy version of this story. Take the models trained
+on the original labels and score them against the corrected ones, and they
+get *worse*: cnn_r34 falls from 0.894 to 0.780, the v2 ViT from 0.899 to
+0.767. They hadn't simply been penalised for reading honestly. They had
+learned the convention, and learned it well: when a minute hand sits
+between two marks, report the lower one. The information is there to do it,
+because a hand that has crept is visibly off the mark, so the old task was
+learnable, just harder and stranger than the one a person performs.
+
+So the honest summary is narrower than "the models were right all along".
+With labels that match what a reader would say, the same small model in the
+same time reads 95% of clocks exactly instead of 88%. With the old labels
+it was learning an additional, arbitrary sub-minute discrimination, and
+paying about seven points for it.
+
+Two things this doesn't settle. Only cnn_small was retrained, because the
+GPU's power connector is why Part 2 ends where it does, so whether the
+ViT's advantage survives relabelling is unknown. And 95.3% is not 100%: the
+remaining 5% is where the resolution question, still unanswered, actually
+lives.
 
 ## Which clocks are hard
 
 The renderer wrote every sampled choice to a CSV, so accuracy can be split
 by what was drawn. The y axis starts at 0.80, because on these two models
-everything lives between 0.85 and 0.92 ([Figure 3.13](#fig-3-13)):
+everything lives between 0.85 and 0.92 ([Figure 3.14](#fig-3-14)):
 
 ![Exact accuracy on held-out fonts by numeral style, face shape, hand style, tick marks, second hand and rotation](/assets/clocks/acc_by_attribute.png)
 
-**Figure 3.13.** Exact accuracy on held-out fonts by numeral style, face shape, hand style, tick marks, second hand and rotation. Exact means both hands right, so a one-minute miss counts as wrong here.
-{: .figcap #fig-3-13}
+**Figure 3.14.** Exact accuracy on held-out fonts by numeral style, face shape, hand style, tick marks, second hand and rotation. Exact means both hands right, so a one-minute miss counts as wrong here.
+{: .figcap #fig-3-14}
 
 With 10,000 images split six ways, each bar rests on a few hundred to a
 few thousand clocks, and a two-point gap is about the noise level. So most
@@ -332,12 +370,12 @@ all the same. The models read hands.
 
 On the held-out set, the ResNet and the ViT are both right on 83.9% of
 clocks and both wrong on 4.7%. The ResNet alone is right on 5.4% and the
-ViT alone on 5.9%. Either one right: 95.3% ([Figure 3.14](#fig-3-14)).
+ViT alone on 5.9%. Either one right: 95.3% ([Figure 3.15](#fig-3-15)).
 
 ![Held-out clocks where both models are right, only the ResNet is right, only the ViT is right, and both are wrong](/assets/clocks/compare_heldout.png){: .no-invert}
 
-**Figure 3.14.** Held-out clocks where both models are exactly right, where only the ResNet is off by five minutes or more, where only the ViT is, and the three where both are.
-{: .figcap #fig-3-14}
+**Figure 3.15.** Held-out clocks where both models are exactly right, where only the ResNet is off by five minutes or more, where only the ViT is, and the three where both are.
+{: .figcap #fig-3-15}
 
 Those percentages count one-minute misses as wrong, and on that count the
 two models miss *different* clocks 6% of the time each, which on a task
@@ -351,12 +389,12 @@ models would gain a few points on the one-minute misses, and wouldn't mean
 anything.
 
 For completeness, the worst misses by circular minute error for each
-model, drawn the same way as the panels at the top of the post ([Figure 3.15](#fig-3-15)):
+model, drawn the same way as the panels at the top of the post ([Figure 3.16](#fig-3-16)):
 
 ![The four largest minute errors on held-out fonts for each model, with both models' hands drawn over the clock](/assets/clocks/overlay_worst.png){: .no-invert}
 
-**Figure 3.15.** The four largest errors on held-out fonts for each model, with both models' hands drawn over the clock. All are hours off, far beyond the one-minute threshold.
-{: .figcap #fig-3-15}
+**Figure 3.16.** The four largest errors on held-out fonts for each model, with both models' hands drawn over the clock. All are hours off, far beyond the one-minute threshold.
+{: .figcap #fig-3-16}
 
 These are the one-in-six-hundred cases, and they're a different kind of
 error: the model swapped the hands. At 8:08 the hour hand sits at 244
@@ -379,12 +417,12 @@ cropped by hand to the face and resized to 128 px, the same input the
 models trained on. The labels are my own readings of the full-resolution
 photographs; four of them I'm not sure of to the minute, and they're
 marked. The two models read the crops with no adjustment of any kind
-([Figure 3.16](#fig-3-16)).
+([Figure 3.17](#fig-3-17)).
 
 ![Thirteen real clock faces cropped from public-domain photographs, each with my reading, the ResNet's reading and the ViT's reading](/assets/clocks/real_clocks.png){: .no-invert}
 
-**Figure 3.16.** Thirteen real clocks. Under each: my reading of the time, then the ResNet-34's and the ViT tiny v2's, with the error in minutes. A bold reading is within a minute of the label.
-{: .figcap #fig-3-16}
+**Figure 3.17.** Thirteen real clocks. Under each: my reading of the time, then the ResNet-34's and the ViT tiny v2's, with the error in minutes. A bold reading is within a minute of the label.
+{: .figcap #fig-3-17}
 
 The ResNet reads three within a minute and the ViT five, and each gets the
 hour wrong on more than half. One of my own labels was wrong until the
@@ -418,12 +456,12 @@ undo perspective, reads 80.4% of the COCO clocks and 77.3% of the Open
 Images clocks within a minute. These models, trained on renders alone and
 handed the raw crop, read 37%. That is the gap between the renderer and
 the world, and it is the number this series would have been dishonest
-without ([Figure 3.17](#fig-3-17)).
+without ([Figure 3.18](#fig-3-18)).
 
 ![Tolerance curves on 3,228 real clocks for the four models, with their synthetic curves faint behind, and the error distribution of the best two](/assets/clocks/real_wild_curves.png)
 
-**Figure 3.17.** Left: the fraction of real clocks read within k minutes, for the four models, with each model's synthetic held-out curve drawn faint behind it. Right: the error split for the ResNet-34 and the ViT tiny v2 on real clocks.
-{: .figcap #fig-3-17}
+**Figure 3.18.** Left: the fraction of real clocks read within k minutes, for the four models, with each model's synthetic held-out curve drawn faint behind it. Right: the error split for the ResNet-34 and the ViT tiny v2 on real clocks.
+{: .figcap #fig-3-18}
 
 The shape of the curves says what kind of failure this is. On synthetic
 clocks every good model's curve is flat after one minute; on real clocks
@@ -435,12 +473,12 @@ still the best of the four on every measure, the plain vit_tiny is still
 behind it, and the small ResNet is worst.
 
 Eight clocks the ViT read within a minute and eight it read more than an
-hour wrong ([Figure 3.18](#fig-3-18)):
+hour wrong ([Figure 3.19](#fig-3-19)):
 
 ![Eight real clocks the ViT read within a minute and eight it read more than an hour wrong](/assets/clocks/real_wild_examples.png){: .no-invert}
 
-**Figure 3.18.** Real clocks from COCO and Open Images, as the 128 px crops the models saw. Top: eight the ViT tiny v2 read within a minute. Bottom: eight it read more than an hour wrong.
-{: .figcap #fig-3-18}
+**Figure 3.19.** Real clocks from COCO and Open Images, as the 128 px crops the models saw. Top: eight the ViT tiny v2 read within a minute. Bottom: eight it read more than an hour wrong.
+{: .figcap #fig-3-19}
 
 The pattern from the thirteen holds at scale. What the model reads well
 looks like the renderer's world: a flat face, seen square on, with hands
@@ -450,12 +488,12 @@ turret clock at an angle, the glass with a reflection, the dial where the
 hands are the same brass as the numerals. One check makes that concrete.
 Sorting the clocks by how large the face is in the original photograph,
 the models read the *small* faces best and the *large* ones worst
-([Figure 3.19](#fig-3-19)):
+([Figure 3.20](#fig-3-20)):
 
 ![Fraction read within five minutes against the size of the face in the photograph, for both models](/assets/clocks/real_wild_size.png)
 
-**Figure 3.19.** The share of real clocks read within five minutes, by the size of the clock face in the original photograph. Large faces are close-ups, so this axis mixes size with perspective, ornament and reflections; see the caveat below.
-{: .figcap #fig-3-19}
+**Figure 3.20.** The share of real clocks read within five minutes, by the size of the clock face in the original photograph. Large faces are close-ups, so this axis mixes size with perspective, ornament and reflections; see the caveat below.
+{: .figcap #fig-3-20}
 
 A face under 64 px in the photograph, blown up to 128, is read within
 five minutes 53% of the time by the ViT; a face over 256 px, shrunk to
@@ -483,17 +521,26 @@ The question in Part 1 was which architecture learns clock geometry more
 easily from scratch. The answer from Part 2 was: the ResNets straight
 away, in 30 epochs; the ViTs not at all until the tokeniser was changed,
 and even then a 3.8M ViT needed nearly three times the training to draw
-level with a 21M ResNet. On equal epochs the ResNets are ahead. This part
-adds that once both are at the same 90%, the 90% is the labels and not
-the models, and the two architectures' remaining errors are the same
-errors on the same clocks.
+level with a 21M ResNet. On equal epochs the ResNets are ahead.
+
+This part changes what that 90% means. It was never a limit of the models
+or of the pixels. It was the price of an arbitrary rounding rule I put in
+the labels, and with the rule corrected the smallest ResNet reads 95.3% of
+unseen clocks exactly in 21 minutes, four points above anything in Part 2.
+Both architectures' remaining errors are the same errors on the same
+clocks, and on real photographs both fall to around 37% within a minute,
+which is where the interesting work now is.
 
 Left to do, in order:
 
-- **Fix the labels.** Either label the crept minute with the nearest
-  minute, or turn creep off, and retrain cnn_small and vit_tiny_v2. The
-  exact rate should jump to the mid-nineties for both. If it doesn't, the
-  resolution question is back.
+- **Retrain the rest on the corrected labels.** cnn_small has been done,
+  and it went from 0.880 to 0.953 on held-out fonts. cnn_r34 and
+  vit_tiny_v2 have not, so whether the ViT keeps its two-point edge once
+  the labels are honest is an open question, and a cheap one to answer.
+- **Find out what the remaining 5% is.** With the labels fixed, the errors
+  that are left are the place where the resolution question can finally be
+  asked properly: render at 192 or 224 px, retrain cnn_small, and see
+  whether it moves.
 - **Finish the ViT sweep, which is the unpaid debt of this series.** The
   modified ViT was trained for 86 epochs and the plain ones for 30, so the
   comparison between them is not a fair fight, and the control that would
