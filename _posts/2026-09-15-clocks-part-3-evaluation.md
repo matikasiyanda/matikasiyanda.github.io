@@ -554,12 +554,35 @@ Left to do, in order:
 - **Seeds.** Two runs of the same configuration differed by three points
   mid-training. Nothing in this series that's within two points of
   something else should be read as an ordering.
-- **Close the gap to photographs.** The 3,228 real clocks put the
-  models at 37% within a minute against 99.7% on renders. The renderer
-  never drew perspective, shadows, reflections or decorated dials; adding
-  them, and fine-tuning on the real time-lapse data the *It's About Time*
-  authors used, is the obvious next experiment, and the test set to
-  measure it on now exists.
+- **Close the gap to photographs, mostly by rendering harder images.**
+  The 3,228 real clocks put the models at 37% within a minute against
+  99.7% on renders, and every failure in that section points back at
+  something the renderer doesn't draw. The augmentation list, in the order
+  I'd add it:
+  - **Scale.** Every rendered face fills most of its 128 px frame. Real
+    ones range from a 20-pixel smudge across a station concourse to a
+    close-up that overflows the crop. Render the face anywhere from a
+    tenth of the frame to larger than it, and the model stops assuming a
+    fixed size.
+  - **Perspective.** The renderer draws every clock square on. Photographs
+    are taken from below, from the side, from across a room, so a circular
+    dial arrives as an ellipse. A random homography would cover it.
+  - **Shadows, glare and reflections.** A bezel casts a shadow across the
+    dial, a window reflects across the glass, a lamp blows out one side of
+    the face. None of these exist in the current renders, and all three
+    appear in the photographs the models read worst.
+  - **Occlusion.** Real clocks are cropped by the frame, hidden behind a
+    pillar or a passer-by, or partly out of the detector's box. The
+    renderer should cut the face off at an edge, or paste something over
+    part of it, and still expect the right answer from what's left.
+  - **Backgrounds and clutter.** A rendered clock sits on a flat colour.
+    A photographed one sits on brick, sky, a shop wall or a kitchen
+    counter, often with a second clock or a digital display beside it.
+
+  Then retrain and re-measure on the same 3,228, which is what makes this
+  an experiment rather than a wish list. Fine-tuning on the real
+  time-lapse data the *It's About Time* authors used is the other half of
+  it.
 
 The code is at
 [github.com/matikasiyanda/clock-check](https://github.com/matikasiyanda/clock-check):
