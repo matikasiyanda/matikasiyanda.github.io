@@ -494,9 +494,13 @@ Left to do, in order:
   minute, or turn creep off, and retrain cnn_small and vit_tiny_v2. The
   exact rate should jump to the mid-nineties for both. If it doesn't, the
   resolution question is back.
-- **Finish the ViT sweep.** The plain vit_tiny at 100 epochs, and the four
-  ablations, so that the tokeniser claim in Part 2 stands on more than one
-  run. This needs a power cable I trust first; see Part 2 for why.
+- **Finish the ViT sweep, which is the unpaid debt of this series.** The
+  modified ViT was trained for 86 epochs and the plain ones for 30, so the
+  comparison between them is not a fair fight, and the control that would
+  make it one, plain vit_tiny on the same schedule, was never run. Nor were
+  the four ablations. Until they are, "the tokeniser was the problem" is
+  the best reading of the evidence rather than a settled result. It needs a
+  power cable I trust first; Part 2 says why.
 - **The angle head.** Regressing $$(\sin\theta, \cos\theta)$$ per hand is
   the loss that would treat a crept clock as almost right rather than
   wrong. It's wired in and unimplemented.

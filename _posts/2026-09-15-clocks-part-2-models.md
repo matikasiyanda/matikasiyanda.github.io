@@ -403,8 +403,7 @@ Two metrics appear in this part. "Exact" means hour and minute are both
 right. "±1 min" means the hour is right and the minute is within one of
 the truth. Exact is what the loss trains for, but it says nothing about
 how far off a miss is, so Part 3 switches to the time error in minutes
-and shows the ordering it gives. Every number is from one seed, and the
-differences between models within a family are inside single-seed noise.
+and shows the ordering it gives. Every number here is from one seed.
 
 ## Results at 30 epochs
 
@@ -443,11 +442,9 @@ and 88.9% exact, and all of them are at 99.5% within one minute and 99.7%
 on the hour. Tripling the parameter count from cnn_small to cnn_r34 buys one
 point. The 11% of misses are almost entirely off-by-one minutes. My first
 hypothesis was a resolution ceiling (the pixel budget is worked out two
-sections down). It turned out to be mostly something else, and something I
-built in myself. Part 3 has the analysis; the short version is that half the
-clocks let the minute hand creep towards the next minute with the seconds,
-and the label doesn't. The models are reading the hand correctly. The label
-is what's ambiguous.
+sections down). It turned out to be mostly the labelling choice Part 1
+described, where the minute hand creeps on with the seconds and the label
+doesn't follow. Part 3 works that out and corrects it.
 
 **Plain ViTs underfit, and get worse as they grow.** vit_tiny reaches 55%
 exact, vit_small with four times the parameters reaches 42%, and vit_p16
@@ -625,49 +622,38 @@ two test splits, on CPU:
 {: .figcap #fig-2-13}
 
 So a 3.8M-parameter ViT with a different tokeniser ends up level with a
-21M ResNet on this task. That sentence is true and it flatters the ViT, so
-here is the fair version of it.
+21M ResNet on this task. That sentence is true, it flatters the ViT, and
+three things have to be said before anyone repeats it.
 
-The comparison the parameter count invites is not against cnn_r34 at all.
-It is against cnn_small, which has 2.8M parameters, the nearest model in
-size. On held-out fonts the ViT reads 0.899 exactly against cnn_small's
-0.880, and 99.8% within a minute against 99.5%. It is better, by about two
-points. It also took 158 minutes of training to get there against
-cnn_small's 19, eight times the compute for two points, on the same GPU.
-If you have a fixed budget of minutes rather than parameters, the ResNet
-is the model to pick.
+**The plain ViTs never got the same training, so this comparison is
+rigged in v2's favour.** vit_tiny and vit_small were stopped at 30 epochs.
+v2 ran to 86. Some part of its lead over them is those extra 56 epochs
+rather than the stem, and I can't say how much, because the run that would
+tell me never happened: plain vit_tiny on the same 100-epoch schedule, the
+control for this whole section. Nor did the four ablations that would
+isolate the individual changes (patch 8, plain patchify stem, learned
+positions, class token). They were queued behind the run that cooked the
+power connector, and I stopped. What's left is evidence, not proof: v2's
+training loss is 1.65 at epoch 30 where plain vit_tiny sat at 2.44 and
+never went below it, which is the shape of a model that can fit the data
+against one that can't. A 100-epoch vit_tiny would still have closed some
+of that gap, and nothing here says how much.
 
-The schedule is the other half of it. The ResNets got 30 epochs. The v2 ViT got 86 of a 100-epoch schedule, nearly
-three times the training, and it needed them. At epoch 30, where the
-ResNets stopped, its validation accuracy was 0.828, five to six points
-below every ResNet's best. It did not pass the best ResNet's 0.891 until
-epoch 63, and it reached its own best, 0.902, at epoch 85. On equal
-training time the ResNets win, and the ViT would have needed still longer
-to get clearly ahead.
+**The matched comparison isn't cnn_r34.** At 3.8M parameters the nearest
+model is cnn_small, at 2.8M. On held-out fonts the ViT reads 0.899 exactly
+against cnn_small's 0.880, and 99.8% within a minute against 99.5%. Better,
+by about two points. It also took 158 minutes of training to get there
+against cnn_small's 19, eight times the compute for two points on the same
+GPU. At epoch 30, where the ResNets stopped, v2 was at 0.828 on validation,
+five to six points below every ResNet. It didn't pass cnn_r34's 0.891 until
+epoch 63. On equal training time the ResNets win.
 
-What the three changes did was make the ViT *learn faster than a plain
-ViT*, not faster than a CNN. That was the point of them: the plain
-vit_tiny was going nowhere, with a training loss of 2.44 after 30 epochs
-and no sign of fitting the data, so rather than pour more epochs or more
-data into an architecture that couldn't see the hands, I changed the
-part that couldn't see them. v2's training loss is 1.65 at epoch 30 and
-1.3 at epoch 86; the ResNets are at 1.28 by epoch 30. The tokeniser
-change closed most of the gap to the CNNs' learning speed, and the extra
-epochs closed the rest.
-
-The control that would separate "better tokeniser" from "trained longer"
-is the plain vit_tiny at 100 epochs, and it was next in the queue when the
-sweep stopped, along with four ablations that each undo one change (patch
-8, plain patchify stem, learned positions, class token). Until those run,
-the claim is what the numbers above support: with the tokeniser fixed and
-three times the epochs, a tiny ViT matches the ResNets; with the same
-epochs, it doesn't.
-
-Two things I'd want before believing any ordering within a family. First,
-more than one seed: two runs of vit_tiny_v2 with the same seed, differing
+**One seed, one resolution.** Two runs of v2 with the same seed, differing
 only in non-deterministic kernels, were 3.5 points apart on validation at
-epoch 23. Second, the resolution test, because if the wall is pixels then
+epoch 23, so nothing here that's within two points of something else is an
+ordering. And if the wall in these numbers is pixels rather than models,
 every model above is being compared on a task none of them can finish.
+Part 3 takes that question apart.
 
 [Part 3 — What the models get wrong](/blog/clocks/part-3-evaluation/) looks
 at the predictions themselves.

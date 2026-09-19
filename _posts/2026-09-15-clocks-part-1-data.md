@@ -63,6 +63,14 @@ the models read hands rather than memorise numerals. Train three ResNets and
 three ViTs of matched sizes. Then look at the predictions, not just the
 accuracy. This post is the data. Everything runs on one RTX 4090.
 
+Two things to know before you start, because they limit what the series
+can claim. The plan above was not finished: the plain ViTs were trained
+for 30 epochs and the modified one for 86, and the control run that would
+separate those two facts never happened, after the GPU's power connector
+overheated. Part 2 says exactly what that leaves standing. And the labels
+in this dataset turned out to disagree with what a person reading the
+clock would say, which Part 3 traces and fixes.
+
 ## What reading a clock requires
 
 Two things make this harder than it looks, and both are about pixels rather
@@ -105,7 +113,7 @@ the minute hand between 72% and 95% of that, so at 128 px
 $$r \approx 0.85 \times 0.38 \times 128 \approx 41\ \text{px}, \qquad \frac{2\pi r}{60} \approx 4.3\ \text{px}$$
 
 for a typical clock, and under 3 px for the smallest faces. Adjacent
-minutes are adjacent classes, three or four pixels apart ([Figure 1.2](#fig-1-2)).
+minutes are adjacent classes ([Figure 1.2](#fig-1-2)).
 
 ![10:37 and 10:38 on the same face, with the minute-hand tip enlarged: three pixels of difference](/assets/clocks/one_minute.png){: .no-invert}
 
