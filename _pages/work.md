@@ -5,7 +5,6 @@ permalink: /work/
 
 <div class="prose" markdown="1">
 
-{% if site.show_unlisted %}
 ## Lost in time: clock readers from scratch, CNNs against ViTs
 
 <p class="meta work-meta">Sep 2026 · PyTorch, a Pillow renderer, ResNets and ViTs from random init, one RTX 4090</p>
@@ -30,8 +29,6 @@ models at 37% within a minute.
 </div>
 
 [Read the series](/blog/clocks/) · [data](/blog/clocks/part-1-data/) · [models](/blog/clocks/part-2-models/) · [results](/blog/clocks/part-3-evaluation/)
-
-{% endif %}
 
 ## Document-search agent, GRPO on one RTX 4090
 

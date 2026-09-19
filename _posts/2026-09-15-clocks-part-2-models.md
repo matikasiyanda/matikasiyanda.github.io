@@ -10,9 +10,6 @@ tags: [vision, vit, cnn, pytorch]
 math: true
 mermaid: true
 image: /assets/clocks/curves.png
-unlisted: true
-draft: true
-sitemap: false
 ---
 
 *Part 2 of [Lost in time](/blog/clocks/). [Part 1](/blog/clocks/part-1-data/)

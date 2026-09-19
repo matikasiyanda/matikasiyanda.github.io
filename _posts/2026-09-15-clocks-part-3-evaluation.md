@@ -9,9 +9,6 @@ description: "Predictions on clocks in fonts never seen in training, then on 3,2
 tags: [vision, vit, cnn, evaluation]
 image: /assets/clocks/err_by_second.png
 math: true
-unlisted: true
-draft: true
-sitemap: false
 ---
 
 *Lost in time, part 3 of 3. [Part 1](/blog/clocks/part-1-data/) built the
