@@ -229,7 +229,7 @@ written up in [three parts](/blog/agent-rl/).
   <https://github.com/quickwit-oss/tantivy>
 - **[Qwen3]** Qwen Team, *Qwen3 Technical Report*, 2025. arXiv:2505.09388.
 - **[LoRA]** Hu et al., *LoRA: Low-Rank Adaptation of Large Language Models*,
-  2021. arXiv:2106.09685.
+  2021\. arXiv:2106.09685.
 - **[Unsloth]** Unsloth AI, *Unsloth*. <https://github.com/unslothai/unsloth>
 - **[vLLM]** Kwon et al., *Efficient Memory Management for Large Language Model
   Serving with PagedAttention*, SOSP 2023. arXiv:2309.06180.

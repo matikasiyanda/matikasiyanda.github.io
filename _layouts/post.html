@@ -45,7 +45,13 @@ layout: default
   {% assign abs_url = page.url | absolute_url %}
   {% assign cite_date = page.date | date: "%Y-%m-%d" %}
   {% assign first_family = page.authors.first.family | downcase %}
-  {% capture bibtex %}@misc{{ lb }}{{ first_family }}{{ year }},
+  {% comment %} key = surname + year + a word from the slug, so keys don't collide {% endcomment %}
+  {% assign slug_words = page.slug | split: "-" %}
+  {% assign key_word = "" %}
+  {% for w in slug_words %}{% if w.size > 3 and key_word == "" %}{% assign key_word = w %}{% endif %}{% endfor %}
+  {% if key_word == "" %}{% assign key_word = page.slug | replace: "-", "" %}{% endif %}
+  {% if page.part %}{% assign key_word = key_word | append: page.part %}{% endif %}
+  {% capture bibtex %}@misc{{ lb }}{{ first_family }}{{ year }}{{ key_word }},
   author = {{ lb }}{{ bib_authors | join: " and " }}{{ rb }},
   title = {{ lb }}{{ page.title }}{{ rb }},
   date = {{ lb }}{{ cite_date }}{{ rb }},

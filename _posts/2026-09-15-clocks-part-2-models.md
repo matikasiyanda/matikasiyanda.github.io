@@ -529,12 +529,14 @@ the real layers see it:
 
 The ResNets keep every pixel until their own layers decide what to
 discard, which is why a standard ImageNet ResNet, with its stride-4 stem,
-was the wrong starting point: it would have thrown away three quarters of
-the minute hand before its first residual block. The plain ViTs discard by
-8 or 16 in one step, so their four-pixel minute is half a token wide at
-best. The v2 stem discards by 4, in three gentle steps with a non-linearity
-between each, which is enough to keep a hand as a line rather than a
-smudge.
+was the wrong starting point: stride 4 in each direction keeps one
+position in sixteen, so the first residual block would see the minute hand
+as a handful of samples rather than a line. The plain ViTs discard by 8 or
+16 in one step, so their four-pixel minute is half a token wide at best.
+The v2 stem discards by 4, as two stride-2 convolutions with a
+normalisation and a non-linearity after each, then a 1x1 projection to the
+token width. Two halvings rather than one eighth-ing, which is enough to
+keep a hand as a line rather than a smudge.
 
 Why not give every ViT a stride-1 stem and be done? Cost. A transformer's
 attention compares every token with every other, so its work grows with
@@ -623,8 +625,19 @@ two test splits, on CPU:
 {: .figcap #fig-2-13}
 
 So a 3.8M-parameter ViT with a different tokeniser ends up level with a
-21M ResNet on this task. Here is the honest version of that sentence. The
-ResNets got 30 epochs. The v2 ViT got 86 of a 100-epoch schedule, nearly
+21M ResNet on this task. That sentence is true and it flatters the ViT, so
+here is the fair version of it.
+
+The comparison the parameter count invites is not against cnn_r34 at all.
+It is against cnn_small, which has 2.8M parameters, the nearest model in
+size. On held-out fonts the ViT reads 0.899 exactly against cnn_small's
+0.880, and 99.8% within a minute against 99.5%. It is better, by about two
+points. It also took 158 minutes of training to get there against
+cnn_small's 19, eight times the compute for two points, on the same GPU.
+If you have a fixed budget of minutes rather than parameters, the ResNet
+is the model to pick.
+
+The schedule is the other half of it. The ResNets got 30 epochs. The v2 ViT got 86 of a 100-epoch schedule, nearly
 three times the training, and it needed them. At epoch 30, where the
 ResNets stopped, its validation accuracy was 0.828, five to six points
 below every ResNet's best. It did not pass the best ResNet's 0.891 until

@@ -454,14 +454,27 @@ the models read the *small* faces best and the *large* ones worst
 
 ![Fraction read within five minutes against the size of the face in the photograph, for both models](/assets/clocks/real_wild_size.png)
 
-**Figure 3.19.** The share of real clocks read within five minutes, by the size of the clock face in the original photograph. The large faces, close-ups with perspective and ornament, are the hardest.
+**Figure 3.19.** The share of real clocks read within five minutes, by the size of the clock face in the original photograph. Large faces are close-ups, so this axis mixes size with perspective, ornament and reflections; see the caveat below.
 {: .figcap #fig-3-19}
 
 A face under 64 px in the photograph, blown up to 128, is read within
 five minutes 53% of the time by the ViT; a face over 256 px, shrunk to
-128, only 37%. Resolution is not what's missing. What's missing is
-everything the renderer never drew: a camera at an angle, a bezel casting
-a shadow, a reflection across the glass, a decorated dial. Those are
+128, only 37%.
+
+That is not a result about resolution, and the figure shouldn't be read as
+one. Size and content are confounded here: a clock that fills 300 pixels
+of a photograph is a close-up, taken from a few feet away, often at an
+angle, with a decorated dial, a reflection on the glass and a bezel
+casting a shadow. A clock 40 pixels across is usually a station or street
+clock photographed head-on from a distance, which is close to what the
+renderer draws. The size axis is mostly standing in for how far the
+photograph is from a flat, square-on rendered face. Separating the two
+would need the real clocks labelled by viewing angle and dial style, which
+they aren't.
+
+Either way it points at the same fix, and it isn't more pixels. It is the
+things the renderer never drew: a camera at an angle, a bezel casting a
+shadow, a reflection across the glass, a decorated dial. Those are
 renderer changes, and the next section lists them.
 
 ## What this changes

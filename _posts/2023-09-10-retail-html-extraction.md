@@ -304,9 +304,9 @@ before any training, on data the model can't have seen. Concretely:
 - **[RoBERTa]** Liu et al., *RoBERTa: A Robustly Optimized BERT Pretraining
   Approach*, 2019. arXiv:1907.11692.
 - **[FLAN-T5]** Chung et al., *Scaling Instruction-Finetuned Language Models*,
-  2022. arXiv:2210.11416.
+  2022\. arXiv:2210.11416.
 - **[LoRA]** Hu et al., *LoRA: Low-Rank Adaptation of Large Language Models*,
-  2021. arXiv:2106.09685.
+  2021\. arXiv:2106.09685.
 - **[flan-alpaca-lora]** Reason-Wang, *flan-alpaca-lora*. The training script
   used for both adapters. <https://github.com/Reason-Wang/flan-alpaca-lora>
 - **[LLM-labels]** Gilardi, Alizadeh & Kubli, *ChatGPT Outperforms Crowd-Workers

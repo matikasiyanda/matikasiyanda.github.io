@@ -224,13 +224,25 @@ and the agent at 0.781.
 
 **2.1× the best retriever on a corpus it had never seen.** Perfect abstention
 (1.000) on unanswerable programming questions. And it was *more* efficient
-there than at home — 2.73 turns and 117 tokens per question versus 2.89 and
-134 — so it wasn't flailing at unfamiliar material, it was searching it.
+there than at home, 2.73 turns and 117 tokens per question versus 2.89 and
+134, so it wasn't flailing at unfamiliar material, it was searching it.
+
+Read the table again, though, and note which row does the work. The SFT
+agent, before any reinforcement learning, already scores 0.760 on this
+corpus. RL adds 0.021 on top. So the gap to the retrievers, the 2.1×, is
+almost entirely the agent format and the supervised fine-tuning that taught
+it: search, read, decide, abstain. What RL contributes here is a small
+sharpening, not the transfer.
+
+That is still worth knowing, and it is a different claim from the one the
+headline number suggests. The skill that crosses domains is the loop, and
+the loop is cheap to teach. RL earned its keep in domain, where it
+took the SFT agent from 0.499 to 0.542 overall and precision stayed near
+0.35 while recall rose; on unseen material it mostly held what SFT
+already had.
 
 Per-slice on the transfer corpus: single 0.597, conjunctive 0.658, chain
-0.576, situational 0.802, cross-source comparison 0.767. RL *improved* on the
-SFT starting point (0.760 → 0.781), so training sharpened the skill rather
-than fitting the domain.
+0.576, situational 0.802, cross-source comparison 0.767.
 
 The two design decisions from Part 1 are what make this interpretable. The
 agent outputs document IDs, so it cannot bluff from parametric knowledge about
@@ -619,7 +631,7 @@ template. The discipline that keeps multi-turn RL from collapsing.
   at Scale*, Mar 2025 — dynamic sampling that discards zero-variance groups.
   My solve-rate band is the offline version of this idea.
 - **[TITO]** Hugging Face, *Agentic RL: Token-In, Token-Out Done Right*, May
-  2026. <https://huggingface.co/blog/huggingface/tito> — the delta-append
+  2026\. <https://huggingface.co/blog/huggingface/tito> — the delta-append
   rollout loop and the chat-template prefix-preservation problem.
 - **[IS]** Yao et al., *Your Efficient RL Framework Secretly Brings You
   Off-Policy RL Training*, 2025.
@@ -670,7 +682,7 @@ template. The discipline that keeps multi-turn RL from collapsing.
 - **[Qwen3]** Qwen Team, *Qwen3 Technical Report*, 2025 — the 1.7B policy and
   the 27B local generator/judge.
 - **[LoRA]** Hu et al., *LoRA: Low-Rank Adaptation of Large Language Models*,
-  2021. arXiv:2106.09685.
+  2021\. arXiv:2106.09685.
 - **[LoRAReg]** Thinking Machines, *LoRA Without Regret*, Sep 2025 — LoRA's
   optimal LR sits ≈10× above full fine-tuning's, and low rank suffices for RL.
   The reason v2 moved from 1e-6 to 5e-6.

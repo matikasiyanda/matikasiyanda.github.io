@@ -246,9 +246,6 @@ steps ([Figure 1.5](#fig-1-5)):
 **Figure 1.5.** One clock drawn in five stages: face and bezel, ticks, numerals, hands, then rotation, blur, noise and JPEG.
 {: .figcap #fig-1-5}
 
-At each step the renderer samples from a list of options. This is what it
-varies, with the share of the training set each option got ([Figure 1.6](#fig-1-6)):
-
 At each step the renderer samples from a list of options. Here is one
 example of each, so the names used from here on mean something
 ([Figure 1.6](#fig-1-6)):
@@ -272,8 +269,17 @@ centre), hand lengths and widths, numeral size and radius, tick lengths, and
 four independent colours (background, face, bezel, hands) under a contrast
 constraint so the hands are visible against the face. About 15% of numeral
 sets rotate with their position around the dial rather than staying
-upright. Half the time the hour hand also creeps with the second hand, as
-some real movements do.
+upright.
+
+One more choice matters more than it looks, and Part 3 turns on it. Each
+hand independently, with probability one half, creeps on with the seconds
+the way a real movement does: the hour hand by $$s/120$$ of a degree and
+the minute hand by $$s/10$$. The label, though, is the sampled
+$$(h, m)$$. So on a quarter of the images (creep on, seconds past 30) the
+minute hand is nearer the next minute than the one the label names, and a
+model that reads the hand honestly is marked wrong. I didn't notice until
+the error analysis in Part 3, which is where the consequences are worked
+out and fixed.
 
 The last step damages the clean render, because a model trained on clean
 renders won't survive a photograph. Blur up to 1.2 px, gaussian noise up to
